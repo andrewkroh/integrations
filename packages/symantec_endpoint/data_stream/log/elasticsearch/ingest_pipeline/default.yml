@@ -1,0 +1,199 @@
+---
+description: Pipeline for parsing Symantec Endpoint logs
+processors:
+- set:
+    field: event.original
+    value: '{{message}}'
+- dissect:
+    if: ctx?.message.contains("KAFKA_CONNECT_SYSLOG")
+    field: message
+    pattern: '%{} - - - - %{message}'
+- set:
+    field: event.ingested
+    value: '{{_ingest.timestamp}}'
+- set:
+    field: observer.vendor
+    value: Symantec
+- set:
+    field: observer.product
+    value: Endpoint Protection
+- set:
+    field: observer.type
+    value: edr
+- set:
+    field: event.module
+    value: symantec
+- set:
+    field: event.dataset
+    value: symantec.endpoint
+- grok:
+    field: message
+    patterns:
+      - '<%{NONNEGINT:log.syslog.facility.code:long}>%{SYSLOGTIMESTAMP:timestamp} %{HOSTNAME:observer.name} %{GREEDYDATA:message}'
+- date:
+    field: timestamp
+    target_field: "@timestamp"
+    formats:
+      - "MMM  d HH:mm:ss"
+      - "MMM dd HH:mm:ss"
+- remove:
+    field:
+      - timestamp
+# https://knowledge.broadcom.com/external/article/155205/external-logging-settings-and-log-event.html
+- dissect:
+    field: message
+    pattern: 'SymantecServer:%{dissect.server},Event Description:%{dissect.event_description},Local Host IP:%{dissect.local_ip},Local Host MAC:%{dissect.local_mac},Remote Host Name:%{dissect.remote_name},Remote Host IP:%{dissect.remote_ip},Remote Host MAC:%{dissect.remote_mac},%{dissect.network_direction},%{dissect.network_transport},Intrusion ID:%{dissect.intrusion_id},Begin:%{dissect.event_start},End Time:%{dissect.event_end},Occurrences:%{dissect.event_count},Application:%{dissect.process_exe},Location:%{dissect.location},User Name:%{dissect.user_name},Domain Name:%{dissect.user_domain},Local Port:%{dissect.local_port},Remote Port:%{dissect.remote_port},CIDS Signature ID:%{dissect.signature_id},CIDS Signature string:%{dissect.signature_name},CIDS Signature SubID:%{dissect.signature_sub_id},Intrusion URL:%{dissect.intrusion_url},Intrusion Payload URL:%{dissect.intrusion_payload_url},SHA-256:%{dissect.sha256},MD-5:%{dissect.md5}'
+# Work-around for https://github.com/elastic/elasticsearch/pull/65524
+- script:
+    if: ctx?.dissect != null
+    lang: painless
+    source: |
+      ctx.dissect.replaceAll((k, v) -> {
+        return v.trim();
+      });
+      ctx.dissect.entrySet().removeIf(entry -> entry.getValue() == "");
+- set:
+    field: event.code
+    value: '{{dissect.signature_id}}'
+    ignore_empty_value: true
+- rename:
+    field: dissect.server
+    target_field: symantec.endpoint.server
+    ignore_missing: true
+- rename:
+    field: dissect.event_description
+    target_field: rule.description
+    ignore_missing: true
+- rename:
+    if: ctx?.dissect?.local_ip != "0.0.0.0"
+    field: dissect.local_ip
+    target_field: source.ip
+    ignore_missing: true
+- rename:
+    if: ctx?.dissect?.local_mac != "000000000000"
+    field: dissect.local_mac
+    target_field: source.mac
+    ignore_missing: true
+- rename:
+    field: dissect.remote_name
+    target_field: destination.domain
+    ignore_missing: true
+- rename:
+    if: ctx?.dissect?.remote_ip != "0.0.0.0"
+    field: dissect.remote_ip
+    target_field: destination.ip
+    ignore_missing: true
+- rename:
+    if: ctx?.dissect?.remote_mac != "000000000000"
+    field: dissect.remote_mac
+    target_field: destination.mac
+    ignore_missing: true
+- set:
+    if: ctx?.dissect?.network_direction == "Inbound"
+    field: network.direction
+    value: ingress
+- set:
+    if: ctx?.dissect?.network_direction == "Outbound"
+    field: network.direction
+    value: egress
+- rename:
+    field: dissect.network_transport
+    target_field: network.transport
+    ignore_missing: true
+- lowercase:
+    field: network.transport
+    ignore_missing: true
+- rename:
+    field: dissect.intrusion_id
+    target_field: rule.id
+    ignore_missing: true
+- date:
+    field: dissect.event_start
+    target_field: event.start
+    ignore_failure: true
+    formats:
+      - yyyy-MM-dd HH:mm:ss
+- date:
+    field: dissect.event_end
+    target_field: event.end
+    ignore_failure: true
+    formats:
+      - yyyy-MM-dd HH:mm:ss
+- convert:
+    field: dissect.event_count
+    target_field: event.count
+    type: long
+    ignore_failure: true
+- rename:
+    field: dissect.process_exe
+    target_field: process.executable
+    ignore_missing: true
+- rename:
+    field: dissect.location
+    target_field: source.geo.name
+    ignore_missing: true
+- rename:
+    field: dissect.user_name
+    target_field: user.name
+    ignore_missing: true
+- rename:
+    field: dissect.user_domain
+    target_field: user.domain
+    ignore_missing: true
+- convert:
+    if: ctx?.dissect?.local_port != "0"
+    field: dissect.local_port
+    target_field: source.port
+    type: long
+    ignore_failure: true
+- convert:
+    if: ctx?.dissect?.remote_port != "0"
+    field: dissect.remote_port
+    target_field: destination.port
+    type: long
+    ignore_failure: true
+- rename:
+    field: dissect.signature_id
+    target_field: symantec.endpoint.signature.id
+    ignore_missing: true
+- rename:
+    field: dissect.signature_name
+    target_field: symantec.endpoint.signature.name
+    ignore_missing: true
+- rename:
+    field: dissect.signature_sub_id
+    target_field: symantec.endpoint.signature.sub_id
+    ignore_missing: true
+- rename:
+    field: dissect.intrusion_url
+    target_field: rule.reference
+    ignore_missing: true
+- rename:
+    field: dissect.intrusion_payload_url
+    target_field: url.original
+    ignore_missing: true
+- rename:
+    field: dissect.sha256
+    target_field: process.hash.sha256
+    ignore_missing: true
+- rename:
+    field: dissect.md5
+    target_field: process.hash.md5
+    ignore_missing: true
+- script:
+    # Local was assumed to be source and remote was assumed to be destination.
+    # But if direction is ingress then swap the two around.
+    if: ctx?.network?.direction == "ingress" && ctx?.source != null && ctx?.destination != null
+    lang: painless
+    source: |
+      def tmp = ctx.source;
+      ctx.source = ctx.destination;
+      ctx.destination = tmp;
+# TODO: Format the MAC addresses.
+- remove:
+    field:
+      - dissect
+on_failure:
+- set:
+    field: error.message
+    value: '{{ _ingest.on_failure_message }}'
