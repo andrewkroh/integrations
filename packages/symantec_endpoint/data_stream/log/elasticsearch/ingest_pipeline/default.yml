@@ -23,6 +23,10 @@ processors:
     field: event.ingested
     value: '{{_ingest.timestamp}}'
 - set:
+    # TODO: See if timestamps can be configured with timezone.
+    field: event.timezone
+    value: -05:00
+- set:
     field: observer.vendor
     value: Symantec
 - set:
@@ -47,6 +51,7 @@ processors:
     formats:
       - "MMM  d HH:mm:ss"
       - "MMM dd HH:mm:ss"
+    timezone: '{{event.timezone}}'
 - remove:
     field:
       - timestamp
@@ -106,9 +111,12 @@ processors:
     field: _csv.server
     target_field: symantec.endpoint.server
     ignore_missing: true
+- remove:
+    field: message
+    ignore_missing: true
 - rename:
     field: _csv.event_description
-    target_field: rule.description
+    target_field: message
     ignore_missing: true
 - rename:
     if: ctx?._csv?.local_ip != "0.0.0.0"
@@ -160,12 +168,14 @@ processors:
     ignore_failure: true
     formats:
       - yyyy-MM-dd HH:mm:ss
+    timezone: '{{event.timezone}}'
 - date:
     field: _csv.event_end
     target_field: event.end
     ignore_failure: true
     formats:
       - yyyy-MM-dd HH:mm:ss
+    timezone: '{{event.timezone}}'
 - convert:
     field: _csv.event_count
     target_field: event.count
@@ -213,11 +223,11 @@ processors:
     ignore_missing: true
 - rename:
     field: _csv.intrusion_url
-    target_field: rule.reference
+    target_field: url.original
     ignore_missing: true
 - rename:
     field: _csv.intrusion_payload_url
-    target_field: url.original
+    target_field: symantec.endpoint.intrusion_payload_url
     ignore_missing: true
 - rename:
     field: _csv.sha256
@@ -236,11 +246,78 @@ processors:
       def tmp = ctx.source;
       ctx.source = ctx.destination;
       ctx.destination = tmp;
-# TODO: Format the MAC addresses.
+
+- append:
+    field: event.category
+    value: [intrusion_detection]
+    allow_duplicates: false
+- append:
+    if: >
+      ctx?.message != null &&
+      ctx.message.contains("not blocked")
+    field: event.type
+    value: [allowed]
+    allow_duplicates: false
+- append:
+    if: >
+      ctx?.message != null &&
+      ctx.message.contains("blocked") &&
+      !ctx.message.contains("not blocked")
+    field: event.type
+    value: [denied]
+    allow_duplicates: false
 
 - remove:
     field:
       - _csv
+
+# IP Geolocation Lookup
+- geoip:
+    if: ctx.source?.geo == null
+    field: source.ip
+    target_field: source.geo
+    ignore_missing: true
+- geoip:
+    if: ctx.destination?.geo == null
+    field: destination.ip
+    target_field: destination.geo
+    ignore_missing: true
+
+# IP Autonomous System (AS) Lookup
+- geoip:
+    database_file: GeoLite2-ASN.mmdb
+    field: source.ip
+    target_field: source.as
+    properties:
+      - asn
+      - organization_name
+    ignore_missing: true
+- geoip:
+    database_file: GeoLite2-ASN.mmdb
+    field: destination.ip
+    target_field: destination.as
+    properties:
+      - asn
+      - organization_name
+    ignore_missing: true
+- rename:
+    field: source.as.asn
+    target_field: source.as.number
+    ignore_missing: true
+- rename:
+    field: source.as.organization_name
+    target_field: source.as.organization.name
+    ignore_missing: true
+- rename:
+    field: destination.as.asn
+    target_field: destination.as.number
+    ignore_missing: true
+- rename:
+    field: destination.as.organization_name
+    target_field: destination.as.organization.name
+    ignore_missing: true
+
+
 on_failure:
 - set:
     field: error.message
