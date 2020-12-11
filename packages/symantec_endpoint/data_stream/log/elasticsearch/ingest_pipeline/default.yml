@@ -25,7 +25,7 @@ processors:
 - set:
     # TODO: See if timestamps can be configured with timezone.
     field: event.timezone
-    value: -05:00
+    value: '-05:00'
 - set:
     field: observer.vendor
     value: Symantec
@@ -247,32 +247,22 @@ processors:
       ctx.source = ctx.destination;
       ctx.destination = tmp;
 
-- append:
-    field: event.category
-    value: [intrusion_detection]
-    allow_duplicates: false
-- append:
-    if: >
-      ctx?.message != null &&
-      ctx.message.contains("not blocked")
-    field: event.type
-    value: [allowed]
-    allow_duplicates: false
-- append:
-    if: >
-      ctx?.message != null &&
-      ctx.message.contains("blocked") &&
-      !ctx.message.contains("not blocked")
-    field: event.type
-    value: [denied]
-    allow_duplicates: false
-- append:
-    if: >
-      ctx?.message != null &&
-      !ctx.message.contains("blocked")
-    field: event.type
-    value: [info]
-    allow_duplicates: false
+- script:
+    description: apply ecs categories
+    lang: painless
+    ignore_failure: true
+    source: |
+      ctx.event.kind = 'event';
+      ctx.event.category = ['intrusion_detection'];
+      if (ctx.message.contains('not blocked')) {
+          ctx.event.type = ['allowed'];
+          ctx.event.action = 'detected';
+      } else if (!ctx.message.contains('not blocked') && ctx.message.contains('blocked')) {
+          ctx.event.type = ['denied'];
+          ctx.event.action = 'blocked';
+      } else {
+          ctx.event.type = ['info'];
+      }
 
 - remove:
     field:
