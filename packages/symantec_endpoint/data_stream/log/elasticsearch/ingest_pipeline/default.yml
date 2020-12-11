@@ -1,9 +1,20 @@
 ---
 description: Pipeline for parsing Symantec Endpoint logs
 processors:
-- set:
-    field: event.original
-    value: '{{message}}'
+# TODO: Replace script with a set processor that uses copy_from.
+#- set:
+#    copy_from: message
+#    field: event.original
+- script:
+    description: set event.original
+    lang: painless
+    source: |
+      def event = ctx.event;
+      if (event == null) {
+          event = [:];
+          ctx['event'] = event;
+      }
+      event['original'] = ctx.message;
 - dissect:
     if: ctx?.message.contains("KAFKA_CONNECT_SYSLOG")
     field: message
@@ -40,144 +51,180 @@ processors:
     field:
       - timestamp
 # https://knowledge.broadcom.com/external/article/155205/external-logging-settings-and-log-event.html
-- dissect:
+- csv:
     field: message
-    pattern: 'SymantecServer:%{dissect.server},Event Description:%{dissect.event_description},Local Host IP:%{dissect.local_ip},Local Host MAC:%{dissect.local_mac},Remote Host Name:%{dissect.remote_name},Remote Host IP:%{dissect.remote_ip},Remote Host MAC:%{dissect.remote_mac},%{dissect.network_direction},%{dissect.network_transport},Intrusion ID:%{dissect.intrusion_id},Begin:%{dissect.event_start},End Time:%{dissect.event_end},Occurrences:%{dissect.event_count},Application:%{dissect.process_exe},Location:%{dissect.location},User Name:%{dissect.user_name},Domain Name:%{dissect.user_domain},Local Port:%{dissect.local_port},Remote Port:%{dissect.remote_port},CIDS Signature ID:%{dissect.signature_id},CIDS Signature string:%{dissect.signature_name},CIDS Signature SubID:%{dissect.signature_sub_id},Intrusion URL:%{dissect.intrusion_url},Intrusion Payload URL:%{dissect.intrusion_payload_url},SHA-256:%{dissect.sha256},MD-5:%{dissect.md5}'
-# Work-around for https://github.com/elastic/elasticsearch/pull/65524
+    target_fields:
+      - _csv.server
+      - _csv.event_description
+      - _csv.local_ip
+      - _csv.local_mac
+      - _csv.remote_name
+      - _csv.remote_ip
+      - _csv.remote_mac
+      - _csv.network_direction
+      - _csv.network_transport
+      - _csv.intrusion_id
+      - _csv.event_start
+      - _csv.event_end
+      - _csv.event_count
+      - _csv.process_exe
+      - _csv.location
+      - _csv.user_name
+      - _csv.user_domain
+      - _csv.local_port
+      - _csv.remote_port
+      - _csv.signature_id
+      - _csv.signature_name
+      - _csv.signature_sub_id
+      - _csv.intrusion_url
+      - _csv.intrusion_payload_url
+      - _csv.sha256
+      - _csv.md5
 - script:
-    if: ctx?.dissect != null
+    description: split each csv value
     lang: painless
     source: |
-      ctx.dissect.replaceAll((k, v) -> {
-        return v.trim();
+      def out = [:];
+      ctx._csv.forEach((k, v) -> {
+          def idx = v.indexOf(":");
+          if (idx != -1 && idx+1 <= v.length()) {
+              def trimmed = v.substring(v.indexOf(":")+1, v.length()).trim();
+              if (!trimmed.isEmpty()) {
+                  out[k] = trimmed;
+              }
+          } else {
+              out[k] = v;
+          }
+          return true;
       });
-      ctx.dissect.entrySet().removeIf(entry -> entry.getValue() == "");
+      ctx._csv = out;
 - set:
     field: event.code
-    value: '{{dissect.signature_id}}'
+    value: '{{_csv.signature_id}}'
     ignore_empty_value: true
 - rename:
-    field: dissect.server
+    field: _csv.server
     target_field: symantec.endpoint.server
     ignore_missing: true
 - rename:
-    field: dissect.event_description
+    field: _csv.event_description
     target_field: rule.description
     ignore_missing: true
 - rename:
-    if: ctx?.dissect?.local_ip != "0.0.0.0"
-    field: dissect.local_ip
+    if: ctx?._csv?.local_ip != "0.0.0.0"
+    field: _csv.local_ip
     target_field: source.ip
     ignore_missing: true
 - rename:
-    if: ctx?.dissect?.local_mac != "000000000000"
-    field: dissect.local_mac
+    if: ctx?._csv?.local_mac != "000000000000"
+    field: _csv.local_mac
     target_field: source.mac
     ignore_missing: true
 - rename:
-    field: dissect.remote_name
+    if: ctx?._csv?.remote_name != ""
+    field: _csv.remote_name
     target_field: destination.domain
     ignore_missing: true
 - rename:
-    if: ctx?.dissect?.remote_ip != "0.0.0.0"
-    field: dissect.remote_ip
+    if: ctx?._csv?.remote_ip != "0.0.0.0"
+    field: _csv.remote_ip
     target_field: destination.ip
     ignore_missing: true
 - rename:
-    if: ctx?.dissect?.remote_mac != "000000000000"
-    field: dissect.remote_mac
+    if: ctx?._csv?.remote_mac != "000000000000"
+    field: _csv.remote_mac
     target_field: destination.mac
     ignore_missing: true
 - set:
-    if: ctx?.dissect?.network_direction == "Inbound"
+    if: ctx?._csv?.network_direction == "Inbound"
     field: network.direction
     value: ingress
 - set:
-    if: ctx?.dissect?.network_direction == "Outbound"
+    if: ctx?._csv?.network_direction == "Outbound"
     field: network.direction
     value: egress
 - rename:
-    field: dissect.network_transport
+    field: _csv.network_transport
     target_field: network.transport
     ignore_missing: true
 - lowercase:
     field: network.transport
     ignore_missing: true
 - rename:
-    field: dissect.intrusion_id
+    field: _csv.intrusion_id
     target_field: rule.id
     ignore_missing: true
 - date:
-    field: dissect.event_start
+    field: _csv.event_start
     target_field: event.start
     ignore_failure: true
     formats:
       - yyyy-MM-dd HH:mm:ss
 - date:
-    field: dissect.event_end
+    field: _csv.event_end
     target_field: event.end
     ignore_failure: true
     formats:
       - yyyy-MM-dd HH:mm:ss
 - convert:
-    field: dissect.event_count
+    field: _csv.event_count
     target_field: event.count
     type: long
     ignore_failure: true
 - rename:
-    field: dissect.process_exe
+    field: _csv.process_exe
     target_field: process.executable
     ignore_missing: true
 - rename:
-    field: dissect.location
+    field: _csv.location
     target_field: source.geo.name
     ignore_missing: true
 - rename:
-    field: dissect.user_name
+    field: _csv.user_name
     target_field: user.name
     ignore_missing: true
 - rename:
-    field: dissect.user_domain
+    field: _csv.user_domain
     target_field: user.domain
     ignore_missing: true
 - convert:
-    if: ctx?.dissect?.local_port != "0"
-    field: dissect.local_port
+    if: ctx?._csv?.local_port != "0"
+    field: _csv.local_port
     target_field: source.port
     type: long
     ignore_failure: true
 - convert:
-    if: ctx?.dissect?.remote_port != "0"
-    field: dissect.remote_port
+    if: ctx?._csv?.remote_port != "0"
+    field: _csv.remote_port
     target_field: destination.port
     type: long
     ignore_failure: true
 - rename:
-    field: dissect.signature_id
+    field: _csv.signature_id
     target_field: symantec.endpoint.signature.id
     ignore_missing: true
 - rename:
-    field: dissect.signature_name
+    field: _csv.signature_name
     target_field: symantec.endpoint.signature.name
     ignore_missing: true
 - rename:
-    field: dissect.signature_sub_id
+    field: _csv.signature_sub_id
     target_field: symantec.endpoint.signature.sub_id
     ignore_missing: true
 - rename:
-    field: dissect.intrusion_url
+    field: _csv.intrusion_url
     target_field: rule.reference
     ignore_missing: true
 - rename:
-    field: dissect.intrusion_payload_url
+    field: _csv.intrusion_payload_url
     target_field: url.original
     ignore_missing: true
 - rename:
-    field: dissect.sha256
+    field: _csv.sha256
     target_field: process.hash.sha256
     ignore_missing: true
 - rename:
-    field: dissect.md5
+    field: _csv.md5
     target_field: process.hash.md5
     ignore_missing: true
 - script:
@@ -190,10 +237,14 @@ processors:
       ctx.source = ctx.destination;
       ctx.destination = tmp;
 # TODO: Format the MAC addresses.
+
 - remove:
     field:
-      - dissect
+      - _csv
 on_failure:
 - set:
     field: error.message
     value: '{{ _ingest.on_failure_message }}'
+- remove:
+    field: _csv
+    ignore_missing: true
