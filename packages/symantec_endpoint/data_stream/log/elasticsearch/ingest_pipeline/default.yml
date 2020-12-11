@@ -266,6 +266,13 @@ processors:
     field: event.type
     value: [denied]
     allow_duplicates: false
+- append:
+    if: >
+      ctx?.message != null &&
+      !ctx.message.contains("blocked")
+    field: event.type
+    value: [info]
+    allow_duplicates: false
 
 - remove:
     field:
