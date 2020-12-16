@@ -1,0 +1,8 @@
+version: '2.3'
+services:
+  checkpoint:
+    tty: true
+    build: .
+    volumes:
+      - ./test-checkpoint.log:/sample_logs/test-checkpoint.log:ro
+    command: /stream -i /sample_logs/test-checkpoint.log -dest elastic-agent:9514
