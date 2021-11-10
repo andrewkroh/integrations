@@ -36,73 +36,164 @@ processors:
 - remove:
     field:
       - timestamp
-# https://knowledge.broadcom.com/external/article/155205/external-logging-settings-and-log-event.html
-- split:
+
+- csv:
     field: message
-    target_field: csv
-    separator: '\s*,\s*'
-##- csv:
-##    field: message
-##    target_fields:
-##      - _csv.server # column 0
-##      - _csv.event_description
-##      - _csv.local_ip # local_host_ip
-##      - _csv.local_mac # local_host_mac
-##      - _csv.remote_name # remote_host_name
-##      - _csv.remote_ip # remote_host_ip
-##      - _csv.remote_mac # remote_host_mac
-##      - _csv.network_direction # contains Inbound / Outbound
-##      - _csv.network_transport # contains UDP / TCP
-##      - _csv.intrusion_id
-##      - _csv.event_start # begin
-##      - _csv.event_end # end_time
-##      - _csv.event_count # occurrences
-##      - _csv.process_exe # application
-##      - _csv.location # location
-##      - _csv.user_name
-##      - _csv.user_domain #domain_name
-##      - _csv.local_port
-##      - _csv.remote_port
-##      - _csv.signature_id # cids_signature_id
-##      - _csv.signature_name # cids_signature_string
-##      - _csv.signature_sub_id # cids_signature_subid
-##      - _csv.intrusion_url
-##      - _csv.intrusion_payload_url
-##      - _csv.sha256 # sha-256
-##      - _csv.md5 # md-5
+    target_fields:
+      - '_unmapped_csv.00'
+      - '_unmapped_csv.01'
+      - '_unmapped_csv.02'
+      - '_unmapped_csv.03'
+      - '_unmapped_csv.04'
+      - '_unmapped_csv.05'
+      - '_unmapped_csv.06'
+      - '_unmapped_csv.07'
+      - '_unmapped_csv.08'
+      - '_unmapped_csv.09'
+      - '_unmapped_csv.10'
+      - '_unmapped_csv.11'
+      - '_unmapped_csv.12'
+      - '_unmapped_csv.13'
+      - '_unmapped_csv.14'
+      - '_unmapped_csv.15'
+      - '_unmapped_csv.16'
+      - '_unmapped_csv.17'
+      - '_unmapped_csv.18'
+      - '_unmapped_csv.19'
+      - '_unmapped_csv.20'
+      - '_unmapped_csv.21'
+      - '_unmapped_csv.22'
+      - '_unmapped_csv.23'
+      - '_unmapped_csv.24'
+      - '_unmapped_csv.25'
+      - '_unmapped_csv.26'
+      - '_unmapped_csv.27'
+      - '_unmapped_csv.28'
+      - '_unmapped_csv.29'
+      - '_unmapped_csv.30'
+      - '_unmapped_csv.31'
+      - '_unmapped_csv.32'
+      - '_unmapped_csv.33'
+      - '_unmapped_csv.34'
+      - '_unmapped_csv.35'
+      - '_unmapped_csv.36'
+      - '_unmapped_csv.37'
+      - '_unmapped_csv.38'
+      - '_unmapped_csv.39'
+      - '_unmapped_csv.40'
+      - '_unmapped_csv.41'
+      - '_unmapped_csv.42'
+      - '_unmapped_csv.43'
+      - '_unmapped_csv.44'
+      - '_unmapped_csv.45'
+      - '_unmapped_csv.46'
+      - '_unmapped_csv.47'
+      - '_unmapped_csv.48'
+      - '_unmapped_csv.49'
+      - '_unmapped_csv.50'
+      - '_unmapped_csv.51'
+      - '_unmapped_csv.52'
+      - '_unmapped_csv.53'
+      - '_unmapped_csv.54'
+      - '_unmapped_csv.55'
+      - '_unmapped_csv.56'
+      - '_unmapped_csv.57'
+      - '_unmapped_csv.58'
+      - '_unmapped_csv.59'
+      - '_unmapped_csv.60'
+      - '_unmapped_csv.61'
+      - '_unmapped_csv.62'
+      - '_unmapped_csv.63'
+      - '_unmapped_csv.64'
+      - '_unmapped_csv.65'
+      - '_unmapped_csv.66'
+      - '_unmapped_csv.67'
+      - '_unmapped_csv.68'
+      - '_unmapped_csv.69'
+      - '_unmapped_csv.70'
+      - '_unmapped_csv.71'
+      - '_unmapped_csv.72'
+      - '_unmapped_csv.73'
+      - '_unmapped_csv.74'
+      - '_unmapped_csv.75'
+      - '_unmapped_csv.76'
+      - '_unmapped_csv.77'
+      - '_unmapped_csv.78'
+      - '_unmapped_csv.79'
+      - '_unmapped_csv.80'
+      - '_unmapped_csv.81'
+      - '_unmapped_csv.82'
+      - '_unmapped_csv.83'
+      - '_unmapped_csv.84'
+      - '_unmapped_csv.85'
+      - '_unmapped_csv.86'
+      - '_unmapped_csv.87'
+      - '_unmapped_csv.88'
+      - '_unmapped_csv.89'
+      - '_unmapped_csv.90'
+      - '_unmapped_csv.91'
+      - '_unmapped_csv.92'
+      - '_unmapped_csv.93'
+      - '_unmapped_csv.94'
+      - '_unmapped_csv.95'
+      - '_unmapped_csv.96'
+      - '_unmapped_csv.97'
+      - '_unmapped_csv.98'
+      - '_unmapped_csv.99'
 - script:
-    description: split each csv value
+    description: Create array from CSV values.
+    tag: csv-map-to-array
     lang: painless
     source: |
-      def out = [:];
+      def columnArray = [];
+      def sortedMap = new TreeMap();
+      sortedMap.putAll(ctx._unmapped_csv);
+      sortedMap.forEach((k, v) -> {
+        columnArray.add(v);
+      });
+      ctx['_unmapped_csv'] = columnArray;
+
+- script:
+    description: Split colon separated key/values.
+    tag: split-colon-separated-key-value
+    lang: painless
+    source: |
+      def keyValue = [:];
       def nonKeyValue = [];
-      ctx.csv.forEach(v -> {
+      ctx._unmapped_csv.forEach(v -> {
           def idx = v.indexOf(": ");
           if (idx != -1 && idx+1 <= v.length()) {
               def k = v.substring(0, idx).toLowerCase().replace(' ', '_').replace('"', '');
               def trimmed = v.substring(v.indexOf(":")+1, v.length()).trim();
               if (!trimmed.isEmpty()) {
-                  out[k] = trimmed;
+                  keyValue[k] = trimmed;
               }
-          } else if (v.indexOf(":") == -1) {
+          } else if (!v.endsWith(":")) {
             nonKeyValue.add(v);
           }
           return true;
       });
-      ctx['csv'] = nonKeyValue;
-      ctx['_csv'] = out;
+      if (!keyValue.isEmpty()) {
+        ctx['_csv'] = keyValue;
+      }
+      if (!nonKeyValue.isEmpty()) {
+        ctx['_unmapped_csv'] = nonKeyValue;
+      }
+
 - script:
-    if: ctx?.csv != null && !ctx.csv.isEmpty()
+    description: Assign unmapped columns.
+    if: ctx?._unmapped_csv != null
     lang: painless
     source: |
-      // Assume first key is always the Symantec Endpoint Protection server name.
-      ctx['observer']['name'] = ctx.csv.get(0);
-      ctx.csv.remove(0);
+      // Assume first column is always the Symantec Endpoint Protection server name.
+      ctx['observer']['name'] = ctx._unmapped_csv.get(0);
+      ctx._unmapped_csv.remove(0);
 
       def networkTransport = ['ethernet', 'tcp', 'udp', 'icmp'];
       def networkDirection = ['inbound', 'outbound'];
-      def unmapped = [];
-      ctx.csv.forEach(unmappedColumn -> {
+      def filteredUnmappedCsv = [];
+
+      ctx._unmapped_csv.forEach(unmappedColumn -> {
         if (networkTransport.contains(unmappedColumn.toLowerCase())) {
           def network = ctx['network'];
           if (network == null) {
@@ -120,22 +211,23 @@ processors:
           return true;
         }
 
-        unmapped.add(unmappedColumn);
+        filteredUnmappedCsv.add(unmappedColumn);
         return true;
       });
 
-      if (!unmapped.isEmpty()) {
-        ctx['csv'] = unmapped;
+      if (!filteredUnmappedCsv.isEmpty()) {
+        ctx['_unmapped_csv'] = filteredUnmappedCsv;
       } else {
-        ctx.remove('csv');
+        ctx.remove('_unmapped_csv');
       }
+
+- rename:
+    field: _unmapped_csv
+    target_field: symantec_endpoint.log._unmapped_csv
+    ignore_missing: true
 
 # TODO: Format MAC addresses.
 
-- set:
-    field: event.code
-    value: '{{{_csv.cids_signature_id}}}'
-    ignore_empty_value: true
 - remove:
     field: message
     ignore_missing: true
@@ -143,10 +235,17 @@ processors:
     field: _csv.event_description
     target_field: message
     ignore_missing: true
-- rename:
+- convert:
     if: ctx?._csv?.local_host_ip != "0.0.0.0"
     field: _csv.local_host_ip
     target_field: source.ip
+    type: ip
+    ignore_missing: true
+- convert:
+    if: ctx?._csv?.local != "0.0.0.0"
+    field: _csv.local
+    target_field: source.ip
+    type: ip
     ignore_missing: true
 - rename:
     if: ctx?._csv?.local_host_mac != "000000000000"
@@ -205,6 +304,13 @@ processors:
       - yyyy-MM-dd HH:mm:ss
     timezone: '{{{event.timezone}}}'
 - date:
+    field: _csv.end
+    target_field: event.end
+    ignore_failure: true
+    formats:
+      - yyyy-MM-dd HH:mm:ss
+    timezone: '{{{event.timezone}}}'
+- date:
     field: _csv.end_time
     target_field: event.end
     ignore_failure: true
@@ -229,7 +335,15 @@ processors:
     target_field: user.name
     ignore_missing: true
 - rename:
+    field: _csv.user
+    target_field: user.name
+    ignore_missing: true
+- rename:
     field: _csv.domain_name
+    target_field: user.domain
+    ignore_missing: true
+- rename:
+    field: _csv.domain
     target_field: user.domain
     ignore_missing: true
 - convert:
@@ -282,14 +396,53 @@ processors:
     field: _csv.action
     target_field: event.action
     ignore_missing: true
+- lowercase:
+    field: event.action
+    ignore_missing: true
 - rename:
     field: _csv.rule
     target_field: rule.name
     ignore_missing: true
+
+- script:
+    # Local was assumed to be source and remote was assumed to be destination.
+    # But if direction is ingress then swap the two around.
+    description: Swap source/destination for "ingress".
+    tag: swap-source-destination-on-ingress
+    if: ctx?.network?.direction == "ingress" && ctx?.source != null && ctx?.destination != null
+    lang: painless
+    source: |
+      def tmp = ctx.source;
+      ctx.source = ctx.destination;
+      ctx.destination = tmp;
+
+- script:
+    description: Apply ECS categorization.
+    tag: ecs-categorization
+    lang: painless
+    ignore_failure: true
+    source: |
+      ctx.event.kind = 'event';
+      ctx.event.category = ['intrusion_detection'];
+      if (ctx?.event?.action != null && ctx.event.action == 'blocked') {
+          ctx.event.type = ['denied'];
+      } else if (ctx?.event?.action != null && ctx.event.action == 'not blocked') {
+          ctx.event.type = ['allowed'];
+      } else if (ctx.message.contains('not blocked')) {
+          ctx.event.type = ['allowed'];
+          ctx.event.action = 'not blocked';
+      } else if (!ctx.message.contains('not blocked') && ctx.message.contains('blocked')) {
+          ctx.event.type = ['denied'];
+          ctx.event.action = 'blocked';
+      } else {
+          ctx.event.type = ['info'];
+      }
+
 - remove:
     ignore_missing: true
     field:
       - _csv.event_description
+      - _csv.local
       - _csv.local_host_ip
       - _csv.local_host_mac
       - _csv.remote_host_name
@@ -297,6 +450,7 @@ processors:
       - _csv.remote_host_mac
       - _csv.intrusion_id
       - _csv.begin
+      - _csv.end
       - _csv.end_time
       - _csv.occurrences
       - _csv.application
@@ -314,45 +468,27 @@ processors:
       - _csv.md-5
       - _csv.rule
       - _csv.action
-- remove:
-    if: ctx?._csv != null && ctx?._csv.isEmpty()
-    field: _csv
-    ignore_missing: true
-- rename:
-    field: csv
-    target_field: symantec_endpoint.log._unmapped_csv_columns
-    ignore_missing: true
+
 - script:
-    # Local was assumed to be source and remote was assumed to be destination.
-    # But if direction is ingress then swap the two around.
-    if: ctx?.network?.direction == "ingress" && ctx?.source != null && ctx?.destination != null
+    description: Merge unmapped key/values into symantec_endpoint.log.
+    tag: merge-unmapped-keys
     lang: painless
     source: |
-      def tmp = ctx.source;
-      ctx.source = ctx.destination;
-      ctx.destination = tmp;
+      def sep = ctx['symantec_endpoint'];
+      if (sep == null) {
+        sep = [:];
+        ctx['symantec_endpoint'] = sep;
+      }
+      def log = sep['log'];
+      if (log == null) {
+        log = [:];
+        sep['log'] = log;
+      }
+      ctx._csv.forEach((k, v) -> {
+        log[k] = v;
+      });
 
-#- script:
-#    description: apply ecs categories
-#    lang: painless
-#    ignore_failure: true
-#    source: |
-#      ctx.event.kind = 'event';
-#      ctx.event.category = ['intrusion_detection'];
-#      if (ctx.message.contains('not blocked')) {
-#          ctx.event.type = ['allowed'];
-#          ctx.event.action = 'detected';
-#      } else if (!ctx.message.contains('not blocked') && ctx.message.contains('blocked')) {
-#          ctx.event.type = ['denied'];
-#          ctx.event.action = 'blocked';
-#      } else {
-#          ctx.event.type = ['info'];
-#      }
-#
-##- remove:
-##    field:
-##      - _csv
-#
+      ctx.remove('_csv');
 
 # Related IP
 - append:
@@ -424,11 +560,12 @@ processors:
     target_field: destination.as.organization.name
     ignore_missing: true
 
-
 on_failure:
 - set:
     field: error.message
     value: '{{ _ingest.on_failure_message }}'
-#- remove:
-#    field: _csv
-#    ignore_missing: true
+- remove:
+    ignore_missing: true
+    field:
+      - _csv
+      - _unmapped_csv

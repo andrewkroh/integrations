@@ -9,9 +9,8 @@
       type: keyword
     - name: intrusion_payload_url
       type: keyword
-    - name: _unmapped_csv_columns
+    - name: _unmapped_csv
       type: keyword
-
 - name: log.syslog.host.name
   type: keyword
 - name: log.syslog.process.name

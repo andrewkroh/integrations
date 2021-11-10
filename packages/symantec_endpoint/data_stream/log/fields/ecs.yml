@@ -58,8 +58,6 @@
   external: ecs
 - name: event.category
   external: ecs
-- name: event.code
-  external: ecs
 - name: event.dataset
   external: ecs
 - name: event.duration
