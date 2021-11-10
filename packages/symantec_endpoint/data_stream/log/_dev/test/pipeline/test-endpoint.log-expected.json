@@ -4,13 +4,19 @@
             "process": {
                 "executable": "C:/PROGRAM FILES (X86)/VMWARE/VMWARE WORKSTATION/VMWARE-HOSTD.EXE",
                 "hash": {
-                    "sha256": "9CD356A59A42BF8BDB7F5C93D5677A1AF079C7AE77361105A3AB2A0BA88CE2F8"
+                    "sha256": "9cd356a59a42bf8bdb7f5c93d5677a1af079c7ae77361105a3ab2a0ba88ce2f8"
                 }
             },
             "log": {
                 "syslog": {
+                    "host": {
+                        "name": "devhost"
+                    },
                     "facility": {
                         "code": 54
+                    },
+                    "process": {
+                        "name": "SymantecServer"
                     }
                 }
             },
@@ -30,20 +36,27 @@
             "url": {
                 "original": "server01.example.com/sdk"
             },
+            "tags": [
+                "preserve_original_even"
+            ],
             "network": {
                 "transport": "tcp",
                 "direction": "ingress"
             },
             "observer": {
-                "name": "devhost",
+                "name": "server01",
                 "product": "Endpoint Protection",
                 "type": "edr",
                 "vendor": "Symantec"
             },
-            "@timestamp": "2020-12-08T10:20:29.000-05:00",
-            "symantec": {
-                "endpoint": {
-                    "server": "server01",
+            "@timestamp": "2021-12-08T10:20:29.000-05:00",
+            "related": {
+                "hash": [
+                    "9cd356a59a42bf8bdb7f5c93d5677a1af079c7ae77361105a3ab2a0ba88ce2f8"
+                ]
+            },
+            "symantec_endpoint": {
+                "log": {
                     "signature": {
                         "name": "Audit: Nessus Vulnerability Scanner Activity",
                         "sub_id": "75167",
@@ -52,23 +65,12 @@
                 }
             },
             "event": {
-                "original": "\u003c54\u003eDec  8 10:20:29 devhost SymantecServer: server01,Event Description: [SID: 29464] Audit: Nessus Vulnerability Scanner Activity attack detected but not blocked. Application path: C:\\PROGRAM FILES (X86)\\VMWARE\\VMWARE WORKSTATION\\VMWARE-HOSTD.EXE,Local Host IP: 0.0.0.0,Local Host MAC: 000000000000,Remote Host Name: ,Remote Host IP: 0.0.0.0,Remote Host MAC: 000000000000,Inbound,TCP,Intrusion ID: 0,Begin: 2020-07-12 08:05:50,End Time: 2020-07-12 08:05:50,Occurrences: 2,Application: C:/PROGRAM FILES (X86)/VMWARE/VMWARE WORKSTATION/VMWARE-HOSTD.EXE,Location: Office,User Name: axelrod,Domain Name: CC,Local Port: 8080,Remote Port: 63462,CIDS Signature ID: 29464,CIDS Signature string: Audit: Nessus Vulnerability Scanner Activity,CIDS Signature SubID: 75167,Intrusion URL: server01.example.com/sdk,Intrusion Payload URL: ,SHA-256: 9CD356A59A42BF8BDB7F5C93D5677A1AF079C7AE77361105A3AB2A0BA88CE2F8,MD-5:",
-                "code": "29464",
-                "timezone": "-05:00",
-                "kind": "event",
-                "module": "symantec",
                 "start": "2020-07-12T08:05:50.000-05:00",
                 "count": 2,
-                "type": [
-                    "allowed"
-                ],
-                "ingested": "2020-12-11T18:27:43.204803155Z",
-                "action": "detected",
                 "end": "2020-07-12T08:05:50.000-05:00",
-                "category": [
-                    "intrusion_detection"
-                ],
-                "dataset": "symantec.endpoint"
+                "original": "\u003c54\u003eDec  8 10:20:29 devhost SymantecServer: server01,Event Description: [SID: 29464] Audit: Nessus Vulnerability Scanner Activity attack detected but not blocked. Application path: C:\\PROGRAM FILES (X86)\\VMWARE\\VMWARE WORKSTATION\\VMWARE-HOSTD.EXE,Local Host IP: 0.0.0.0,Local Host MAC: 000000000000,Remote Host Name: ,Remote Host IP: 0.0.0.0,Remote Host MAC: 000000000000,Inbound,TCP,Intrusion ID: 0,Begin: 2020-07-12 08:05:50,End Time: 2020-07-12 08:05:50,Occurrences: 2,Application: C:/PROGRAM FILES (X86)/VMWARE/VMWARE WORKSTATION/VMWARE-HOSTD.EXE,Location: Office,User Name: axelrod,Domain Name: CC,Local Port: 8080,Remote Port: 63462,CIDS Signature ID: 29464,CIDS Signature string: Audit: Nessus Vulnerability Scanner Activity,CIDS Signature SubID: 75167,Intrusion URL: server01.example.com/sdk,Intrusion Payload URL: ,SHA-256: 9CD356A59A42BF8BDB7F5C93D5677A1AF079C7AE77361105A3AB2A0BA88CE2F8,MD-5:",
+                "code": "29464",
+                "timezone": "-05:00"
             },
             "user": {
                 "name": "axelrod",
@@ -78,8 +80,14 @@
         {
             "log": {
                 "syslog": {
+                    "host": {
+                        "name": "devhost"
+                    },
                     "facility": {
                         "code": 51
+                    },
+                    "process": {
+                        "name": "SymantecServer"
                     }
                 }
             },
@@ -96,20 +104,33 @@
                 "ip": "192.168.50.3"
             },
             "message": "Portscan",
+            "tags": [
+                "preserve_original_even"
+            ],
             "network": {
                 "transport": "tcp",
                 "direction": "ingress"
             },
             "observer": {
-                "name": "devhost",
+                "name": "server02",
                 "product": "Endpoint Protection",
                 "type": "edr",
                 "vendor": "Symantec"
             },
-            "@timestamp": "2020-12-08T11:08:30.000-05:00",
-            "symantec": {
-                "endpoint": {
-                    "server": "server02",
+            "@timestamp": "2021-12-08T11:08:30.000-05:00",
+            "related": {
+                "ip": [
+                    "192.168.50.3",
+                    "192.168.50.2"
+                ]
+            },
+            "host": {
+                "ip": [
+                    "192.168.50.2"
+                ]
+            },
+            "symantec_endpoint": {
+                "log": {
                     "signature": {
                         "name": "Portscan",
                         "sub_id": "0",
@@ -118,22 +139,12 @@
                 }
             },
             "event": {
-                "ingested": "2020-12-11T18:27:43.204807249Z",
-                "original": "\u003c51\u003eDec  8 11:08:30 devhost SymantecServer: server02,Event Description: Portscan,Local Host IP: 192.168.50.2,Local Host MAC: 000000000000,Remote Host Name: ,Remote Host IP: 192.168.50.3,Remote Host MAC: 000000000000,Inbound,TCP,Intrusion ID: 0,Begin: 2020-12-08 09:08:01,End Time: 2020-12-08 09:08:01,Occurrences: 1,Application: ,Location: Office,User Name: john,Domain Name: local,Local Port: 0,Remote Port: 0,CIDS Signature ID: 10000,CIDS Signature string: Portscan,CIDS Signature SubID: 0,Intrusion URL: ,Intrusion Payload URL: ,SHA-256: ,MD-5:",
-                "code": "10000",
-                "timezone": "-05:00",
-                "kind": "event",
-                "module": "symantec",
                 "start": "2020-12-08T09:08:01.000-05:00",
                 "count": 1,
                 "end": "2020-12-08T09:08:01.000-05:00",
-                "category": [
-                    "intrusion_detection"
-                ],
-                "type": [
-                    "info"
-                ],
-                "dataset": "symantec.endpoint"
+                "original": "\u003c51\u003eDec  8 11:08:30 devhost SymantecServer: server02,Event Description: Portscan,Local Host IP: 192.168.50.2,Local Host MAC: 000000000000,Remote Host Name: ,Remote Host IP: 192.168.50.3,Remote Host MAC: 000000000000,Inbound,TCP,Intrusion ID: 0,Begin: 2020-12-08 09:08:01,End Time: 2020-12-08 09:08:01,Occurrences: 1,Application: ,Location: Office,User Name: john,Domain Name: local,Local Port: 0,Remote Port: 0,CIDS Signature ID: 10000,CIDS Signature string: Portscan,CIDS Signature SubID: 0,Intrusion URL: ,Intrusion Payload URL: ,SHA-256: ,MD-5:",
+                "code": "10000",
+                "timezone": "-05:00"
             },
             "user": {
                 "name": "john",
@@ -143,8 +154,14 @@
         {
             "log": {
                 "syslog": {
+                    "host": {
+                        "name": "devhost"
+                    },
                     "facility": {
                         "code": 51
+                    },
+                    "process": {
+                        "name": "SymantecServer"
                     }
                 }
             },
@@ -161,44 +178,43 @@
                 "mac": "AABBCCDDEEFF"
             },
             "message": "ARP Cache Poison",
+            "tags": [
+                "preserve_original_even"
+            ],
             "network": {
-                "transport": "unknown",
                 "direction": "ingress"
             },
             "observer": {
-                "name": "devhost",
+                "name": "server03",
                 "product": "Endpoint Protection",
                 "type": "edr",
                 "vendor": "Symantec"
             },
-            "@timestamp": "2020-12-01T17:44:16.000-05:00",
-            "symantec": {
-                "endpoint": {
-                    "server": "server03",
+            "@timestamp": "2021-12-01T17:44:16.000-05:00",
+            "host": {
+                "mac": [
+                    "2DFF88AABBDC"
+                ]
+            },
+            "symantec_endpoint": {
+                "log": {
                     "signature": {
                         "name": "ARP Cache Poison",
                         "sub_id": "0",
                         "id": "99990"
-                    }
+                    },
+                    "_unmapped_csv_columns": [
+                        "Unknown"
+                    ]
                 }
             },
             "event": {
-                "ingested": "2020-12-11T18:27:43.204808838Z",
-                "original": "\u003c51\u003eDec  1 17:44:16 devhost SymantecServer: server03,Event Description: ARP Cache Poison,Local Host IP: 0.0.0.0,Local Host MAC: 2DFF88AABBDC,Remote Host Name: ,Remote Host IP: 0.0.0.0,Remote Host MAC: AABBCCDDEEFF,Inbound,Unknown,Intrusion ID: 0,Begin: 2020-11-23 13:56:35,End Time: 2020-11-23 13:56:35,Occurrences: 1,Application: ,Location: Remote,User Name: bobby,Domain Name: local,Local Port: 0,Remote Port: 0,CIDS Signature ID: 99990,CIDS Signature string: ARP Cache Poison,CIDS Signature SubID: 0,Intrusion URL: ,Intrusion Payload URL: ,SHA-256: ,MD-5:",
-                "code": "99990",
-                "timezone": "-05:00",
-                "kind": "event",
-                "module": "symantec",
                 "start": "2020-11-23T13:56:35.000-05:00",
                 "count": 1,
                 "end": "2020-11-23T13:56:35.000-05:00",
-                "category": [
-                    "intrusion_detection"
-                ],
-                "type": [
-                    "info"
-                ],
-                "dataset": "symantec.endpoint"
+                "original": "\u003c51\u003eDec  1 17:44:16 devhost SymantecServer: server03,Event Description: ARP Cache Poison,Local Host IP: 0.0.0.0,Local Host MAC: 2DFF88AABBDC,Remote Host Name: ,Remote Host IP: 0.0.0.0,Remote Host MAC: AABBCCDDEEFF,Inbound,Unknown,Intrusion ID: 0,Begin: 2020-11-23 13:56:35,End Time: 2020-11-23 13:56:35,Occurrences: 1,Application: ,Location: Remote,User Name: bobby,Domain Name: local,Local Port: 0,Remote Port: 0,CIDS Signature ID: 99990,CIDS Signature string: ARP Cache Poison,CIDS Signature SubID: 0,Intrusion URL: ,Intrusion Payload URL: ,SHA-256: ,MD-5:",
+                "code": "99990",
+                "timezone": "-05:00"
             },
             "user": {
                 "name": "bobby",
@@ -214,8 +230,14 @@
             },
             "log": {
                 "syslog": {
+                    "host": {
+                        "name": "devhost"
+                    },
                     "facility": {
                         "code": 54
+                    },
+                    "process": {
+                        "name": "SymantecServer"
                     }
                 }
             },
@@ -235,50 +257,123 @@
             },
             "message": "[SID: 30369] Audit: Nessus Vulnerability Scanner Activity 3 attack detected but not blocked. Application path: SYSTEM",
             "url": {
-                "original": "server04.lerner.ad.cchs.net//${%23w%3d%23context.get('com.opensymphony.xwork2.dispatcher.HttpServletResponse').getWriter(),%23w.print('Nessus%20Response:%20'),%23w.println('struts_2_3_14_3_command_execution-1365356639'),%23w.flush(),%23w.close()}.action"
+                "original": "server04.example.com//${%23w%3d%23context.get('com.opensymphony.xwork2.dispatcher.HttpServletResponse').getWriter()"
             },
+            "tags": [
+                "preserve_original_even"
+            ],
             "network": {
                 "transport": "tcp",
                 "direction": "ingress"
             },
             "observer": {
-                "name": "devhost",
+                "name": "server04",
                 "product": "Endpoint Protection",
                 "type": "edr",
                 "vendor": "Symantec"
             },
-            "@timestamp": "2020-12-11T11:23:22.000-05:00",
-            "symantec": {
-                "endpoint": {
-                    "server": "server04",
+            "@timestamp": "2021-12-11T11:23:22.000-05:00",
+            "related": {
+                "hash": [
+                    "0000000000000000000000000000000000000000000000000000000000000000"
+                ],
+                "ip": [
+                    "10.88.31.147",
+                    "10.11.12.13"
+                ]
+            },
+            "host": {
+                "ip": [
+                    "10.11.12.13"
+                ]
+            },
+            "symantec_endpoint": {
+                "log": {
                     "signature": {
                         "name": "Audit: Nessus Vulnerability Scanner Activity 3",
                         "sub_id": "75185",
                         "id": "30369"
-                    }
+                    },
+                    "_unmapped_csv_columns": [
+                        "%23w.println('struts_2_3_14_3_command_execution-1365356639')",
+                        "%23w.flush()",
+                        "%23w.close()}.action\""
+                    ]
                 }
             },
             "event": {
-                "original": "\u003c54\u003eDec 11 11:23:22 devhost SymantecServer: server04,Event Description: [SID: 30369] Audit: Nessus Vulnerability Scanner Activity 3 attack detected but not blocked. Application path: SYSTEM,Local Host IP: 10.11.12.13,Local Host MAC: 000000000000,Remote Host Name: ,Remote Host IP: 10.88.31.147,Remote Host MAC: 000000000000,Inbound,TCP,Intrusion ID: 0,Begin: 2020-12-11 10:08:25,End Time: 2020-12-11 10:08:25,Occurrences: 1,Application: SYSTEM,Location: Wireless,User Name: none,Domain Name: ,Local Port: 5985,Remote Port: 42734,CIDS Signature ID: 30369,CIDS Signature string: Audit: Nessus Vulnerability Scanner Activity 3,CIDS Signature SubID: 75185,\"Intrusion URL: server04.lerner.ad.cchs.net//${%23w%3d%23context.get('com.opensymphony.xwork2.dispatcher.HttpServletResponse').getWriter(),%23w.print('Nessus%20Response:%20'),%23w.println('struts_2_3_14_3_command_execution-1365356639'),%23w.flush(),%23w.close()}.action\",Intrusion Payload URL: ,SHA-256: 0000000000000000000000000000000000000000000000000000000000000000,MD-5:",
-                "code": "30369",
-                "timezone": "-05:00",
-                "kind": "event",
-                "module": "symantec",
                 "start": "2020-12-11T10:08:25.000-05:00",
                 "count": 1,
-                "type": [
-                    "allowed"
-                ],
-                "ingested": "2020-12-11T18:27:43.204810211Z",
-                "action": "detected",
                 "end": "2020-12-11T10:08:25.000-05:00",
-                "category": [
-                    "intrusion_detection"
-                ],
-                "dataset": "symantec.endpoint"
+                "original": "\u003c54\u003eDec 11 11:23:22 devhost SymantecServer: server04,Event Description: [SID: 30369] Audit: Nessus Vulnerability Scanner Activity 3 attack detected but not blocked. Application path: SYSTEM,Local Host IP: 10.11.12.13,Local Host MAC: 000000000000,Remote Host Name: ,Remote Host IP: 10.88.31.147,Remote Host MAC: 000000000000,Inbound,TCP,Intrusion ID: 0,Begin: 2020-12-11 10:08:25,End Time: 2020-12-11 10:08:25,Occurrences: 1,Application: SYSTEM,Location: Wireless,User Name: none,Domain Name: ,Local Port: 5985,Remote Port: 42734,CIDS Signature ID: 30369,CIDS Signature string: Audit: Nessus Vulnerability Scanner Activity 3,CIDS Signature SubID: 75185,\"Intrusion URL: server04.example.com//${%23w%3d%23context.get('com.opensymphony.xwork2.dispatcher.HttpServletResponse').getWriter(),%23w.print('Nessus%20Response:%20'),%23w.println('struts_2_3_14_3_command_execution-1365356639'),%23w.flush(),%23w.close()}.action\",Intrusion Payload URL: ,SHA-256: 0000000000000000000000000000000000000000000000000000000000000000,MD-5:",
+                "code": "30369",
+                "timezone": "-05:00"
             },
             "user": {
                 "name": "none"
+            }
+        },
+        {
+            "log": {
+                "syslog": {
+                    "facility": {
+                        "code": 54
+                    },
+                    "process": {
+                        "name": "SymantecServer"
+                    }
+                }
+            },
+            "destination": {
+                "geo": {
+                    "name": "OFFICE-EAST"
+                },
+                "port": 8080,
+                "mac": "0123456789AB"
+            },
+            "rule": {
+                "name": "Block all other traffic"
+            },
+            "source": {
+                "mac": "ABCDEF123455"
+            },
+            "tags": [
+                "preserve_original_even"
+            ],
+            "network": {
+                "transport": "ethernet",
+                "direction": "ingress"
+            },
+            "observer": {
+                "name": "server05",
+                "product": "Endpoint Protection",
+                "type": "edr",
+                "vendor": "Symantec"
+            },
+            "@timestamp": "2021-12-09T00:56:49.000-05:00",
+            "host": {
+                "mac": [
+                    "0123456789AB"
+                ]
+            },
+            "symantec_endpoint": {
+                "log": {
+                    "_unmapped_csv_columns": [
+                        "XXXXXXXXXXXX"
+                    ]
+                }
+            },
+            "event": {
+                "start": "2020-12-09T00:46:50.000-05:00",
+                "count": 1,
+                "action": "Blocked",
+                "end": "2020-12-09T00:46:50.000-05:00",
+                "original": "\u003c54\u003eDec 9 00:56:49 SymantecServer: server05,XXXXXXXXXXXX,Local Host IP: 0.0.0.0,Local Port: 8080,Local Host MAC: 0123456789AB,Remote Host IP: 0.0.0.0,Remote Host Name: ,Remote Port: 0,Remote Host MAC: ABCDEF123455,ETHERNET,Inbound,Begin: 2020-12-09 00:46:50,End Time: 2020-12-09 00:46:50,Occurrences: 1,Application: ,Rule: Block all other traffic,Location: OFFICE-EAST,User Name: Citrix,Domain Name: Citrix,Action: Blocked,SHA-256: ,MD-5:",
+                "timezone": "-05:00"
+            },
+            "user": {
+                "name": "Citrix",
+                "domain": "Citrix"
             }
         }
     ]

@@ -1,27 +1,9 @@
 ---
 description: Pipeline for parsing Symantec Endpoint logs
 processors:
-# TODO: Replace script with a set processor that uses copy_from.
-#- set:
-#    copy_from: message
-#    field: event.original
-- script:
-    description: set event.original
-    lang: painless
-    source: |
-      def event = ctx.event;
-      if (event == null) {
-          event = [:];
-          ctx['event'] = event;
-      }
-      event['original'] = ctx.message;
-- dissect:
-    if: ctx?.message.contains("KAFKA_CONNECT_SYSLOG")
-    field: message
-    pattern: '%{} - - - - %{message}'
 - set:
-    field: event.ingested
-    value: '{{_ingest.timestamp}}'
+    copy_from: message
+    field: event.original
 - set:
     # TODO: See if timestamps can be configured with timezone.
     field: event.timezone
@@ -35,82 +17,125 @@ processors:
 - set:
     field: observer.type
     value: edr
-- set:
-    field: event.module
-    value: symantec
-- set:
-    field: event.dataset
-    value: symantec.endpoint
 - grok:
     field: message
     patterns:
-      - '<%{NONNEGINT:log.syslog.facility.code:long}>%{SYSLOGTIMESTAMP:timestamp} %{HOSTNAME:observer.name} %{GREEDYDATA:message}'
+      - '<%{NONNEGINT:log.syslog.facility.code:long}>(?:%{SYSLOGTIMESTAMP:timestamp}|%{TIMESTAMP_ISO8601:timestamp})(?: %{SYSLOGFACILITY})?(?: %{SYSLOGHOST:log.syslog.host.name})?(?: %{SYSLOGPROG}:)? %{GREEDYDATA:message}'
+      - '%{SYSLOG5424LINE}'
+    pattern_definitions:
+      SYSLOGPROG: '%{PROG:log.syslog.process.name}(?:\[%{POSINT:log.syslog.process.pid}\])?'
 - date:
     field: timestamp
     target_field: "@timestamp"
     formats:
-      - "MMM  d HH:mm:ss"
       - "MMM dd HH:mm:ss"
-    timezone: '{{event.timezone}}'
+      - "MMM  d HH:mm:ss"
+      - "MMM d HH:mm:ss"
+      - ISO8601
+    timezone: '{{{event.timezone}}}'
 - remove:
     field:
       - timestamp
 # https://knowledge.broadcom.com/external/article/155205/external-logging-settings-and-log-event.html
-- csv:
+- split:
     field: message
-    target_fields:
-      - _csv.server
-      - _csv.event_description
-      - _csv.local_ip
-      - _csv.local_mac
-      - _csv.remote_name
-      - _csv.remote_ip
-      - _csv.remote_mac
-      - _csv.network_direction
-      - _csv.network_transport
-      - _csv.intrusion_id
-      - _csv.event_start
-      - _csv.event_end
-      - _csv.event_count
-      - _csv.process_exe
-      - _csv.location
-      - _csv.user_name
-      - _csv.user_domain
-      - _csv.local_port
-      - _csv.remote_port
-      - _csv.signature_id
-      - _csv.signature_name
-      - _csv.signature_sub_id
-      - _csv.intrusion_url
-      - _csv.intrusion_payload_url
-      - _csv.sha256
-      - _csv.md5
+    target_field: csv
+    separator: '\s*,\s*'
+##- csv:
+##    field: message
+##    target_fields:
+##      - _csv.server # column 0
+##      - _csv.event_description
+##      - _csv.local_ip # local_host_ip
+##      - _csv.local_mac # local_host_mac
+##      - _csv.remote_name # remote_host_name
+##      - _csv.remote_ip # remote_host_ip
+##      - _csv.remote_mac # remote_host_mac
+##      - _csv.network_direction # contains Inbound / Outbound
+##      - _csv.network_transport # contains UDP / TCP
+##      - _csv.intrusion_id
+##      - _csv.event_start # begin
+##      - _csv.event_end # end_time
+##      - _csv.event_count # occurrences
+##      - _csv.process_exe # application
+##      - _csv.location # location
+##      - _csv.user_name
+##      - _csv.user_domain #domain_name
+##      - _csv.local_port
+##      - _csv.remote_port
+##      - _csv.signature_id # cids_signature_id
+##      - _csv.signature_name # cids_signature_string
+##      - _csv.signature_sub_id # cids_signature_subid
+##      - _csv.intrusion_url
+##      - _csv.intrusion_payload_url
+##      - _csv.sha256 # sha-256
+##      - _csv.md5 # md-5
 - script:
     description: split each csv value
     lang: painless
     source: |
       def out = [:];
-      ctx._csv.forEach((k, v) -> {
-          def idx = v.indexOf(":");
+      def nonKeyValue = [];
+      ctx.csv.forEach(v -> {
+          def idx = v.indexOf(": ");
           if (idx != -1 && idx+1 <= v.length()) {
+              def k = v.substring(0, idx).toLowerCase().replace(' ', '_').replace('"', '');
               def trimmed = v.substring(v.indexOf(":")+1, v.length()).trim();
               if (!trimmed.isEmpty()) {
                   out[k] = trimmed;
               }
-          } else {
-              out[k] = v;
+          } else if (v.indexOf(":") == -1) {
+            nonKeyValue.add(v);
           }
           return true;
       });
-      ctx._csv = out;
+      ctx['csv'] = nonKeyValue;
+      ctx['_csv'] = out;
+- script:
+    if: ctx?.csv != null && !ctx.csv.isEmpty()
+    lang: painless
+    source: |
+      // Assume first key is always the Symantec Endpoint Protection server name.
+      ctx['observer']['name'] = ctx.csv.get(0);
+      ctx.csv.remove(0);
+
+      def networkTransport = ['ethernet', 'tcp', 'udp', 'icmp'];
+      def networkDirection = ['inbound', 'outbound'];
+      def unmapped = [];
+      ctx.csv.forEach(unmappedColumn -> {
+        if (networkTransport.contains(unmappedColumn.toLowerCase())) {
+          def network = ctx['network'];
+          if (network == null) {
+            ctx['network'] = [:];
+          }
+          ctx['network']['transport'] = unmappedColumn.toLowerCase();
+          return true;
+        }
+        if (networkDirection.contains(unmappedColumn.toLowerCase())) {
+          def network = ctx['network'];
+          if (network == null) {
+            ctx['network'] = [:];
+          }
+          ctx['network']['direction'] = unmappedColumn.toLowerCase();
+          return true;
+        }
+
+        unmapped.add(unmappedColumn);
+        return true;
+      });
+
+      if (!unmapped.isEmpty()) {
+        ctx['csv'] = unmapped;
+      } else {
+        ctx.remove('csv');
+      }
+
+# TODO: Format MAC addresses.
+
 - set:
     field: event.code
-    value: '{{_csv.signature_id}}'
+    value: '{{{_csv.cids_signature_id}}}'
     ignore_empty_value: true
-- rename:
-    field: _csv.server
-    target_field: symantec.endpoint.server
-    ignore_missing: true
 - remove:
     field: message
     ignore_missing: true
@@ -119,36 +144,46 @@ processors:
     target_field: message
     ignore_missing: true
 - rename:
-    if: ctx?._csv?.local_ip != "0.0.0.0"
-    field: _csv.local_ip
+    if: ctx?._csv?.local_host_ip != "0.0.0.0"
+    field: _csv.local_host_ip
     target_field: source.ip
     ignore_missing: true
 - rename:
-    if: ctx?._csv?.local_mac != "000000000000"
-    field: _csv.local_mac
+    if: ctx?._csv?.local_host_mac != "000000000000"
+    field: _csv.local_host_mac
     target_field: source.mac
     ignore_missing: true
+- append:
+    if: ctx?.source?.ip != null
+    field: host.ip
+    value: '{{{source.ip}}}'
+    allow_duplicates: false
+- append:
+    if: ctx?.source?.mac != null
+    field: host.mac
+    value: '{{{source.mac}}}'
+    allow_duplicates: false
 - rename:
-    if: ctx?._csv?.remote_name != ""
-    field: _csv.remote_name
+    if: ctx?._csv?.remote_host_name != ""
+    field: _csv.remote_host_name
     target_field: destination.domain
     ignore_missing: true
 - rename:
-    if: ctx?._csv?.remote_ip != "0.0.0.0"
-    field: _csv.remote_ip
+    if: ctx?._csv?.remote_host_ip != "0.0.0.0"
+    field: _csv.remote_host_ip
     target_field: destination.ip
     ignore_missing: true
 - rename:
-    if: ctx?._csv?.remote_mac != "000000000000"
-    field: _csv.remote_mac
+    if: ctx?._csv?.remote_host_mac != "000000000000"
+    field: _csv.remote_host_mac
     target_field: destination.mac
     ignore_missing: true
 - set:
-    if: ctx?._csv?.network_direction == "Inbound"
+    if: ctx?.network?.direction == "inbound"
     field: network.direction
     value: ingress
 - set:
-    if: ctx?._csv?.network_direction == "Outbound"
+    if: ctx?.network?.direction == "outbound"
     field: network.direction
     value: egress
 - rename:
@@ -163,26 +198,26 @@ processors:
     target_field: rule.id
     ignore_missing: true
 - date:
-    field: _csv.event_start
+    field: _csv.begin
     target_field: event.start
     ignore_failure: true
     formats:
       - yyyy-MM-dd HH:mm:ss
-    timezone: '{{event.timezone}}'
+    timezone: '{{{event.timezone}}}'
 - date:
-    field: _csv.event_end
+    field: _csv.end_time
     target_field: event.end
     ignore_failure: true
     formats:
       - yyyy-MM-dd HH:mm:ss
-    timezone: '{{event.timezone}}'
+    timezone: '{{{event.timezone}}}'
 - convert:
-    field: _csv.event_count
+    field: _csv.occurrences
     target_field: event.count
     type: long
     ignore_failure: true
 - rename:
-    field: _csv.process_exe
+    field: _csv.application
     target_field: process.executable
     ignore_missing: true
 - rename:
@@ -194,7 +229,7 @@ processors:
     target_field: user.name
     ignore_missing: true
 - rename:
-    field: _csv.user_domain
+    field: _csv.domain_name
     target_field: user.domain
     ignore_missing: true
 - convert:
@@ -210,16 +245,16 @@ processors:
     type: long
     ignore_failure: true
 - rename:
-    field: _csv.signature_id
-    target_field: symantec.endpoint.signature.id
+    field: _csv.cids_signature_id
+    target_field: symantec_endpoint.log.signature.id
     ignore_missing: true
 - rename:
-    field: _csv.signature_name
-    target_field: symantec.endpoint.signature.name
+    field: _csv.cids_signature_string
+    target_field: symantec_endpoint.log.signature.name
     ignore_missing: true
 - rename:
-    field: _csv.signature_sub_id
-    target_field: symantec.endpoint.signature.sub_id
+    field: _csv.cids_signature_subid
+    target_field: symantec_endpoint.log.signature.sub_id
     ignore_missing: true
 - rename:
     field: _csv.intrusion_url
@@ -227,15 +262,65 @@ processors:
     ignore_missing: true
 - rename:
     field: _csv.intrusion_payload_url
-    target_field: symantec.endpoint.intrusion_payload_url
+    target_field: symantec_endpoint.log.intrusion_payload_url
     ignore_missing: true
 - rename:
-    field: _csv.sha256
+    field: _csv.sha-256
     target_field: process.hash.sha256
     ignore_missing: true
+- lowercase:
+    field: process.hash.sha256
+    ignore_missing: true
 - rename:
-    field: _csv.md5
+    field: _csv.md-5
     target_field: process.hash.md5
+    ignore_missing: true
+- lowercase:
+    field: process.hash.md5
+    ignore_missing: true
+- rename:
+    field: _csv.action
+    target_field: event.action
+    ignore_missing: true
+- rename:
+    field: _csv.rule
+    target_field: rule.name
+    ignore_missing: true
+- remove:
+    ignore_missing: true
+    field:
+      - _csv.event_description
+      - _csv.local_host_ip
+      - _csv.local_host_mac
+      - _csv.remote_host_name
+      - _csv.remote_host_ip
+      - _csv.remote_host_mac
+      - _csv.intrusion_id
+      - _csv.begin
+      - _csv.end_time
+      - _csv.occurrences
+      - _csv.application
+      - _csv.location
+      - _csv.user_name
+      - _csv.domain_name
+      - _csv.local_port
+      - _csv.remote_port
+      - _csv.cids_signature_id
+      - _csv.cids_signature_string
+      - _csv.cids_signature_subid
+      - _csv.intrusion_url
+      - _csv.intrusion_payload_url
+      - _csv.sha-256
+      - _csv.md-5
+      - _csv.rule
+      - _csv.action
+- remove:
+    if: ctx?._csv != null && ctx?._csv.isEmpty()
+    field: _csv
+    ignore_missing: true
+- rename:
+    field: csv
+    target_field: symantec_endpoint.log._unmapped_csv_columns
     ignore_missing: true
 - script:
     # Local was assumed to be source and remote was assumed to be destination.
@@ -247,26 +332,51 @@ processors:
       ctx.source = ctx.destination;
       ctx.destination = tmp;
 
-- script:
-    description: apply ecs categories
-    lang: painless
-    ignore_failure: true
-    source: |
-      ctx.event.kind = 'event';
-      ctx.event.category = ['intrusion_detection'];
-      if (ctx.message.contains('not blocked')) {
-          ctx.event.type = ['allowed'];
-          ctx.event.action = 'detected';
-      } else if (!ctx.message.contains('not blocked') && ctx.message.contains('blocked')) {
-          ctx.event.type = ['denied'];
-          ctx.event.action = 'blocked';
-      } else {
-          ctx.event.type = ['info'];
-      }
+#- script:
+#    description: apply ecs categories
+#    lang: painless
+#    ignore_failure: true
+#    source: |
+#      ctx.event.kind = 'event';
+#      ctx.event.category = ['intrusion_detection'];
+#      if (ctx.message.contains('not blocked')) {
+#          ctx.event.type = ['allowed'];
+#          ctx.event.action = 'detected';
+#      } else if (!ctx.message.contains('not blocked') && ctx.message.contains('blocked')) {
+#          ctx.event.type = ['denied'];
+#          ctx.event.action = 'blocked';
+#      } else {
+#          ctx.event.type = ['info'];
+#      }
+#
+##- remove:
+##    field:
+##      - _csv
+#
 
-- remove:
-    field:
-      - _csv
+# Related IP
+- append:
+    if: ctx?.source?.ip != null
+    field: related.ip
+    value: '{{{source.ip}}}'
+    allow_duplicates: false
+- append:
+    if: ctx?.destination?.ip != null
+    field: related.ip
+    value: '{{{destination.ip}}}'
+    allow_duplicates: false
+
+# Related Hash
+- append:
+    if: ctx?.process?.hash?.md5 != null
+    field: related.hash
+    value: '{{{process.hash.md5}}}'
+    allow_duplicates: true
+- append:
+    if: ctx?.process?.hash?.sha256 != null
+    field: related.hash
+    value: '{{{process.hash.sha256}}}'
+    allow_duplicates: true
 
 # IP Geolocation Lookup
 - geoip:
@@ -319,6 +429,6 @@ on_failure:
 - set:
     field: error.message
     value: '{{ _ingest.on_failure_message }}'
-- remove:
-    field: _csv
-    ignore_missing: true
+#- remove:
+#    field: _csv
+#    ignore_missing: true
