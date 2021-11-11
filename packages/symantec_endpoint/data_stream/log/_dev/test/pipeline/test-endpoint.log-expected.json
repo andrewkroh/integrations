@@ -37,16 +37,15 @@
                 "original": "server01.example.com/sdk"
             },
             "tags": [
-                "preserve_original_even"
+                "preserve_original_event"
             ],
             "network": {
                 "transport": "tcp",
                 "direction": "ingress"
             },
             "observer": {
-                "name": "server01",
-                "product": "Endpoint Protection",
                 "type": "edr",
+                "product": "Endpoint Protection",
                 "vendor": "Symantec"
             },
             "@timestamp": "2021-12-08T10:20:29.000-05:00",
@@ -54,6 +53,9 @@
                 "hash": [
                     "9cd356a59a42bf8bdb7f5c93d5677a1af079c7ae77361105a3ab2a0ba88ce2f8"
                 ]
+            },
+            "host": {
+                "hostname": "server01"
             },
             "symantec_endpoint": {
                 "log": {
@@ -112,16 +114,15 @@
             },
             "message": "Portscan",
             "tags": [
-                "preserve_original_even"
+                "preserve_original_event"
             ],
             "network": {
                 "transport": "tcp",
                 "direction": "ingress"
             },
             "observer": {
-                "name": "server02",
-                "product": "Endpoint Protection",
                 "type": "edr",
+                "product": "Endpoint Protection",
                 "vendor": "Symantec"
             },
             "@timestamp": "2021-12-08T11:08:30.000-05:00",
@@ -132,6 +133,7 @@
                 ]
             },
             "host": {
+                "hostname": "server02",
                 "ip": [
                     "192.168.50.2"
                 ]
@@ -192,19 +194,19 @@
             },
             "message": "ARP Cache Poison",
             "tags": [
-                "preserve_original_even"
+                "preserve_original_event"
             ],
             "network": {
                 "direction": "ingress"
             },
             "observer": {
-                "name": "server03",
-                "product": "Endpoint Protection",
                 "type": "edr",
+                "product": "Endpoint Protection",
                 "vendor": "Symantec"
             },
             "@timestamp": "2021-12-01T17:44:16.000-05:00",
             "host": {
+                "hostname": "server03",
                 "mac": [
                     "2DFF88AABBDC"
                 ]
@@ -279,16 +281,15 @@
                 "original": "server04.example.com//${%23w%3d%23context.get('com.opensymphony.xwork2.dispatcher.HttpServletResponse').getWriter(),%23w.print('Nessus%20Response:%20'),%23w.println('struts_2_3_14_3_command_execution-1365356639'),%23w.flush(),%23w.close()}.action"
             },
             "tags": [
-                "preserve_original_even"
+                "preserve_original_event"
             ],
             "network": {
                 "transport": "tcp",
                 "direction": "ingress"
             },
             "observer": {
-                "name": "server04",
-                "product": "Endpoint Protection",
                 "type": "edr",
+                "product": "Endpoint Protection",
                 "vendor": "Symantec"
             },
             "@timestamp": "2021-12-11T11:23:22.000-05:00",
@@ -302,6 +303,7 @@
                 ]
             },
             "host": {
+                "hostname": "server04",
                 "ip": [
                     "10.11.12.13"
                 ]
@@ -359,20 +361,20 @@
                 "mac": "ABCDEF123455"
             },
             "tags": [
-                "preserve_original_even"
+                "preserve_original_event"
             ],
             "network": {
                 "transport": "ethernet",
                 "direction": "ingress"
             },
             "observer": {
-                "name": "server05",
-                "product": "Endpoint Protection",
                 "type": "edr",
+                "product": "Endpoint Protection",
                 "vendor": "Symantec"
             },
             "@timestamp": "2021-12-09T00:56:49.000-05:00",
             "host": {
+                "hostname": "server05",
                 "mac": [
                     "0123456789AB"
                 ]
@@ -429,15 +431,14 @@
             },
             "message": "The client will block traffic from IP address 10.33.146.1 for the next 60 seconds (from 03/10/2019 23:51:04 to 03/10/2019 23:52:04).",
             "tags": [
-                "preserve_original_even"
+                "preserve_original_event"
             ],
             "network": {
                 "direction": "ingress"
             },
             "observer": {
-                "name": "20-11111A111111",
-                "product": "Endpoint Protection",
                 "type": "edr",
+                "product": "Endpoint Protection",
                 "vendor": "Symantec"
             },
             "@timestamp": "2021-10-03T23:51:53.000-05:00",
@@ -448,6 +449,7 @@
                 ]
             },
             "host": {
+                "hostname": "20-11111A111111",
                 "ip": [
                     "10.246.162.238"
                 ]
@@ -480,6 +482,204 @@
             "user": {
                 "name": "A1111111",
                 "domain": "TESTDOMAIN"
+            }
+        },
+        {
+            "observer": {
+                "type": "edr",
+                "product": "Endpoint Protection",
+                "vendor": "Symantec"
+            },
+            "@timestamp": "2021-10-04T10:51:33.000-05:00",
+            "log": {
+                "syslog": {
+                    "host": {
+                        "name": "symantec.endpointprotection.english.test"
+                    },
+                    "facility": {
+                        "code": 51
+                    },
+                    "process": {
+                        "name": "SymantecServer"
+                    }
+                }
+            },
+            "host": {
+                "hostname": "The management server received the client log successfully"
+            },
+            "symantec_endpoint": {
+                "log": {
+                    "server_name": "SAMPLE0008",
+                    "site": "Site_TEST_SITE",
+                    "_unmapped_csv": [
+                        "TESTHOST18",
+                        "sampleuser99",
+                        "sample.abccompany.com"
+                    ]
+                }
+            },
+            "event": {
+                "original": "\u003c51\u003eOct 4 10:51:33 symantec.endpointprotection.english.test SymantecServer: Site: Site_TEST_SITE,Server Name: SAMPLE0008,Domain Name: Default,The management server received the client log successfully,TESTHOST18,sampleuser99,sample.abccompany.com",
+                "category": [
+                    "intrusion_detection"
+                ],
+                "timezone": "-05:00",
+                "kind": "event"
+            },
+            "user": {
+                "domain": "Default"
+            },
+            "tags": [
+                "preserve_original_event"
+            ]
+        },
+        {
+            "observer": {
+                "type": "edr",
+                "product": "Endpoint Protection",
+                "vendor": "Symantec"
+            },
+            "@timestamp": "2021-10-04T10:51:33.000-05:00",
+            "log": {
+                "syslog": {
+                    "host": {
+                        "name": "symantec.endpointprotection.english.test"
+                    },
+                    "facility": {
+                        "code": 51
+                    },
+                    "process": {
+                        "name": "SymantecServer"
+                    }
+                }
+            },
+            "host": {
+                "hostname": "sam196136"
+            },
+            "rule": {
+                "name": "Prevent registration of new Browser Helper Objects | [AC15-1.1] Prevent registration of new Browser Helper Objects"
+            },
+            "symantec_endpoint": {
+                "log": {
+                    "_unmapped_csv": [
+                        "10.221.252.252",
+                        "Blocked",
+                        "[AC15-1.1] Prevent registration of new Browser Helper Objects - Registry Value=0x1 - Caller MD5=747c6064888f11f5431b34a422780650",
+                        "Registry Write",
+                        "16464",
+                        "C:/Windows/SysWOW64/msiexec.exe",
+                        "0",
+                        "No Module Name",
+                        "/REGISTRY/MACHINE/SOFTWARE/Microsoft/Windows/CurrentVersion/Explorer/Browser Helper Objects/{F4971EE7-DAA0-4053-9964-665D8EE6A077}/NoExplorer"
+                    ],
+                    "file_size_(bytes)": "0"
+                }
+            },
+            "event": {
+                "start": "2020-11-12T09:22:22.000-05:00",
+                "end": "2020-11-12T09:22:22.000-05:00",
+                "original": "\u003c51\u003eOct 4 10:51:33 symantec.endpointprotection.english.test SymantecServer: sam196136,10.221.252.252,Blocked,[AC15-1.1] Prevent registration of new Browser Helper Objects - Registry Value=0x1 - Caller MD5=747c6064888f11f5431b34a422780650,Registry Write,Begin: 2020-11-12 09:22:22,End Time: 2020-11-12 09:22:22,Rule: Prevent registration of new Browser Helper Objects | [AC15-1.1] Prevent registration of new Browser Helper Objects,16464,C:/Windows/SysWOW64/msiexec.exe,0,No Module Name,/REGISTRY/MACHINE/SOFTWARE/Microsoft/Windows/CurrentVersion/Explorer/Browser Helper Objects/{F4971EE7-DAA0-4053-9964-665D8EE6A077}/NoExplorer,User Name: SYSTEM,Domain Name: SMPL,Action Type: ,File size (bytes): 0,Device ID:",
+                "category": [
+                    "intrusion_detection"
+                ],
+                "timezone": "-05:00",
+                "kind": "event"
+            },
+            "user": {
+                "name": "SYSTEM",
+                "domain": "SMPL"
+            },
+            "tags": [
+                "preserve_original_event"
+            ]
+        },
+        {
+            "process": {
+                "executable": "C:/WINDOWS/system32/NTOSKRNL.EXE",
+                "hash": {
+                    "sha256": "5379732000000000000000000000000000000000000000000000000000000000",
+                    "md5": "53797320000000000000000000000000"
+                }
+            },
+            "log": {
+                "syslog": {
+                    "host": {
+                        "name": "symantec.endpointprotection.english.test"
+                    },
+                    "facility": {
+                        "code": 51
+                    },
+                    "process": {
+                        "name": "SymantecServer"
+                    }
+                }
+            },
+            "destination": {
+                "geo": {
+                    "name": "Default"
+                },
+                "port": 80,
+                "mac": "CCF9E4A91226",
+                "ip": "192.168.1.113"
+            },
+            "rule": {
+                "name": "Block Unapproved Incoming Ports"
+            },
+            "source": {
+                "port": 33424,
+                "mac": "2C3AFDA79E71",
+                "ip": "192.168.1.1"
+            },
+            "tags": [
+                "preserve_original_event"
+            ],
+            "network": {
+                "transport": "tcp",
+                "direction": "ingress"
+            },
+            "observer": {
+                "type": "edr",
+                "product": "Endpoint Protection",
+                "vendor": "Symantec"
+            },
+            "@timestamp": "2021-10-04T10:51:33.000-05:00",
+            "related": {
+                "hash": [
+                    "53797320000000000000000000000000",
+                    "5379732000000000000000000000000000000000000000000000000000000000"
+                ],
+                "ip": [
+                    "192.168.1.1",
+                    "192.168.1.113"
+                ]
+            },
+            "host": {
+                "hostname": "sam733904",
+                "mac": [
+                    "CCF9E4A91226"
+                ],
+                "ip": [
+                    "192.168.1.113"
+                ]
+            },
+            "event": {
+                "original": "\u003c51\u003eOct 4 10:51:33 symantec.endpointprotection.english.test SymantecServer: sam733904,Local Host IP: 192.168.1.113,Local Port: 80,Local Host MAC: CCF9E4A91226,Remote Host IP: 192.168.1.1,Remote Host Name: ,Remote Port: 33424,Remote Host MAC: 2C3AFDA79E71,TCP,Inbound,Begin: 2020-11-11 19:25:21,End Time: 2020-11-11 19:25:28,Occurrences: 4,Application: C:/WINDOWS/system32/NTOSKRNL.EXE,Rule: Block Unapproved Incoming Ports,Location: Default,User Name: sampleuser4,Domain Name: SMPL,Action: Blocked,SHA-256: 5379732000000000000000000000000000000000000000000000000000000000,MD-5: 53797320000000000000000000000000",
+                "timezone": "-05:00",
+                "kind": "event",
+                "start": "2020-11-11T19:25:21.000-05:00",
+                "count": 4,
+                "action": "blocked",
+                "end": "2020-11-11T19:25:28.000-05:00",
+                "category": [
+                    "intrusion_detection"
+                ],
+                "type": [
+                    "denied"
+                ]
+            },
+            "user": {
+                "name": "sampleuser4",
+                "domain": "SMPL"
             }
         }
     ]

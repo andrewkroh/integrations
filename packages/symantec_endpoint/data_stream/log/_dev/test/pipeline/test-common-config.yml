@@ -2,4 +2,4 @@ dynamic_fields:
   event.ingested: "^.*$"
 fields:
   tags:
-    - preserve_original_even
+    - preserve_original_event

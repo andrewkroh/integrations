@@ -17,6 +17,8 @@ processors:
 - set:
     field: observer.type
     value: edr
+
+# TODO: Handle non-syslog logs.
 - grok:
     field: message
     patterns:
@@ -186,7 +188,10 @@ processors:
     lang: painless
     source: |
       // Assume first column is always the Symantec Endpoint Protection server name.
-      ctx['observer']['name'] = ctx._unmapped_csv.get(0);
+      if (ctx?.host == null) {
+        ctx['host'] = [:];
+      }
+      ctx['host']['hostname'] = ctx._unmapped_csv.get(0);
       ctx._unmapped_csv.remove(0);
 
       def networkTransport = ['ethernet', 'tcp', 'udp', 'icmp'];
@@ -235,15 +240,14 @@ processors:
     field: _csv.event_description
     target_field: message
     ignore_missing: true
+- rename:
+    if: ctx?._csv?.local_host_ip == null
+    field: _csv.local
+    target_field: _csv.local_host_ip
+    ignore_missing: true
 - convert:
     if: ctx?._csv?.local_host_ip != "0.0.0.0"
     field: _csv.local_host_ip
-    target_field: source.ip
-    type: ip
-    ignore_missing: true
-- convert:
-    if: ctx?._csv?.local != "0.0.0.0"
-    field: _csv.local
     target_field: source.ip
     type: ip
     ignore_missing: true
@@ -303,13 +307,11 @@ processors:
     formats:
       - yyyy-MM-dd HH:mm:ss
     timezone: '{{{event.timezone}}}'
-- date:
+- rename:
+    if: ctx?._csv?.end_time == null
     field: _csv.end
-    target_field: event.end
-    ignore_failure: true
-    formats:
-      - yyyy-MM-dd HH:mm:ss
-    timezone: '{{{event.timezone}}}'
+    target_field: _csv.end_time
+    ignore_missing: true
 - date:
     field: _csv.end_time
     target_field: event.end
@@ -474,19 +476,21 @@ processors:
     tag: merge-unmapped-keys
     lang: painless
     source: |
-      def sep = ctx['symantec_endpoint'];
-      if (sep == null) {
-        sep = [:];
-        ctx['symantec_endpoint'] = sep;
+      if (ctx?._csv != null && !ctx?._csv.isEmpty()) {
+        def sep = ctx['symantec_endpoint'];
+        if (sep == null) {
+          sep = [:];
+          ctx['symantec_endpoint'] = sep;
+        }
+        def log = sep['log'];
+        if (log == null) {
+          log = [:];
+          sep['log'] = log;
+        }
+        ctx._csv.forEach((k, v) -> {
+          log[k] = v;
+        });
       }
-      def log = sep['log'];
-      if (log == null) {
-        log = [:];
-        sep['log'] = log;
-      }
-      ctx._csv.forEach((k, v) -> {
-        log[k] = v;
-      });
 
       ctx.remove('_csv');
 
