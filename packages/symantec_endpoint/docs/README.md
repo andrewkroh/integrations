@@ -120,8 +120,10 @@ Contains log entries from Symantec FortiGate applicances.
 | observer.vendor | Vendor name of the observer. | keyword |
 | process.command_line | Full command line that started the process, including the absolute path to the executable, and all arguments. Some arguments may be filtered to protect sensitive information. | wildcard |
 | process.executable | Absolute path to the process executable. | keyword |
+| process.hash.md5 | MD5 hash. | keyword |
 | process.hash.sha256 | SHA256 hash. | keyword |
 | process.name | Process name. Sometimes called program name or similar. | keyword |
+| process.pid | Process id. | long |
 | related.hash | All the hashes seen on your event. Populating this field, then using it to search for hashes can help in situations where you're unsure what the hash algorithm is (and therefore which key name to search). | keyword |
 | related.ip | All of the IPs seen on your event. | ip |
 | related.user | All the user names or other user identifiers seen on the event. | keyword |

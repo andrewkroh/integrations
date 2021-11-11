@@ -124,7 +124,11 @@
   external: ecs
 - name: process.hash.sha256
   external: ecs
+- name: process.hash.md5
+  external: ecs
 - name: process.name
+  external: ecs
+- name: process.pid
   external: ecs
 - name: related.hash
   external: ecs

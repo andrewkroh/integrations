@@ -20,18 +20,47 @@
                     }
                 }
             },
+            "_csv_array": [
+                "server01",
+                "Event Description: [SID: 29464] Audit: Nessus Vulnerability Scanner Activity attack detected but not blocked. Application path: C:\\PROGRAM FILES (X86)\\VMWARE\\VMWARE WORKSTATION\\VMWARE-HOSTD.EXE",
+                "Local Host IP: 0.0.0.0",
+                "Local Host MAC: 000000000000",
+                "Remote Host Name: ",
+                "Remote Host IP: 0.0.0.0",
+                "Remote Host MAC: 000000000000",
+                "Inbound",
+                "TCP",
+                "Intrusion ID: 0",
+                "Begin: 2020-07-12 08:05:50",
+                "End Time: 2020-07-12 08:05:50",
+                "Occurrences: 2",
+                "Application: C:/PROGRAM FILES (X86)/VMWARE/VMWARE WORKSTATION/VMWARE-HOSTD.EXE",
+                "Location: Office",
+                "User Name: axelrod",
+                "Domain Name: CC",
+                "Local Port: 8080",
+                "Remote Port: 63462",
+                "CIDS Signature ID: 29464",
+                "CIDS Signature string: Audit: Nessus Vulnerability Scanner Activity",
+                "CIDS Signature SubID: 75167",
+                "Intrusion URL: server01.example.com/sdk",
+                "Intrusion Payload URL: ",
+                "SHA-256: 9CD356A59A42BF8BDB7F5C93D5677A1AF079C7AE77361105A3AB2A0BA88CE2F8",
+                "MD-5:"
+            ],
             "destination": {
-                "geo": {
-                    "name": "Office"
-                },
-                "port": 8080
+                "port": 63462
             },
             "rule": {
                 "id": "0"
             },
             "source": {
-                "port": 63462
+                "geo": {
+                    "name": "Office"
+                },
+                "port": 8080
             },
+            "_fingerprint": "NONE|event_description|local_host_ip|local_host_mac|remote_host_ip|remote_host_mac|NONE|NONE|intrusion_id|begin|end_time|occurrences|application|location|user_name|domain_name|local_port|remote_port|cids_signature_id|cids_signature_string|cids_signature_subid|intrusion_url|sha-256|md-5",
             "message": "[SID: 29464] Audit: Nessus Vulnerability Scanner Activity attack detected but not blocked. Application path: C:\\PROGRAM FILES (X86)\\VMWARE\\VMWARE WORKSTATION\\VMWARE-HOSTD.EXE",
             "url": {
                 "original": "server01.example.com/sdk"
@@ -39,10 +68,6 @@
             "tags": [
                 "preserve_original_event"
             ],
-            "network": {
-                "transport": "tcp",
-                "direction": "ingress"
-            },
             "observer": {
                 "type": "edr",
                 "product": "Endpoint Protection",
@@ -100,26 +125,51 @@
                     }
                 }
             },
+            "_csv_array": [
+                "server02",
+                "Event Description: Portscan",
+                "Local Host IP: 192.168.50.2",
+                "Local Host MAC: 000000000000",
+                "Remote Host Name: ",
+                "Remote Host IP: 192.168.50.3",
+                "Remote Host MAC: 000000000000",
+                "Inbound",
+                "TCP",
+                "Intrusion ID: 0",
+                "Begin: 2020-12-08 09:08:01",
+                "End Time: 2020-12-08 09:08:01",
+                "Occurrences: 1",
+                "Application: ",
+                "Location: Office",
+                "User Name: john",
+                "Domain Name: local",
+                "Local Port: 0",
+                "Remote Port: 0",
+                "CIDS Signature ID: 10000",
+                "CIDS Signature string: Portscan",
+                "CIDS Signature SubID: 0",
+                "Intrusion URL: ",
+                "Intrusion Payload URL: ",
+                "SHA-256: ",
+                "MD-5:"
+            ],
             "destination": {
-                "geo": {
-                    "name": "Office"
-                },
-                "ip": "192.168.50.2"
+                "ip": "192.168.50.3"
             },
             "rule": {
                 "id": "0"
             },
             "source": {
-                "ip": "192.168.50.3"
+                "geo": {
+                    "name": "Office"
+                },
+                "ip": "192.168.50.2"
             },
+            "_fingerprint": "NONE|event_description|local_host_ip|local_host_mac|remote_host_ip|remote_host_mac|NONE|NONE|intrusion_id|begin|end_time|occurrences|location|user_name|domain_name|local_port|remote_port|cids_signature_id|cids_signature_string|cids_signature_subid|md-5",
             "message": "Portscan",
             "tags": [
                 "preserve_original_event"
             ],
-            "network": {
-                "transport": "tcp",
-                "direction": "ingress"
-            },
             "observer": {
                 "type": "edr",
                 "product": "Endpoint Protection",
@@ -128,8 +178,8 @@
             "@timestamp": "2021-12-08T11:08:30.000-05:00",
             "related": {
                 "ip": [
-                    "192.168.50.3",
-                    "192.168.50.2"
+                    "192.168.50.2",
+                    "192.168.50.3"
                 ]
             },
             "host": {
@@ -180,25 +230,51 @@
                     }
                 }
             },
+            "_csv_array": [
+                "server03",
+                "Event Description: ARP Cache Poison",
+                "Local Host IP: 0.0.0.0",
+                "Local Host MAC: 2DFF88AABBDC",
+                "Remote Host Name: ",
+                "Remote Host IP: 0.0.0.0",
+                "Remote Host MAC: AABBCCDDEEFF",
+                "Inbound",
+                "Unknown",
+                "Intrusion ID: 0",
+                "Begin: 2020-11-23 13:56:35",
+                "End Time: 2020-11-23 13:56:35",
+                "Occurrences: 1",
+                "Application: ",
+                "Location: Remote",
+                "User Name: bobby",
+                "Domain Name: local",
+                "Local Port: 0",
+                "Remote Port: 0",
+                "CIDS Signature ID: 99990",
+                "CIDS Signature string: ARP Cache Poison",
+                "CIDS Signature SubID: 0",
+                "Intrusion URL: ",
+                "Intrusion Payload URL: ",
+                "SHA-256: ",
+                "MD-5:"
+            ],
             "destination": {
-                "geo": {
-                    "name": "Remote"
-                },
-                "mac": "2DFF88AABBDC"
+                "mac": "AABBCCDDEEFF"
             },
             "rule": {
                 "id": "0"
             },
             "source": {
-                "mac": "AABBCCDDEEFF"
+                "geo": {
+                    "name": "Remote"
+                },
+                "mac": "2DFF88AABBDC"
             },
+            "_fingerprint": "NONE|event_description|local_host_ip|local_host_mac|remote_host_ip|remote_host_mac|NONE|NONE|intrusion_id|begin|end_time|occurrences|location|user_name|domain_name|local_port|remote_port|cids_signature_id|cids_signature_string|cids_signature_subid|md-5",
             "message": "ARP Cache Poison",
             "tags": [
                 "preserve_original_event"
             ],
-            "network": {
-                "direction": "ingress"
-            },
             "observer": {
                 "type": "edr",
                 "product": "Endpoint Protection",
@@ -217,10 +293,7 @@
                         "name": "ARP Cache Poison",
                         "sub_id": "0",
                         "id": "99990"
-                    },
-                    "_unmapped_csv": [
-                        "Unknown"
-                    ]
+                    }
                 }
             },
             "event": {
@@ -262,20 +335,49 @@
                     }
                 }
             },
+            "_csv_array": [
+                "server04",
+                "Event Description: [SID: 30369] Audit: Nessus Vulnerability Scanner Activity 3 attack detected but not blocked. Application path: SYSTEM",
+                "Local Host IP: 10.11.12.13",
+                "Local Host MAC: 000000000000",
+                "Remote Host Name: ",
+                "Remote Host IP: 10.88.31.147",
+                "Remote Host MAC: 000000000000",
+                "Inbound",
+                "TCP",
+                "Intrusion ID: 0",
+                "Begin: 2020-12-11 10:08:25",
+                "End Time: 2020-12-11 10:08:25",
+                "Occurrences: 1",
+                "Application: SYSTEM",
+                "Location: Wireless",
+                "User Name: none",
+                "Domain Name: ",
+                "Local Port: 5985",
+                "Remote Port: 42734",
+                "CIDS Signature ID: 30369",
+                "CIDS Signature string: Audit: Nessus Vulnerability Scanner Activity 3",
+                "CIDS Signature SubID: 75185",
+                "Intrusion URL: server04.example.com//${%23w%3d%23context.get('com.opensymphony.xwork2.dispatcher.HttpServletResponse').getWriter(),%23w.print('Nessus%20Response:%20'),%23w.println('struts_2_3_14_3_command_execution-1365356639'),%23w.flush(),%23w.close()}.action",
+                "Intrusion Payload URL: ",
+                "SHA-256: 0000000000000000000000000000000000000000000000000000000000000000",
+                "MD-5:"
+            ],
             "destination": {
+                "port": 42734,
+                "ip": "10.88.31.147"
+            },
+            "rule": {
+                "id": "0"
+            },
+            "source": {
                 "geo": {
                     "name": "Wireless"
                 },
                 "port": 5985,
                 "ip": "10.11.12.13"
             },
-            "rule": {
-                "id": "0"
-            },
-            "source": {
-                "port": 42734,
-                "ip": "10.88.31.147"
-            },
+            "_fingerprint": "NONE|event_description|local_host_ip|local_host_mac|remote_host_ip|remote_host_mac|NONE|NONE|intrusion_id|begin|end_time|occurrences|application|location|user_name|local_port|remote_port|cids_signature_id|cids_signature_string|cids_signature_subid|intrusion_url|sha-256|md-5",
             "message": "[SID: 30369] Audit: Nessus Vulnerability Scanner Activity 3 attack detected but not blocked. Application path: SYSTEM",
             "url": {
                 "original": "server04.example.com//${%23w%3d%23context.get('com.opensymphony.xwork2.dispatcher.HttpServletResponse').getWriter(),%23w.print('Nessus%20Response:%20'),%23w.println('struts_2_3_14_3_command_execution-1365356639'),%23w.flush(),%23w.close()}.action"
@@ -283,10 +385,6 @@
             "tags": [
                 "preserve_original_event"
             ],
-            "network": {
-                "transport": "tcp",
-                "direction": "ingress"
-            },
             "observer": {
                 "type": "edr",
                 "product": "Endpoint Protection",
@@ -298,8 +396,8 @@
                     "0000000000000000000000000000000000000000000000000000000000000000"
                 ],
                 "ip": [
-                    "10.88.31.147",
-                    "10.11.12.13"
+                    "10.11.12.13",
+                    "10.88.31.147"
                 ]
             },
             "host": {
@@ -347,26 +445,46 @@
                     }
                 }
             },
+            "_csv_array": [
+                "server05",
+                "Local Host IP: 0.0.0.0",
+                "Local Port: 8080",
+                "Local Host MAC: 0123456789AB",
+                "Remote Host IP: 0.0.0.0",
+                "Remote Host Name: ",
+                "Remote Port: 0",
+                "Remote Host MAC: ABCDEF123455",
+                "ETHERNET",
+                "Inbound",
+                "Begin: 2020-12-09 00:46:50",
+                "End Time: 2020-12-09 00:46:50",
+                "Occurrences: 1",
+                "Application: ",
+                "Rule: Block all other traffic",
+                "Location: OFFICE-EAST",
+                "User Name: Citrix",
+                "Domain Name: Citrix",
+                "Action: Blocked",
+                "SHA-256: ",
+                "MD-5:"
+            ],
             "destination": {
+                "mac": "ABCDEF123455"
+            },
+            "rule": {
+                "name": "Block all other traffic"
+            },
+            "source": {
                 "geo": {
                     "name": "OFFICE-EAST"
                 },
                 "port": 8080,
                 "mac": "0123456789AB"
             },
-            "rule": {
-                "name": "Block all other traffic"
-            },
-            "source": {
-                "mac": "ABCDEF123455"
-            },
+            "_fingerprint": "NONE|local_host_ip|local_port|local_host_mac|remote_host_ip|remote_port|remote_host_mac|NONE|NONE|begin|end_time|occurrences|rule|location|user_name|domain_name|action|md-5",
             "tags": [
                 "preserve_original_event"
             ],
-            "network": {
-                "transport": "ethernet",
-                "direction": "ingress"
-            },
             "observer": {
                 "type": "edr",
                 "product": "Endpoint Protection",
@@ -379,15 +497,8 @@
                     "0123456789AB"
                 ]
             },
-            "symantec_endpoint": {
-                "log": {
-                    "_unmapped_csv": [
-                        "XXXXXXXXXXXX"
-                    ]
-                }
-            },
             "event": {
-                "original": "\u003c54\u003eDec 9 00:56:49 SymantecServer: server05,XXXXXXXXXXXX,Local Host IP: 0.0.0.0,Local Port: 8080,Local Host MAC: 0123456789AB,Remote Host IP: 0.0.0.0,Remote Host Name: ,Remote Port: 0,Remote Host MAC: ABCDEF123455,ETHERNET,Inbound,Begin: 2020-12-09 00:46:50,End Time: 2020-12-09 00:46:50,Occurrences: 1,Application: ,Rule: Block all other traffic,Location: OFFICE-EAST,User Name: Citrix,Domain Name: Citrix,Action: Blocked,SHA-256: ,MD-5:",
+                "original": "\u003c54\u003eDec 9 00:56:49 SymantecServer: server05,Local Host IP: 0.0.0.0,Local Port: 8080,Local Host MAC: 0123456789AB,Remote Host IP: 0.0.0.0,Remote Host Name: ,Remote Port: 0,Remote Host MAC: ABCDEF123455,ETHERNET,Inbound,Begin: 2020-12-09 00:46:50,End Time: 2020-12-09 00:46:50,Occurrences: 1,Application: ,Rule: Block all other traffic,Location: OFFICE-EAST,User Name: Citrix,Domain Name: Citrix,Action: Blocked,SHA-256: ,MD-5:",
                 "timezone": "-05:00",
                 "kind": "event",
                 "start": "2020-12-09T00:46:50.000-05:00",
@@ -420,6 +531,33 @@
                     }
                 }
             },
+            "_csv_array": [
+                "20-11111A111111",
+                "Event Description: The client will block traffic from IP address 10.33.146.1 for the next 60 seconds (from 03/10/2019 23:51:04 to 03/10/2019 23:52:04). ",
+                "Local: 10.246.162.238",
+                "Local Host MAC: 000000000000",
+                "Remote Host Name: ",
+                "Remote Host IP: 10.33.146.1",
+                "Remote Host MAC: 000000000000",
+                "Inbound",
+                "OTHERS",
+                "Begin: 2019-10-03 23:51:04",
+                "End: 2019-10-03 23:52:04",
+                "Occurrences: 1",
+                "Application: ",
+                "Location: Test Loc - VPN",
+                "User: A1111111",
+                "Domain: TESTDOMAIN",
+                "Local Port: 0",
+                "Remote Port: 0",
+                "CIDS Signature ID: 0",
+                "CIDS Signature string: ",
+                "CIDS Signature SubID: 0",
+                "Intrusion URL: ",
+                "Intrusion Payload URL: ",
+                "SHA-256: ",
+                "MD-5:"
+            ],
             "destination": {
                 "geo": {
                     "name": "Test Loc - VPN"
@@ -429,11 +567,13 @@
             "source": {
                 "ip": "10.33.146.1"
             },
+            "_fingerprint": "NONE|event_description|local|local_host_mac|remote_host_ip|remote_host_mac|NONE|NONE|begin|end|occurrences|location|user|domain|local_port|remote_port|cids_signature_id|cids_signature_subid|md-5",
             "message": "The client will block traffic from IP address 10.33.146.1 for the next 60 seconds (from 03/10/2019 23:51:04 to 03/10/2019 23:52:04).",
             "tags": [
                 "preserve_original_event"
             ],
             "network": {
+                "transport": "others",
                 "direction": "ingress"
             },
             "observer": {
@@ -459,14 +599,12 @@
                     "signature": {
                         "sub_id": "0",
                         "id": "0"
-                    },
-                    "_unmapped_csv": [
-                        "OTHERS"
-                    ]
+                    }
                 }
             },
             "event": {
                 "original": "\u003c51\u003eOct 3 23:51:53 symantec.endpointprotection.english.test SymantecServer: 20-11111A111111,Event Description: The client will block traffic from IP address 10.33.146.1 for the next 60 seconds (from 03/10/2019 23:51:04 to 03/10/2019 23:52:04). ,Local: 10.246.162.238,Local Host MAC: 000000000000,Remote Host Name: ,Remote Host IP: 10.33.146.1,Remote Host MAC: 000000000000,Inbound,OTHERS,,Begin: 2019-10-03 23:51:04,End: 2019-10-03 23:52:04,Occurrences: 1,Application: ,Location: Test Loc - VPN,User: A1111111,Domain: TESTDOMAIN,Local Port: 0,Remote Port: 0,CIDS Signature ID: 0,CIDS Signature string: ,CIDS Signature SubID: 0,Intrusion URL: ,Intrusion Payload URL: ,SHA-256: ,MD-5:",
+                "provider": "Agent Security Log",
                 "timezone": "-05:00",
                 "kind": "event",
                 "start": "2019-10-03T23:51:04.000-05:00",
@@ -485,12 +623,6 @@
             }
         },
         {
-            "observer": {
-                "type": "edr",
-                "product": "Endpoint Protection",
-                "vendor": "Symantec"
-            },
-            "@timestamp": "2021-10-04T10:51:33.000-05:00",
             "log": {
                 "syslog": {
                     "host": {
@@ -504,18 +636,34 @@
                     }
                 }
             },
+            "_csv_array": [
+                "Site: Site_TEST_SITE",
+                "Server Name: SAMPLE0008",
+                "Domain Name: Default",
+                "The management server received the client log successfully",
+                "TESTHOST18",
+                "sampleuser99",
+                "sample.abccompany.com"
+            ],
+            "_fingerprint": "site|server_name|domain_name|NONE|NONE|NONE|NONE",
+            "message": "The management server received the client log successfully",
+            "tags": [
+                "preserve_original_event"
+            ],
+            "observer": {
+                "type": "edr",
+                "product": "Endpoint Protection",
+                "vendor": "Symantec"
+            },
+            "@timestamp": "2021-10-04T10:51:33.000-05:00",
             "host": {
-                "hostname": "The management server received the client log successfully"
+                "hostname": "Site: Site_TEST_SITE"
             },
             "symantec_endpoint": {
                 "log": {
                     "server_name": "SAMPLE0008",
-                    "site": "Site_TEST_SITE",
-                    "_unmapped_csv": [
-                        "TESTHOST18",
-                        "sampleuser99",
-                        "sample.abccompany.com"
-                    ]
+                    "local_host_name": "TESTHOST18",
+                    "site": "Site_TEST_SITE"
                 }
             },
             "event": {
@@ -523,23 +671,23 @@
                 "category": [
                     "intrusion_detection"
                 ],
+                "type": [
+                    "info"
+                ],
+                "provider": "Agent Activity Log",
                 "timezone": "-05:00",
                 "kind": "event"
             },
             "user": {
-                "domain": "Default"
-            },
-            "tags": [
-                "preserve_original_event"
-            ]
+                "name": "sampleuser99",
+                "domain": "sample.abccompany.com"
+            }
         },
         {
-            "observer": {
-                "type": "edr",
-                "product": "Endpoint Protection",
-                "vendor": "Symantec"
+            "process": {
+                "pid": 16464,
+                "executable": "C:/Windows/SysWOW64/msiexec.exe"
             },
-            "@timestamp": "2021-10-04T10:51:33.000-05:00",
             "log": {
                 "syslog": {
                     "host": {
@@ -553,45 +701,73 @@
                     }
                 }
             },
-            "host": {
-                "hostname": "sam196136"
-            },
+            "_csv_array": [
+                "sam196136",
+                "10.221.252.252",
+                "Blocked",
+                "[AC15-1.1] Prevent registration of new Browser Helper Objects - Registry Value=0x1 - Caller MD5=747c6064888f11f5431b34a422780650",
+                "Registry Write",
+                "Begin: 2020-11-12 09:22:22",
+                "End Time: 2020-11-12 09:22:22",
+                "Rule: Prevent registration of new Browser Helper Objects | [AC15-1.1] Prevent registration of new Browser Helper Objects",
+                "16464",
+                "C:/Windows/SysWOW64/msiexec.exe",
+                "0",
+                "No Module Name",
+                "/REGISTRY/MACHINE/SOFTWARE/Microsoft/Windows/CurrentVersion/Explorer/Browser Helper Objects/{F4971EE7-DAA0-4053-9964-665D8EE6A077}/NoExplorer",
+                "User Name: SYSTEM",
+                "Domain Name: SMPL",
+                "Action Type: ",
+                "File size (bytes): 0",
+                "Device ID:"
+            ],
             "rule": {
                 "name": "Prevent registration of new Browser Helper Objects | [AC15-1.1] Prevent registration of new Browser Helper Objects"
             },
+            "_fingerprint": "NONE|NONE|NONE|NONE|NONE|begin|end_time|rule|NONE|NONE|NONE|NONE|NONE|user_name|domain_name|file_size_(bytes)|device_id",
+            "message": "[AC15-1.1] Prevent registration of new Browser Helper Objects - Registry Value=0x1 - Caller MD5=747c6064888f11f5431b34a422780650",
+            "tags": [
+                "preserve_original_event"
+            ],
+            "observer": {
+                "type": "edr",
+                "product": "Endpoint Protection",
+                "vendor": "Symantec"
+            },
+            "@timestamp": "2021-10-04T10:51:33.000-05:00",
+            "file": {
+                "size": 0
+            },
+            "host": {
+                "hostname": "sam196136"
+            },
             "symantec_endpoint": {
                 "log": {
-                    "_unmapped_csv": [
-                        "10.221.252.252",
-                        "Blocked",
-                        "[AC15-1.1] Prevent registration of new Browser Helper Objects - Registry Value=0x1 - Caller MD5=747c6064888f11f5431b34a422780650",
-                        "Registry Write",
-                        "16464",
-                        "C:/Windows/SysWOW64/msiexec.exe",
-                        "0",
-                        "No Module Name",
-                        "/REGISTRY/MACHINE/SOFTWARE/Microsoft/Windows/CurrentVersion/Explorer/Browser Helper Objects/{F4971EE7-DAA0-4053-9964-665D8EE6A077}/NoExplorer"
-                    ],
-                    "file_size_(bytes)": "0"
+                    "caller_return_address": "0",
+                    "caller_return_module_name": "No Module Name",
+                    "parameters": "/REGISTRY/MACHINE/SOFTWARE/Microsoft/Windows/CurrentVersion/Explorer/Browser Helper Objects/{F4971EE7-DAA0-4053-9964-665D8EE6A077}/NoExplorer",
+                    "api_name": "Registry Write"
                 }
             },
             "event": {
-                "start": "2020-11-12T09:22:22.000-05:00",
-                "end": "2020-11-12T09:22:22.000-05:00",
                 "original": "\u003c51\u003eOct 4 10:51:33 symantec.endpointprotection.english.test SymantecServer: sam196136,10.221.252.252,Blocked,[AC15-1.1] Prevent registration of new Browser Helper Objects - Registry Value=0x1 - Caller MD5=747c6064888f11f5431b34a422780650,Registry Write,Begin: 2020-11-12 09:22:22,End Time: 2020-11-12 09:22:22,Rule: Prevent registration of new Browser Helper Objects | [AC15-1.1] Prevent registration of new Browser Helper Objects,16464,C:/Windows/SysWOW64/msiexec.exe,0,No Module Name,/REGISTRY/MACHINE/SOFTWARE/Microsoft/Windows/CurrentVersion/Explorer/Browser Helper Objects/{F4971EE7-DAA0-4053-9964-665D8EE6A077}/NoExplorer,User Name: SYSTEM,Domain Name: SMPL,Action Type: ,File size (bytes): 0,Device ID:",
+                "provider": "Agent Behavior Log",
+                "timezone": "-05:00",
+                "kind": "event",
+                "start": "2020-11-12T09:22:22.000-05:00",
+                "action": "blocked",
+                "end": "2020-11-12T09:22:22.000-05:00",
                 "category": [
                     "intrusion_detection"
                 ],
-                "timezone": "-05:00",
-                "kind": "event"
+                "type": [
+                    "denied"
+                ]
             },
             "user": {
                 "name": "SYSTEM",
                 "domain": "SMPL"
-            },
-            "tags": [
-                "preserve_original_event"
-            ]
+            }
         },
         {
             "process": {
@@ -614,6 +790,29 @@
                     }
                 }
             },
+            "_csv_array": [
+                "sam733904",
+                "Local Host IP: 192.168.1.113",
+                "Local Port: 80",
+                "Local Host MAC: CCF9E4A91226",
+                "Remote Host IP: 192.168.1.1",
+                "Remote Host Name: ",
+                "Remote Port: 33424",
+                "Remote Host MAC: 2C3AFDA79E71",
+                "TCP",
+                "Inbound",
+                "Begin: 2020-11-11 19:25:21",
+                "End Time: 2020-11-11 19:25:28",
+                "Occurrences: 4",
+                "Application: C:/WINDOWS/system32/NTOSKRNL.EXE",
+                "Rule: Block Unapproved Incoming Ports",
+                "Location: Default",
+                "User Name: sampleuser4",
+                "Domain Name: SMPL",
+                "Action: Blocked",
+                "SHA-256: 5379732000000000000000000000000000000000000000000000000000000000",
+                "MD-5: 53797320000000000000000000000000"
+            ],
             "destination": {
                 "geo": {
                     "name": "Default"
@@ -630,6 +829,7 @@
                 "mac": "2C3AFDA79E71",
                 "ip": "192.168.1.1"
             },
+            "_fingerprint": "NONE|local_host_ip|local_port|local_host_mac|remote_host_ip|remote_port|remote_host_mac|NONE|NONE|begin|end_time|occurrences|application|rule|location|user_name|domain_name|action|sha-256|md-5",
             "tags": [
                 "preserve_original_event"
             ],
@@ -664,6 +864,7 @@
             },
             "event": {
                 "original": "\u003c51\u003eOct 4 10:51:33 symantec.endpointprotection.english.test SymantecServer: sam733904,Local Host IP: 192.168.1.113,Local Port: 80,Local Host MAC: CCF9E4A91226,Remote Host IP: 192.168.1.1,Remote Host Name: ,Remote Port: 33424,Remote Host MAC: 2C3AFDA79E71,TCP,Inbound,Begin: 2020-11-11 19:25:21,End Time: 2020-11-11 19:25:28,Occurrences: 4,Application: C:/WINDOWS/system32/NTOSKRNL.EXE,Rule: Block Unapproved Incoming Ports,Location: Default,User Name: sampleuser4,Domain Name: SMPL,Action: Blocked,SHA-256: 5379732000000000000000000000000000000000000000000000000000000000,MD-5: 53797320000000000000000000000000",
+                "provider": "Agent Traffic Log",
                 "timezone": "-05:00",
                 "kind": "event",
                 "start": "2020-11-11T19:25:21.000-05:00",
