@@ -13,26 +13,8 @@ This integration has been tested against FortiOS version 6.0.x and 6.2.x. Versio
 
 ## Logs
 
-### Firewall
-
 Contains log entries from Symantec FortiGate applicances.
 
-{{fields "firewall"}}
+{{fields "log"}}
 
-### Clientendpoint
 
-The `clientendpoint` dataset collects Symantec FortiClient Endpoint Security logs.
-
-{{fields "clientendpoint"}}
-
-### Fortimail
-
-The `fortimail` dataset collects Symantec FortiMail logs.
-
-{{fields "fortimail"}}
-
-### Fortimanager
-
-The `fortimanager` dataset collects Symantec Manager/Analyzer logs.
-
-{{fields "fortimanager"}}
