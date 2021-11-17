@@ -1,6 +1,7 @@
-# Symantec Integration
+# Symantec Endpoint Protection Integration
 
-This integration is for Symantec FortiOS and FortiClient Endpoint logs sent in the syslog format. It includes the following datasets for receiving logs:
+This integration is for Symantec FortiOS and FortiClient Endpoint logs sent in
+the syslog format. It includes the following datasets for receiving logs:
 
 - `firewall` dataset: consists of Symantec FortiGate logs.
 - `clientendpoint` dataset: supports Symantec FortiClient Endpoint Security logs.
@@ -9,7 +10,8 @@ This integration is for Symantec FortiOS and FortiClient Endpoint logs sent in t
 
 ## Compatibility
 
-This integration has been tested against FortiOS version 6.0.x and 6.2.x. Versions above this are expected to work but have not been tested.
+This integration has been tested against FortiOS version 6.0.x and 6.2.x.
+Versions above this are expected to work but have not been tested.
 
 ## Logs
 

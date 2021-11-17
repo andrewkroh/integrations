@@ -1,0 +1,7 @@
+service: symantec_endpoint-logfile
+input: logfile
+data_stream:
+  vars:
+    paths:
+      - "{{SERVICE_LOGS_DIR}}/*endpoint*.log"
+    preserve_original_event: true

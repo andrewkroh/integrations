@@ -158,6 +158,8 @@
   external: ecs
 - name: source.bytes
   external: ecs
+- name: source.domain
+  external: ecs
 - name: source.geo.city_name
   external: ecs
 - name: source.geo.continent_name

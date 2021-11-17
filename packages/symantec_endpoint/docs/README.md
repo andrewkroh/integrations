@@ -1,6 +1,7 @@
-# Symantec Integration
+# Symantec Endpoint Protection Integration
 
-This integration is for Symantec FortiOS and FortiClient Endpoint logs sent in the syslog format. It includes the following datasets for receiving logs:
+This integration is for Symantec FortiOS and FortiClient Endpoint logs sent in
+the syslog format. It includes the following datasets for receiving logs:
 
 - `firewall` dataset: consists of Symantec FortiGate logs.
 - `clientendpoint` dataset: supports Symantec FortiClient Endpoint Security logs.
@@ -9,7 +10,8 @@ This integration is for Symantec FortiOS and FortiClient Endpoint logs sent in t
 
 ## Compatibility
 
-This integration has been tested against FortiOS version 6.0.x and 6.2.x. Versions above this are expected to work but have not been tested.
+This integration has been tested against FortiOS version 6.0.x and 6.2.x.
+Versions above this are expected to work but have not been tested.
 
 ## Logs
 
@@ -65,7 +67,7 @@ Contains log entries from Symantec FortiGate applicances.
 | error.code | Error code describing the error. | keyword |
 | error.message | Error message. | match_only_text |
 | event.category | This is one of four ECS Categorization Fields, and indicates the second level in the ECS category hierarchy. `event.category` represents the "big buckets" of ECS categories. For example, filtering on `event.category:process` yields all events relating to process activity. This field is closely related to `event.type`, which is used as a subcategory. This field is an array. This will allow proper categorization of some events that fall in multiple categories. | keyword |
-| event.dataset | Event dataset | constant_keyword |
+| event.dataset | Name of the dataset. If an event source publishes more than one type of log or events (e.g. access log, error log), the dataset is used to specify which one the event comes from. It's recommended but not required to start the dataset name with the module name, followed by a dot, then the dataset name. | keyword |
 | event.duration | Duration of the event in nanoseconds. If event.start and event.end are known this value should be the difference between the end and start time. | long |
 | event.ingested | Timestamp when an event arrived in the central data store. This is different from `@timestamp`, which is when the event originally occurred.  It's also different from `event.created`, which is meant to capture the first time an agent saw the event. In normal conditions, assuming no tampering, the timestamps should chronologically look like this: `@timestamp` \< `event.created` \< `event.ingested`. | date |
 | event.kind | This is one of four ECS Categorization Fields, and indicates the highest level in the ECS category hierarchy. `event.kind` gives high-level information about what type of information the event contains, without being specific to the contents of the event. For example, values of this field distinguish alert events from metric events. The value of this field can be used to inform how these kinds of events should be handled. They may warrant different retention, different access control, it may also help understand whether the data coming in at a regular interval or not. | keyword |
@@ -100,9 +102,12 @@ Contains log entries from Symantec FortiGate applicances.
 | log.offset | Offset of the entry in the log file. | long |
 | log.source.address | Source address from which the log event was read / sent from. | keyword |
 | log.syslog.facility.code | The Syslog numeric facility of the log event, if available. According to RFCs 5424 and 3164, this value should be an integer between 0 and 23. | long |
-| log.syslog.host.name |  | keyword |
+| log.syslog.host.hostname |  | keyword |
+| log.syslog.priority |  | long |
 | log.syslog.process.name |  | keyword |
 | log.syslog.process.pid |  | long |
+| log.syslog.structured_data |  | flattened |
+| log.syslog.version |  | long |
 | message | For log events the message field contains the log message, optimized for viewing in a log viewer. For structured logs without an original message field, other fields can be concatenated to form a human-readable summary of the event. If multiple messages exist, they can be combined into one message. | match_only_text |
 | network.application | A name given to an application level protocol. This can be arbitrarily assigned for things like microservices, but also apply to things like skype, icq, facebook, twitter. This would be used in situations where the vendor or service can be decoded such as from the source/dest IP owners, ports, or wire format. The field value must be normalized to lowercase for querying. See the documentation section "Implementing ECS". | keyword |
 | network.bytes | Total bytes transferred in both directions. If `source.bytes` and `destination.bytes` are known, `network.bytes` is their sum. | long |
@@ -138,6 +143,7 @@ Contains log entries from Symantec FortiGate applicances.
 | source.as.number | Unique number allocated to the autonomous system. The autonomous system number (ASN) uniquely identifies each network on the Internet. | long |
 | source.as.organization.name | Organization name. | keyword |
 | source.bytes | Bytes sent from the source to the destination. | long |
+| source.domain | Source domain. | keyword |
 | source.geo.city_name | City name. | keyword |
 | source.geo.continent_name | Name of the continent. | keyword |
 | source.geo.country_iso_code | Country ISO code. | keyword |
@@ -155,11 +161,16 @@ Contains log entries from Symantec FortiGate applicances.
 | source.user.email | User email address. | keyword |
 | source.user.group.name | Name of the group. | keyword |
 | source.user.name | Short name or login of the user. | keyword |
-| symantec_endpoint.log._unmapped_csv |  | keyword |
+| symantec_endpoint.log.api_name |  | keyword |
+| symantec_endpoint.log.caller_return_address |  | keyword |
+| symantec_endpoint.log.caller_return_module_name |  | keyword |
 | symantec_endpoint.log.intrusion_payload_url |  | keyword |
+| symantec_endpoint.log.parameters |  | keyword |
+| symantec_endpoint.log.server_name |  | keyword |
 | symantec_endpoint.log.signature.id |  | keyword |
 | symantec_endpoint.log.signature.name |  | keyword |
 | symantec_endpoint.log.signature.sub_id |  | keyword |
+| symantec_endpoint.log.site |  | keyword |
 | tags | List of keywords used to tag each event. | keyword |
 | tls.client.issuer | Distinguished name of subject of the issuer of the x.509 certificate presented by the client. | keyword |
 | tls.client.server_name | Also called an SNI, this tells the server which hostname to which the client is attempting to connect to. When this value is available, it should get copied to `destination.domain`. | keyword |

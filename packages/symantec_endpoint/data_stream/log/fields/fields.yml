@@ -1,6 +1,18 @@
 - name: symantec_endpoint.log
   type: group
   fields:
+    - name: api_name
+      type: keyword
+    - name: caller_return_address
+      type: keyword
+    - name: caller_return_module_name
+      type: keyword
+    - name: parameters
+      type: keyword
+    - name: server_name
+      type: keyword
+    - name: site
+      type: keyword
     - name: signature.id
       type: keyword
     - name: signature.name
@@ -9,11 +21,15 @@
       type: keyword
     - name: intrusion_payload_url
       type: keyword
-    - name: _unmapped_csv
-      type: keyword
-- name: log.syslog.host.name
+- name: log.syslog.host.hostname
   type: keyword
 - name: log.syslog.process.name
   type: keyword
 - name: log.syslog.process.pid
   type: long
+- name: log.syslog.priority
+  type: long
+- name: log.syslog.version
+  type: long
+- name: log.syslog.structured_data
+  type: flattened
