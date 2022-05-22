@@ -3,7 +3,7 @@
         {
             "@timestamp": "2022-02-21T21:54:44.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "action": "ssh_login",
@@ -57,7 +57,7 @@
         {
             "@timestamp": "2022-02-23T00:13:35.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "action": "ssh_login",
@@ -110,7 +110,7 @@
         {
             "@timestamp": "2022-02-21T21:56:12.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "action": "ssh_login",
@@ -160,7 +160,7 @@
         {
             "@timestamp": "2022-02-20T08:35:22.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "action": "ssh_login",
@@ -230,7 +230,7 @@
         {
             "@timestamp": "2022-02-21T23:35:33.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -271,7 +271,7 @@
         {
             "@timestamp": "2022-02-19T15:30:04.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -324,7 +324,7 @@
         {
             "@timestamp": "2022-02-23T00:08:48.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -365,7 +365,7 @@
         {
             "@timestamp": "2022-02-24T00:13:02.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -407,7 +407,7 @@
         {
             "@timestamp": "2022-02-22T11:47:05.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "category": [
@@ -444,7 +444,7 @@
         {
             "@timestamp": "2022-02-22T11:47:05.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "category": [

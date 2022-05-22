@@ -3,7 +3,7 @@
         {
             "@timestamp": "2022-02-09T21:19:40.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -35,7 +35,7 @@
         {
             "@timestamp": "2022-02-09T21:19:40.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -76,7 +76,7 @@
         {
             "@timestamp": "2022-02-09T21:19:40.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -112,7 +112,7 @@
         {
             "@timestamp": "2022-02-09T21:19:41.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -143,7 +143,7 @@
         {
             "@timestamp": "2022-02-09T21:21:02.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -184,7 +184,7 @@
         {
             "@timestamp": "2022-02-09T21:21:02.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -209,7 +209,7 @@
         {
             "@timestamp": "2022-02-09T21:21:02.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -245,7 +245,7 @@
         {
             "@timestamp": "2022-02-09T21:21:02.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -276,7 +276,7 @@
         {
             "@timestamp": "2022-02-22T10:21:42.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -308,7 +308,7 @@
         {
             "@timestamp": "2022-02-22T10:21:43.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -326,7 +326,7 @@
         {
             "@timestamp": "2022-02-22T10:24:49.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -367,7 +367,7 @@
         {
             "@timestamp": "2022-02-22T10:24:49.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -403,7 +403,7 @@
         {
             "@timestamp": "2022-02-22T10:26:52.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -429,7 +429,7 @@
         {
             "@timestamp": "2022-02-22T10:26:52.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -461,7 +461,7 @@
         {
             "@timestamp": "2022-02-22T10:49:54.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "action": "ssh_login",
@@ -514,7 +514,7 @@
         {
             "@timestamp": "2022-02-22T10:49:54.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -550,7 +550,7 @@
         {
             "@timestamp": "2022-02-22T10:50:01.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -591,7 +591,7 @@
         {
             "@timestamp": "2022-02-22T10:50:17.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -632,7 +632,7 @@
         {
             "@timestamp": "2022-02-22T10:50:17.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -668,7 +668,7 @@
         {
             "@timestamp": "2022-02-22T10:50:28.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -699,7 +699,7 @@
         {
             "@timestamp": "2022-02-22T11:04:28.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "action": "ssh_login",
@@ -752,7 +752,7 @@
         {
             "@timestamp": "2022-02-22T11:04:28.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -788,7 +788,7 @@
         {
             "@timestamp": "2022-02-22T11:04:32.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -814,7 +814,7 @@
         {
             "@timestamp": "2022-02-22T11:04:32.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -846,7 +846,7 @@
         {
             "@timestamp": "2022-02-22T11:17:01.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -882,7 +882,7 @@
         {
             "@timestamp": "2022-02-22T11:17:01.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -914,7 +914,7 @@
         {
             "@timestamp": "2022-02-22T11:21:21.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "action": "ssh_login",
@@ -967,7 +967,7 @@
         {
             "@timestamp": "2022-02-22T11:21:21.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -1003,7 +1003,7 @@
         {
             "@timestamp": "2022-02-22T11:21:24.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -1029,7 +1029,7 @@
         {
             "@timestamp": "2022-02-22T11:21:24.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -1061,7 +1061,7 @@
         {
             "@timestamp": "2022-02-22T11:24:43.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -1102,7 +1102,7 @@
         {
             "@timestamp": "2022-02-22T11:24:43.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -1138,7 +1138,7 @@
         {
             "@timestamp": "2022-02-22T23:17:01.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -1174,7 +1174,7 @@
         {
             "@timestamp": "2022-02-22T23:17:01.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -1206,7 +1206,7 @@
         {
             "@timestamp": "2022-02-22T23:29:50.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -1237,7 +1237,7 @@
         {
             "@timestamp": "2022-02-22T23:29:50.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -1269,7 +1269,7 @@
         {
             "@timestamp": "2022-02-23T19:17:01.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -1305,7 +1305,7 @@
         {
             "@timestamp": "2022-02-23T19:17:01.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -1337,7 +1337,7 @@
         {
             "@timestamp": "2022-02-23T19:26:35.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "action": "ssh_login",
@@ -1390,7 +1390,7 @@
         {
             "@timestamp": "2022-02-23T19:26:35.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -1426,7 +1426,7 @@
         {
             "@timestamp": "2022-02-23T20:05:18.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -1467,7 +1467,7 @@
         {
             "@timestamp": "2022-02-23T20:05:18.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -1503,7 +1503,7 @@
         {
             "@timestamp": "2022-02-23T20:15:04.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -1534,7 +1534,7 @@
         {
             "@timestamp": "2022-02-23T20:15:09.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -1560,7 +1560,7 @@
         {
             "@timestamp": "2022-02-23T20:15:09.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -1592,7 +1592,7 @@
         {
             "@timestamp": "2022-02-23T23:17:01.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -1628,7 +1628,7 @@
         {
             "@timestamp": "2022-02-23T23:17:01.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -1660,7 +1660,7 @@
         {
             "@timestamp": "2022-02-24T00:11:15.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "action": "ssh_login",
@@ -1713,7 +1713,7 @@
         {
             "@timestamp": "2022-02-24T00:11:15.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -1749,7 +1749,7 @@
         {
             "@timestamp": "2022-02-24T00:11:24.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "action": "ssh_login",
@@ -1802,7 +1802,7 @@
         {
             "@timestamp": "2022-02-24T00:11:24.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -1838,7 +1838,7 @@
         {
             "@timestamp": "2022-02-24T00:11:26.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -1879,7 +1879,7 @@
         {
             "@timestamp": "2022-02-24T00:11:26.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -1915,7 +1915,7 @@
         {
             "@timestamp": "2022-02-24T00:12:02.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "category": [
@@ -1949,7 +1949,7 @@
         {
             "@timestamp": "2022-02-24T00:12:02.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "category": [
@@ -1983,7 +1983,7 @@
         {
             "@timestamp": "2022-02-24T00:12:02.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "category": [
@@ -2020,7 +2020,7 @@
         {
             "@timestamp": "2022-02-24T00:12:02.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "category": [
@@ -2068,7 +2068,7 @@
         {
             "@timestamp": "2022-02-24T00:12:07.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -2094,7 +2094,7 @@
         {
             "@timestamp": "2022-02-24T00:12:10.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -2120,7 +2120,7 @@
         {
             "@timestamp": "2022-02-24T00:12:14.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -2146,7 +2146,7 @@
         {
             "@timestamp": "2022-02-24T00:12:14.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -2172,7 +2172,7 @@
         {
             "@timestamp": "2022-02-24T00:12:14.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -2209,7 +2209,7 @@
         {
             "@timestamp": "2022-02-24T00:12:20.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -2234,7 +2234,7 @@
         {
             "@timestamp": "2022-02-24T00:12:37.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -2275,7 +2275,7 @@
         {
             "@timestamp": "2022-02-24T00:12:37.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -2311,7 +2311,7 @@
         {
             "@timestamp": "2022-02-24T00:12:37.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -2342,7 +2342,7 @@
         {
             "@timestamp": "2022-02-24T00:12:42.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -2384,7 +2384,7 @@
         {
             "@timestamp": "2022-02-24T00:12:42.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -2409,7 +2409,7 @@
         {
             "@timestamp": "2022-02-24T00:12:50.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -2450,7 +2450,7 @@
         {
             "@timestamp": "2022-02-24T00:12:50.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -2486,7 +2486,7 @@
         {
             "@timestamp": "2022-02-24T00:12:50.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -2517,7 +2517,7 @@
         {
             "@timestamp": "2022-02-24T00:13:02.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -2559,7 +2559,7 @@
         {
             "@timestamp": "2022-02-24T00:13:02.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -2584,7 +2584,7 @@
         {
             "@timestamp": "2022-02-24T00:13:06.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -2625,7 +2625,7 @@
         {
             "@timestamp": "2022-02-24T00:13:06.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -2661,7 +2661,7 @@
         {
             "@timestamp": "2022-02-24T00:13:06.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -2692,7 +2692,7 @@
         {
             "@timestamp": "2022-02-24T00:17:01.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -2728,7 +2728,7 @@
         {
             "@timestamp": "2022-02-24T00:17:01.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -2760,7 +2760,7 @@
         {
             "@timestamp": "2022-02-24T00:45:47.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -2792,7 +2792,7 @@
         {
             "@timestamp": "2022-02-24T00:45:48.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -2823,7 +2823,7 @@
         {
             "@timestamp": "2022-02-24T00:45:49.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -2849,7 +2849,7 @@
         {
             "@timestamp": "2022-02-24T00:45:49.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -2881,7 +2881,7 @@
         {
             "@timestamp": "2022-02-24T00:46:32.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "action": "ssh_login",
@@ -2934,7 +2934,7 @@
         {
             "@timestamp": "2022-02-24T00:46:32.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -2970,7 +2970,7 @@
         {
             "@timestamp": "2022-02-24T00:46:32.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -2996,7 +2996,7 @@
         {
             "@timestamp": "2022-02-24T00:46:32.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -3028,7 +3028,7 @@
         {
             "@timestamp": "2022-02-24T01:05:42.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -3060,7 +3060,7 @@
         {
             "@timestamp": "2022-02-24T08:17:01.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -3096,7 +3096,7 @@
         {
             "@timestamp": "2022-02-24T08:17:01.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -3128,7 +3128,7 @@
         {
             "@timestamp": "2022-02-24T09:17:01.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -3164,7 +3164,7 @@
         {
             "@timestamp": "2022-02-24T09:17:01.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -3196,7 +3196,7 @@
         {
             "@timestamp": "2022-02-24T09:18:35.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "action": "ssh_login",
@@ -3249,7 +3249,7 @@
         {
             "@timestamp": "2022-02-24T09:18:35.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -3285,7 +3285,7 @@
         {
             "@timestamp": "2022-02-24T09:18:40.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -3326,7 +3326,7 @@
         {
             "@timestamp": "2022-02-24T09:18:40.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -3362,7 +3362,7 @@
         {
             "@timestamp": "2022-02-24T09:18:46.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -3393,7 +3393,7 @@
         {
             "@timestamp": "2022-02-24T09:18:53.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -3434,7 +3434,7 @@
         {
             "@timestamp": "2022-02-24T09:18:53.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -3470,7 +3470,7 @@
         {
             "@timestamp": "2022-02-24T09:18:53.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -3501,7 +3501,7 @@
         {
             "@timestamp": "2022-02-24T09:19:04.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -3542,7 +3542,7 @@
         {
             "@timestamp": "2022-02-24T09:19:04.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -3578,7 +3578,7 @@
         {
             "@timestamp": "2022-02-24T09:19:04.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -3609,7 +3609,7 @@
         {
             "@timestamp": "2022-02-24T09:19:09.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -3650,7 +3650,7 @@
         {
             "@timestamp": "2022-02-24T09:19:09.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -3686,7 +3686,7 @@
         {
             "@timestamp": "2022-02-24T09:19:09.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -3717,7 +3717,7 @@
         {
             "@timestamp": "2022-02-24T09:19:29.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -3758,7 +3758,7 @@
         {
             "@timestamp": "2022-02-24T09:19:29.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -3794,7 +3794,7 @@
         {
             "@timestamp": "2022-02-24T09:19:55.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "category": [
@@ -3828,7 +3828,7 @@
         {
             "@timestamp": "2022-02-24T09:19:55.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "category": [
@@ -3862,7 +3862,7 @@
         {
             "@timestamp": "2022-02-24T09:19:55.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "category": [
@@ -3899,7 +3899,7 @@
         {
             "@timestamp": "2022-02-24T09:19:55.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "category": [
@@ -3947,7 +3947,7 @@
         {
             "@timestamp": "2022-02-24T09:19:55.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -3973,7 +3973,7 @@
         {
             "@timestamp": "2022-02-24T09:19:55.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -3999,7 +3999,7 @@
         {
             "@timestamp": "2022-02-24T09:20:08.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -4030,7 +4030,7 @@
         {
             "@timestamp": "2022-02-24T09:20:10.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -4071,7 +4071,7 @@
         {
             "@timestamp": "2022-02-24T09:20:10.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -4107,7 +4107,7 @@
         {
             "@timestamp": "2022-02-24T09:20:10.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -4138,7 +4138,7 @@
         {
             "@timestamp": "2022-02-24T09:26:29.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -4179,7 +4179,7 @@
         {
             "@timestamp": "2022-02-24T09:26:29.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -4215,7 +4215,7 @@
         {
             "@timestamp": "2022-02-24T09:26:29.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -4246,7 +4246,7 @@
         {
             "@timestamp": "2022-02-24T09:26:59.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "action": "ssh_login",
@@ -4299,7 +4299,7 @@
         {
             "@timestamp": "2022-02-24T09:26:59.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",

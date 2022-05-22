@@ -3,7 +3,7 @@
         {
             "@timestamp": "2022-02-22T16:45:20.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "action": "ssh_login",
@@ -73,7 +73,7 @@
         {
             "@timestamp": "2022-02-22T16:45:20.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -105,7 +105,7 @@
         {
             "@timestamp": "2022-02-22T16:45:26.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -131,7 +131,7 @@
         {
             "@timestamp": "2022-02-22T16:45:26.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -157,7 +157,7 @@
         {
             "@timestamp": "2022-02-22T16:45:26.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -183,7 +183,7 @@
         {
             "@timestamp": "2022-02-22T16:45:32.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -209,7 +209,7 @@
         {
             "@timestamp": "2022-02-22T17:04:51.000Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",

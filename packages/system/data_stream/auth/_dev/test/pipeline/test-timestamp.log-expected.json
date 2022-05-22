@@ -3,7 +3,7 @@
         {
             "@timestamp": "2019-06-14T10:40:20.912Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -39,7 +39,7 @@
         {
             "@timestamp": "2019-06-14T11:31:15.412Z",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",

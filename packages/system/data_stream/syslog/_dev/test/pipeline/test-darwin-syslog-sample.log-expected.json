@@ -3,7 +3,7 @@
         {
             "@timestamp": "2022-12-13T11:35:28.000-02:00",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -24,7 +24,7 @@
         {
             "@timestamp": "2022-12-13T11:35:28.000-02:00",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
@@ -45,7 +45,7 @@
         {
             "@timestamp": "2022-04-04T03:39:57.000-02:00",
             "ecs": {
-                "version": "8.0.0"
+                "version": "8.2.0"
             },
             "event": {
                 "kind": "event",
