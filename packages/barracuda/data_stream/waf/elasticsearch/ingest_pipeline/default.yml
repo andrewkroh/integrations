@@ -7,7 +7,7 @@ processors:
           ignore_missing: true
     - set:
           field: ecs.version
-          value: "8.7.0"
+          value: "8.8.0"
     - grok:
           field: event.original
           patterns:
@@ -15,7 +15,6 @@ processors:
     - dissect:
           field: _temp.full_message
           pattern: "%{barracuda.waf.unit_name} %{barracuda.waf.log_type} %{_temp.remMessage}"
-
     ################################################################
     # Collect the time related fields from the event and join them to form a pattern to parse
     ################################################################
@@ -29,7 +28,6 @@ processors:
     - set:
           field: event.created
           copy_from: "@timestamp"
-
     ################################################################
     # Run different pipelines for different log types
     ################################################################
@@ -48,7 +46,6 @@ processors:
     - pipeline:
           name: '{{ IngestPipeline "audit" }}'
           if: ctx.barracuda?.waf?.log_type != null && ctx.barracuda?.waf?.log_type == "AUDIT"
-
     ################################################################
     ## Cleanup script to remove null, empty , '-' values in the document
     ################################################################
@@ -76,7 +73,6 @@ processors:
                   }
               }
               handleMap(ctx);
-
     ################################################################
     # Cleanup temporary resources
     ################################################################
@@ -88,7 +84,6 @@ processors:
           if: "ctx?.tags == null || !(ctx.tags.contains('preserve_original_event'))"
           ignore_failure: true
           ignore_missing: true
-
 ################################################################
 # Handle failures
 ################################################################
@@ -101,5 +96,8 @@ on_failure:
           field: event.kind
           value: pipeline_error
     - append:
-          field: error.message
-          value: "{{ _ingest.on_failure_message }}"
+        field: error.message
+        value: >-
+          Processor '{{ _ingest.on_failure_processor_type }}'
+          {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+          {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
