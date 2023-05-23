@@ -3,7 +3,7 @@ description: Pipeline for parsing Box Events
 processors:
   - set:
       field: ecs.version
-      value: "8.7.0"
+      value: "8.8.0"
   - rename:
       field: message
       target_field: event.original
@@ -22,7 +22,7 @@ processors:
       field: box.session_id
       target_field: box.session.id
       ignore_missing: true
-# `box.type` is always `event` - remove to avoid ambiguity with `event.kind`
+  # `box.type` is always `event` - remove to avoid ambiguity with `event.kind`
   - remove:
       field: box.type
       ignore_missing: true
@@ -49,19 +49,19 @@ processors:
         ACCESS_GRANTED:
           map:
             category: ['configuration']
-            type: ['access','allowed']
+            type: ['access', 'allowed']
         ACCESS_REVOKED:
           map:
             category: ['configuration']
-            type: ['access','denied']
+            type: ['access', 'denied']
         ADD_DEVICE_ASSOCIATION:
           map:
             category: ['host']
-            type: ['access','allowed']
+            type: ['access', 'allowed']
         ADD_LOGIN_ACTIVITY_DEVICE:
           map:
-            category: ['host','session']
-            type: ['access','allowed']
+            category: ['host', 'session']
+            type: ['access', 'allowed']
         ADMIN_LOGIN:
           map:
             category: ['session']
@@ -72,11 +72,11 @@ processors:
             type: ['creation']
         APPLICATION_PUBLIC_KEY_ADDED:
           map:
-            category: ['process','authentication','iam']
+            category: ['process', 'authentication', 'iam']
             type: ['creation']
         APPLICATION_PUBLIC_KEY_DELETED:
           map:
-            category: ['process','authentication','iam']
+            category: ['process', 'authentication', 'iam']
             type: ['deletion']
         CHANGE_ADMIN_ROLE:
           map:
@@ -85,31 +85,31 @@ processors:
         CHANGE_FOLDER_PERMISSION:
           map:
             category: ['file']
-            type: ['access','change']
+            type: ['access', 'change']
         COLLABORATION_ACCEPT:
           map:
             category: ['process']
-            type: ['access','start']
+            type: ['access', 'start']
         COLLABORATION_EXPIRATION:
           map:
             category: ['process']
-            type: ['access','deletion']
+            type: ['access', 'deletion']
         COLLABORATION_INVITE:
           map:
             category: ['process']
-            type: ['access','creation']
+            type: ['access', 'creation']
         COLLABORATION_REMOVE:
           map:
             category: ['process']
-            type: ['access','end']
+            type: ['access', 'end']
         COLLABORATION_ROLE_CHANGE:
           map:
             category: ['process']
-            type: ['access','change']
+            type: ['access', 'change']
         COLLAB_ADD_COLLABORATOR:
           map:
             category: ['process']
-            type: ['access','creation']
+            type: ['access', 'creation']
         COLLAB_INVITE_COLLABORATOR:
           map:
             category: ['process']
@@ -117,11 +117,11 @@ processors:
         COLLAB_REMOVE_COLLABORATOR:
           map:
             category: ['process']
-            type: ['access','deletion']
+            type: ['access', 'deletion']
         COLLAB_ROLE_CHANGE:
           map:
             category: ['process']
-            type: ['access','change']
+            type: ['access', 'change']
         COMMENT_CREATE:
           map:
             category: ['database']
@@ -136,8 +136,8 @@ processors:
             type: ['access']
         CONTENT_WORKFLOW_ABNORMAL_DOWNLOAD_ACTIVITY:
           map:
-            category: ['process','threat']
-            type: ['access','connection','indicator']
+            category: ['process', 'threat']
+            type: ['access', 'connection', 'indicator']
         CONTENT_WORKFLOW_AUTOMATION_ADD:
           map:
             category: ['process']
@@ -148,27 +148,27 @@ processors:
             type: ['change']
         CONTENT_WORKFLOW_POLICY_ADD:
           map:
-            category: ['process','configuration']
+            category: ['process', 'configuration']
             type: ['creation']
         CONTENT_WORKFLOW_SHARING_POLICY_VIOLATION:
           map:
-            category: ['process','threat']
-            type: ['access','indicator']
+            category: ['process', 'threat']
+            type: ['access', 'indicator']
         CONTENT_WORKFLOW_UPLOAD_POLICY_VIOLATION:
           map:
-            category: ['process','threat']
-            type: ['access','indicator']
+            category: ['process', 'threat']
+            type: ['access', 'indicator']
         COPY:
           map:
             category: ['file']
             type: ['creation']
         DATA_RETENTION_CREATE_RETENTION:
           map:
-            category: ['process','configuration']
+            category: ['process', 'configuration']
             type: ['creation']
         DATA_RETENTION_REMOVE_RETENTION:
           map:
-            category: ['process','configuration']
+            category: ['process', 'configuration']
             type: ['deletion']
         DELETE:
           map:
@@ -177,11 +177,11 @@ processors:
         DELETE_USER:
           map:
             category: ['iam']
-            type: ['user','deletion']
+            type: ['user', 'deletion']
         DEVICE_TRUST_CHECK_FAILED:
           map:
-            category: ['authentication','threat']
-            type: ['denied','indicator']
+            category: ['authentication', 'threat']
+            type: ['denied', 'indicator']
         DOWNLOAD:
           map:
             category: ['file']
@@ -189,7 +189,7 @@ processors:
         EDIT:
           map:
             category: ['file']
-            type: ['access','change']
+            type: ['access', 'change']
         EDIT_USER:
           map:
             category: ['iam']
@@ -208,15 +208,15 @@ processors:
             type: ['user']
         ENTERPRISE_APP_AUTHORIZATION_UPDATE:
           map:
-            category: ['iam','process']
+            category: ['iam', 'process']
             type: ['change']
         FAILED_LOGIN:
           map:
-            category: ['iam','threat']
-            type: ['denied','indicator']
+            category: ['iam', 'threat']
+            type: ['denied', 'indicator']
         FILE_MARKED_MALICIOUS:
           map:
-            category: ['file','threat']
+            category: ['file', 'threat']
             type: ['indicator']
         FILE_WATERMARKED_DOWNLOAD:
           map:
@@ -225,31 +225,31 @@ processors:
         GROUP_ADD_ITEM:
           map:
             category: ['iam']
-            type: ['change','group']
+            type: ['change', 'group']
         GROUP_ADD_USER:
           map:
             category: ['iam']
-            type: ['creation','group']
+            type: ['creation', 'group']
         GROUP_CREATION:
           map:
             category: ['iam']
-            type: ['creation','group']
+            type: ['creation', 'group']
         GROUP_DELETION:
           map:
             category: ['iam']
-            type: ['deletion','group']
+            type: ['deletion', 'group']
         GROUP_EDITED:
           map:
             category: ['iam']
-            type: ['change','group']
+            type: ['change', 'group']
         GROUP_REMOVE_ITEM:
           map:
             category: ['iam']
-            type: ['deletion','group']
+            type: ['deletion', 'group']
         GROUP_REMOVE_USER:
           map:
             category: ['iam']
-            type: ['deletion','group','user']
+            type: ['deletion', 'group', 'user']
         ITEM_COPY:
           map:
             category: ['file']
@@ -264,7 +264,7 @@ processors:
             type: ['access']
         ITEM_MAKE_CURRENT_VERSION:
           map:
-            category: ['file','database']
+            category: ['file', 'database']
             type: ['change']
         ITEM_MODIFY:
           map:
@@ -272,7 +272,7 @@ processors:
             type: ['change']
         ITEM_MOVE:
           map:
-            category: ['file','database']
+            category: ['file', 'database']
             type: ['change']
         ITEM_OPEN:
           map:
@@ -284,39 +284,39 @@ processors:
             type: ['access']
         ITEM_RENAME:
           map:
-            category: ['file','database']
+            category: ['file', 'database']
             type: ['change']
         ITEM_SHARED:
           map:
-            category: ['file','database']
+            category: ['file', 'database']
             type: ['change']
         ITEM_SHARED_CREATE:
           map:
-            category: ['file','database']
+            category: ['file', 'database']
             type: ['change']
         ITEM_SHARED_UNSHARE:
           map:
-            category: ['file','database']
+            category: ['file', 'database']
             type: ['change']
         ITEM_SHARED_UPDATE:
           map:
-            category: ['file','database']
+            category: ['file', 'database']
             type: ['change']
         ITEM_SYNC:
           map:
-            category: ['file','database']
+            category: ['file', 'database']
             type: ['access']
         ITEM_TRASH:
           map:
-            category: ['file','database']
+            category: ['file', 'database']
             type: ['deletion']
         ITEM_UNDELETE_VIA_TRASH:
           map:
-            category: ['file','database']
+            category: ['file', 'database']
             type: ['creation']
         ITEM_UNSYNC:
           map:
-            category: ['file','database']
+            category: ['file', 'database']
             type: ['creation']
         ITEM_UPLOAD:
           map:
@@ -324,35 +324,35 @@ processors:
             type: ['creation']
         LEGAL_HOLD_ASSIGNMENT_CREATE:
           map:
-            category: ['process','database']
+            category: ['process', 'database']
             type: ['creation']
         LEGAL_HOLD_ASSIGNMENT_DELETE:
           map:
-            category: ['process','database']
+            category: ['process', 'database']
             type: ['deletion']
         LEGAL_HOLD_POLICY_CREATE:
           map:
-            category: ['process','database']
+            category: ['process', 'database']
             type: ['creation']
         LEGAL_HOLD_POLICY_DELETE:
           map:
-            category: ['process','database']
+            category: ['process', 'database']
             type: ['deletion']
         LEGAL_HOLD_POLICY_UPDATE:
           map:
-            category: ['process','database']
+            category: ['process', 'database']
             type: ['change']
         LOCK:
           map:
-            category: ['process','file']
+            category: ['process', 'file']
             type: ['access']
         LOCK_CREATE:
           map:
-            category: ['process','file']
+            category: ['process', 'file']
             type: ['creation']
         LOCK_DESTROY:
           map:
-            category: ['process','file']
+            category: ['process', 'file']
             type: ['deletion']
         LOGIN:
           map:
@@ -393,7 +393,7 @@ processors:
         MOVE:
           map:
             category: ['file']
-            type: ['creation','deletion']
+            type: ['creation', 'deletion']
         NEW_USER:
           map:
             category: ['iam']
@@ -408,23 +408,23 @@ processors:
             type: ['deletion']
         REMOVE_LOGIN_ACTIVITY_DEVICE:
           map:
-            category: ['host','session']
+            category: ['host', 'session']
             type: ['deletion']
         RENAME:
           map:
-            category: ['file','database']
+            category: ['file', 'database']
             type: ['change']
         RETENTION_POLICY_ASSIGNMENT_ADD:
           map:
-            category: ['database','process']
+            category: ['database', 'process']
             type: ['creation']
         SHARE:
           map:
-            category: ['file','database']
+            category: ['file', 'database']
             type: ['creation']
         SHARE_EXPIRATION:
           map:
-            category: ['process','database']
+            category: ['process', 'database']
             type: ['deletion']
         SHIELD_ALERT:
           map:
@@ -432,67 +432,67 @@ processors:
             type: ['indicator']
         SHIELD_EXTERNAL_COLLAB_ACCESS_BLOCKED:
           map:
-            category: ['threat','process']
+            category: ['threat', 'process']
             type: ['denied']
         SHIELD_EXTERNAL_COLLAB_ACCESS_BLOCKED_MISSING_JUSTIFICATION:
           map:
-            category: ['threat','process']
+            category: ['threat', 'process']
             type: ['denied']
         SHIELD_EXTERNAL_COLLAB_INVITE_BLOCKED:
           map:
-            category: ['threat','process']
+            category: ['threat', 'process']
             type: ['denied']
         SHIELD_EXTERNAL_COLLAB_INVITE_BLOCKED_MISSING_JUSTIFICATION:
           map:
-            category: ['threat','process']
+            category: ['threat', 'process']
             type: ['denied']
         SHIELD_JUSTIFICATION_APPROVAL:
           map:
-            category: ['threat','process']
+            category: ['threat', 'process']
             type: ['admin']
         SIGN_DOCUMENT_ASSIGNED:
           map:
-            category: ['process','iam']
+            category: ['process', 'iam']
             type: ['start']
         SIGN_DOCUMENT_CANCELLED:
           map:
-            category: ['process','iam']
+            category: ['process', 'iam']
             type: ['end']
         SIGN_DOCUMENT_COMPLETED:
           map:
-            category: ['process','iam']
+            category: ['process', 'iam']
             type: ['end']
         SIGN_DOCUMENT_CONVERTED:
           map:
-            category: ['process','iam']
+            category: ['process', 'iam']
             type: ['change']
         SIGN_DOCUMENT_CREATED:
           map:
-            category: ['process','iam']
+            category: ['process', 'iam']
             type: ['creation']
         SIGN_DOCUMENT_DECLINED:
           map:
-            category: ['process','iam']
+            category: ['process', 'iam']
             type: ['denied']
         SIGN_DOCUMENT_EXPIRED:
           map:
-            category: ['process','iam']
+            category: ['process', 'iam']
             type: ['change']
         SIGN_DOCUMENT_SIGNED:
           map:
-            category: ['process','iam']
+            category: ['process', 'iam']
             type: ['change']
         SIGN_DOCUMENT_VIEWED_BY_SIGNED:
           map:
-            category: ['process','iam']
+            category: ['process', 'iam']
             type: ['access']
         SIGNER_DOWNLOADED:
           map:
-            category: ['process','iam']
+            category: ['process', 'iam']
             type: ['access']
         SIGNER_FORWARDED:
           map:
-            category: ['process','iam']
+            category: ['process', 'iam']
             type: ['change']
         STORAGE_EXPIRATION:
           map:
@@ -500,35 +500,35 @@ processors:
             type: ['change']
         TAG_ITEM_CREATE:
           map:
-            category: ['file','database']
+            category: ['file', 'database']
             type: ['creation']
         TASK_ASSIGNMENT_CREATE:
           map:
-            category: ['process','database']
-            type: ['user','creation']
+            category: ['process', 'database']
+            type: ['user', 'creation']
         TASK_ASSIGNMENT_DELETE:
           map:
-            category: ['process','database']
-            type: ['user','deletion']
+            category: ['process', 'database']
+            type: ['user', 'deletion']
         TASK_ASSIGNMENT_UPDATE:
           map:
-            category: ['process','database']
-            type: ['user','change']
+            category: ['process', 'database']
+            type: ['user', 'change']
         TASK_CREATE:
           map:
-            category: ['process','database']
+            category: ['process', 'database']
             type: ['creation']
         TASK_UPDATE:
           map:
-            category: ['process','database']
+            category: ['process', 'database']
             type: ['creation']
         TERMS_OF_SERVICE_ACCEPT:
           map:
-            category: ['process','database']
+            category: ['process', 'database']
             type: ['user']
         TERMS_OF_SERVICE_REJECT:
           map:
-            category: ['process','database']
+            category: ['process', 'database']
             type: ['user']
         UNDELETE:
           map:
@@ -540,15 +540,15 @@ processors:
             type: ['change']
         UNSHARE:
           map:
-            category: ['process','database']
+            category: ['process', 'database']
             type: ['change']
         UPDATE_COLLABORATION_EXPIRATION:
           map:
-            category: ['process','database']
-            type: ['user','change']
+            category: ['process', 'database']
+            type: ['user', 'change']
         UPDATE_SHARE_EXPIRATION:
           map:
-            category: ['process','database']
+            category: ['process', 'database']
             type: ['change']
         UPLOAD:
           map:
@@ -556,15 +556,15 @@ processors:
             type: ['creation']
         USER_AUTHENTICATE_OAUTH2_ACCESS_TOKEN_CREATE:
           map:
-            category: ['authentication','iam']
-            type: ['user','creation']
+            category: ['authentication', 'iam']
+            type: ['user', 'creation']
         WATERMARK_LABEL_CREATE:
           map:
-            category: ['file','process']
+            category: ['file', 'process']
             type: ['creation']
         WATERMARK_LABEL_DELETE:
           map:
-            category: ['file','process']
+            category: ['file', 'process']
             type: ['deletion']
       source: |
         def eventType = params.getOrDefault(ctx.box.event_type, null);
@@ -584,7 +584,7 @@ processors:
       field: box.event_id
       target_field: event.id
       ignore_missing: true
-# If a user or item triggers an event, The response of the GET /events endpoint contains an event source object.
+  # If a user or item triggers an event, The response of the GET /events endpoint contains an event source object.
   - convert:
       field: box.source.sequence_id
       target_field: event.sequence
@@ -645,7 +645,7 @@ processors:
       field: box.source.file_version.sha1
       target_field: file.hash.sha1
       ignore_missing: true
-# Shield Focussed Processors
+  # Shield Focussed Processors
   - rename:
       field: box.ip_address
       target_field: client.ip
@@ -692,8 +692,8 @@ processors:
       field: box.additional_details.shield_alert.user.id
       ignore_failure: true
       ignore_missing: true
-# script processors to unpack the 4 box shield event formats
-#
+  # script processors to unpack the 4 box shield event formats
+  #
   - script:
       description: Prepare intervening objects for subsequent scripts
       lang: painless
@@ -719,7 +719,7 @@ processors:
             ctx.related.indicator_type = new ArrayList();
           }
         }
-#
+  #
   - script:
       description: Unpack Suspicious sessions property within array of object within array of object
       lang: painless
@@ -763,7 +763,7 @@ processors:
             }
           }
         }
-#
+  #
   - script:
       description: Unpack Suspicious locations properties
       lang: painless
@@ -875,7 +875,7 @@ processors:
         }
         ctx.threat.indicator.type = "software";
         ctx.related.indicator_type.add(ctx.threat.indicator.type);
-# Deduplicate Arrays 
+  # Deduplicate Arrays 
   - script:
       description: Deduplicate Arrays
       lang: painless
@@ -912,8 +912,8 @@ processors:
                 .collect(Collectors.toList());
           }
         }
-# post-script processors dependent on outcome of scripts, or append to fields
-# created by scripts - prefer allow_duplicates = false to assuming scripts always terminated
+  # post-script processors dependent on outcome of scripts, or append to fields
+  # created by scripts - prefer allow_duplicates = false to assuming scripts always terminated
   - date:
       field: shield_date
       target_field: "@timestamp"
@@ -1011,9 +1011,9 @@ processors:
       ignore_failure: true
       allow_duplicates: false
       if: ctx.user?.effective?.name != null
-# remove fields remapped by scripts
+  # remove fields remapped by scripts
   - remove:
-      field: 
+      field:
         - box.additional_details.shield_alert.alert_summary.alert_activities
         - box.additional_details.shield_alert.alert_summary.alert_summary.anomaly_period.date_range.end_date
         - box.additional_details.shield_alert.alert_summary.alert_summary.anomaly_period.date_range.start_date
@@ -1045,7 +1045,7 @@ processors:
             ctx.box.additional_details.shield_alert.priority.substring(0, 1).toUpperCase() + 
             ctx.box.additional_details.shield_alert.priority.substring(1);
         }
-# geo
+  # geo
   - foreach:
       field: threat.enrichments
       ignore_missing: true
@@ -1054,7 +1054,7 @@ processors:
           field: "_ingest._value.indicator.ip"
           target_field: "_ingest._value.indicator.geo"
           ignore_missing: true
-  - geoip: 
+  - geoip:
       field: threat.indicator.ip
       target_field: threat.indicator.geo
       ignore_missing: true
@@ -1091,10 +1091,10 @@ processors:
           }
         }
   - remove:
-      field: "related.geo"   
+      field: "related.geo"
       ignore_failure: true
-      ignore_missing: true      
-# AS look-ups on enrichments within Array
+      ignore_missing: true
+  # AS look-ups on enrichments within Array
   - foreach:
       field: threat.enrichments
       ignore_missing: true
@@ -1123,7 +1123,7 @@ processors:
           field: "_ingest._value.indicator.as.organization_name"
           target_field: "_ingest._value.indicator.as.organization.name"
           ignore_missing: true
-# AS lookup for stand-alone indicator 
+  # AS lookup for stand-alone indicator 
   - geoip:
       database_file: GeoLite2-ASN.mmdb
       field: threat.indicator.ip
@@ -1140,13 +1140,13 @@ processors:
       field: threat.indicator.as.organization_name
       target_field: threat.indicator.as.organization.name
       ignore_missing: true
-# Conditionally, remove event.original
+  # Conditionally, remove event.original
   - remove:
       field: event.original
       if: "ctx.tags == null || !(ctx.tags.contains('preserve_original_event'))"
       ignore_failure: true
       ignore_missing: true
-# Drop empty/null fields
+  # Drop empty/null fields
   - script:
       description: Drops null/empty values recursively
       lang: painless
@@ -1167,4 +1167,10 @@ processors:
 on_failure:
   - set:
       field: error.message
-      value: '{{ _ingest.on_failure_message }}'
+      value: >-
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+  - set:
+      field: event.kind
+      value: pipeline_error
