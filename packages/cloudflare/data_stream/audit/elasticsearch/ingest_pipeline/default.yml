@@ -3,7 +3,7 @@ description: Pipeline for parsing cloudflare audit logs
 processors:
 - set:
     field: ecs.version
-    value: '8.7.0'
+    value: '8.8.0'
 - rename:
     field: message
     target_field: event.original
@@ -150,77 +150,77 @@ processors:
           - info
         outcome: success
       token_create:
-        category: 
+        category:
           - iam
         type:
           - creation
       token_revoke:
-        category: 
+        category:
           - iam
         type:
           - deletion
       token_roll:
-        category: 
+        category:
           - iam
         type:
           - change
       api_key_view:
-        category: 
+        category:
           - iam
         type:
           - info
       rotate_api_key:
-        category: 
+        category:
           - iam
         type:
           - change
       api_key_created:
-        category: 
+        category:
           - iam
         type:
           - creation
       purge:
-        category: 
+        category:
           - configuration
         type:
           - deletion
       tls_settings_deployed:
-        category: 
+        category:
           - configuration
         type:
           - info
       add:
-        category: 
+        category:
           - configuration
         type:
           - creation
       delete:
-        category: 
+        category:
           - configuration
         type:
           - deletion
       rec_add:
-        category: 
+        category:
           - configuration
         type:
           - creation
       rec_del:
-        category: 
+        category:
           - configuration
         type:
           - deletion
       pending:
-        category: 
+        category:
           - configuration
         type:
           - info
       change_setting:
-        category: 
+        category:
           - configuration
         type:
           - change
       add_enforce_twofactor:
-        category: 
+        category:
           - iam
           - configuration
         type:
@@ -241,7 +241,7 @@ processors:
     field:
       - json
       - _config
-    ignore_missing: true  
+    ignore_missing: true
 - remove:
     field: event.original
     if: "ctx?.tags == null || !(ctx.tags.contains('preserve_original_event'))"
@@ -275,4 +275,10 @@ processors:
 on_failure:
 - set:
     field: error.message
-    value: "{{ _ingest.on_failure_message }}"
+    value: >-
+      Processor '{{ _ingest.on_failure_processor_type }}'
+      {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+      {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+- set:
+    field: event.kind
+    value: pipeline_error
