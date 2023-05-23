@@ -3,7 +3,7 @@ description: Pipeline for parsing Akamai logs
 processors:
 - set:
     field: ecs.version
-    value: '8.7.0'
+    value: '8.8.0'
 - rename:
     field: message
     target_field: event.original
@@ -25,7 +25,7 @@ processors:
     timezone: UTC
     target_field: "@timestamp"
 - set:
-    field: "event.start" 
+    field: "event.start"
     copy_from: "@timestamp"
 - rename:
     field: json.httpMessage.status
@@ -52,7 +52,7 @@ processors:
     copy_from: http.request.id
     ignore_empty_value: true
 - fingerprint:
-    fields: 
+    fields:
         - http.request.id
     target_field: "_id"
     ignore_missing: true
@@ -159,7 +159,7 @@ processors:
     ignore_missing: true
     if: ctx?.source?.geo?.country_iso_code == null
 - set:
-    field: source.geo.region_iso_code 
+    field: source.geo.region_iso_code
     value: "{{json.geo.country}}-{{json.geo.regionCode}}"
     ignore_empty_value: true
     if: ctx?.source?.geo?.region_iso_code == null
@@ -355,12 +355,12 @@ processors:
     target_field: akamai.siem.client_data.app_version
     ignore_missing: true
 - convert:
-    field: json.clientData.telemetryType	
+    field: json.clientData.telemetryType
     target_field: akamai.siem.client_data.telemetry_type
     type: long
     ignore_missing: true
 - rename:
-    field: json.clientData.sdkVersion	
+    field: json.clientData.sdkVersion
     target_field: akamai.siem.client_data.sdk_version
     ignore_missing: true
 ## User Risk Data
@@ -369,17 +369,17 @@ processors:
     target_field: akamai.siem.user_risk.uuid
     ignore_missing: true
 - convert:
-    field: json.userRiskData.status	
+    field: json.userRiskData.status
     target_field: akamai.siem.user_risk.status
     type: long
     ignore_missing: true
 - convert:
-    field: json.userRiskData.score	
+    field: json.userRiskData.score
     target_field: akamai.siem.user_risk.score
     type: long
     ignore_missing: true
 - convert:
-    field: json.userRiskData.allow	
+    field: json.userRiskData.allow
     target_field: akamai.siem.user_risk.allow
     type: long
     ignore_missing: true
@@ -419,7 +419,7 @@ processors:
     field:
       - json
       - _tmp
-    ignore_missing: true  
+    ignore_missing: true
 - remove:
     field: event.original
     if: "ctx?.tags == null || !(ctx.tags.contains('preserve_original_event'))"
@@ -453,4 +453,10 @@ processors:
 on_failure:
 - set:
     field: error.message
-    value: "{{ _ingest.on_failure_message }}"
+    value: >-
+      Processor '{{ _ingest.on_failure_processor_type }}'
+      {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+      {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+- set:
+    field: event.kind
+    value: pipeline_error
