@@ -3,7 +3,7 @@ description: Pipeline for CEF logs. CEF decoding happens in the Agent. This perf
 processors:
   - set:
       field: ecs.version
-      value: 8.7.0
+      value: 8.8.0
   - convert:
       field: event.id
       ignore_missing: true
@@ -194,8 +194,10 @@ on_failure:
       ignore_missing: true
   - set:
       field: error.message
-      value: |-
-        Processor "{{ _ingest.on_failure_processor_type }}" with tag "{{ _ingest.on_failure_processor_tag }}" in pipeline "{{ _ingest.on_failure_pipeline }}" failed with message "{{ _ingest.on_failure_message }}"
+      value: >-
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
   - set:
       field: event.kind
       value: pipeline_error
