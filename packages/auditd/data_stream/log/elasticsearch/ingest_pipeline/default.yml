@@ -3,7 +3,7 @@ description: Pipeline for parsing Linux auditd logs
 processors:
   - set:
       field: ecs.version
-      value: '8.7.0'
+      value: '8.8.0'
   - rename:
       field: message
       target_field: event.original
@@ -17,9 +17,7 @@ processors:
         AUDIT_KEY_VALUES: "%{WORD}=%{GREEDYDATA}"
         ANY: ".*"
       patterns:
-      - "%{AUDIT_PREFIX} %{AUDIT_KEY_VALUES:auditd.log.kv} old auid=%{NUMBER:auditd.log.old_auid}
-        new auid=%{NUMBER:auditd.log.new_auid} old ses=%{NUMBER:auditd.log.old_ses}
-        new ses=%{NUMBER:auditd.log.new_ses}"
+      - "%{AUDIT_PREFIX} %{AUDIT_KEY_VALUES:auditd.log.kv} old auid=%{NUMBER:auditd.log.old_auid} new auid=%{NUMBER:auditd.log.new_auid} old ses=%{NUMBER:auditd.log.old_ses} new ses=%{NUMBER:auditd.log.new_ses}"
       - "%{AUDIT_PREFIX} %{AUDIT_KEY_VALUES:auditd.log.kv} msg=['\"]([^=]*\\s)?%{ANY:auditd.log.sub_kv}['\"]"
       - "%{AUDIT_PREFIX} %{AUDIT_KEY_VALUES:auditd.log.kv}"
       - "%{AUDIT_PREFIX}"
@@ -2129,10 +2127,10 @@ processors:
       field: event.outcome
       value: "unknown"
       ignore_failure: true
-   # The processor below populates process.args list from argN fields.
-   #
-   # It handles the common case of a complete record: Contains argc=N and a0 to aN-1,
-   # and the truncated case: Contains aI, aI+1, ..., aN-1, for I>0, and no argc.
+  # The processor below populates process.args list from argN fields.
+  #
+  # It handles the common case of a complete record: Contains argc=N and a0 to aN-1,
+  # and the truncated case: Contains aI, aI+1, ..., aN-1, for I>0, and no argc.
   - script:
       lang: painless
       description: Extracts process arguments from EXECVE calls.
@@ -2240,4 +2238,10 @@ processors:
 on_failure:
   - set:
       field: error.message
-      value: "{{ _ingest.on_failure_message }}"
+      value: >-
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+  - set:
+      field: event.kind
+      value: pipeline_error
