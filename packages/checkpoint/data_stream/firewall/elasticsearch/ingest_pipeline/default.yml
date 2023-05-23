@@ -3,7 +3,7 @@ description: Pipeline for parsing checkpoint firewall logs
 processors:
   - set:
       field: ecs.version
-      value: '8.7.0'
+      value: '8.8.0'
   - rename:
       field: message
       target_field: event.original
@@ -12,10 +12,7 @@ processors:
       field: event.original
       tag: "grok_syslog_line"
       patterns:
-        - '%{SYSLOG5424PRI}%{NONNEGINT:syslog5424_ver} +(?:%{TIMESTAMP}|-)
-          +(?:%{IPORHOST:syslog5424_host}|-) +(-|%{SYSLOG5424PRINTASCII:syslog5424_app})
-          +(-|%{SYSLOG5424PRINTASCII:syslog5424_proc}) +(?::-|%{SYSLOG5424PRINTASCII:syslog5424_msgid})
-          +\[%{GREEDYDATA:syslog5424_sd}\]'
+        - '%{SYSLOG5424PRI}%{NONNEGINT:syslog5424_ver} +(?:%{TIMESTAMP}|-) +(?:%{IPORHOST:syslog5424_host}|-) +(-|%{SYSLOG5424PRINTASCII:syslog5424_app}) +(-|%{SYSLOG5424PRINTASCII:syslog5424_proc}) +(?::-|%{SYSLOG5424PRINTASCII:syslog5424_msgid}) +\[%{GREEDYDATA:syslog5424_sd}\]'
       pattern_definitions:
         TIMESTAMP: "%{TIMESTAMP_ISO8601:syslog5424_ts}(?:-?%{ISO8601_TIMEZONE:_temp_.tz})?"
         TIMESTAMP_ISO8601: "%{YEAR}-%{MONTHNUM}-%{MONTHDAY}[T ]%{HOUR}:?%{MINUTE}(?::?%{SECOND})?"
@@ -87,7 +84,7 @@ processors:
       field: checkpoint
       ignore_missing: true
       ignore_failure: true
-      processor: 
+      processor:
         lowercase:
           field: "_ingest._key"
   - remove:
@@ -1095,20 +1092,7 @@ processors:
   - script:
       description: Drops null/empty values recursively.
       lang: painless
-      source:
-        boolean dropEmptyFields(Object object) {
-          if (object == null || object == '') {
-            return true;
-          } else if (object instanceof Map) {
-            ((Map) object).values().removeIf(value -> dropEmptyFields(value));
-            return (((Map) object).size() == 0);
-          } else if (object instanceof List) {
-            ((List) object).removeIf(value -> dropEmptyFields(value));
-            return (((List) object).length == 0);
-          }
-          return false;
-        }
-        dropEmptyFields(ctx);
+      source: boolean dropEmptyFields(Object object) { if (object == null || object == '') { return true; } else if (object instanceof Map) { ((Map) object).values().removeIf(value -> dropEmptyFields(value)); return (((Map) object).size() == 0); } else if (object instanceof List) { ((List) object).removeIf(value -> dropEmptyFields(value)); return (((List) object).length == 0); } return false; } dropEmptyFields(ctx);
   - remove:
       field: event.original
       if: "ctx?.tags == null || !(ctx.tags.contains('preserve_original_event'))"
@@ -1120,4 +1104,7 @@ on_failure:
       value: pipeline_error
   - append:
       field: error.message
-      value: "{{ _ingest.on_failure_message }}"
+      value: >-
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
