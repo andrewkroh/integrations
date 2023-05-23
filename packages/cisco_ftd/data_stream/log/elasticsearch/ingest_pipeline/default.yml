@@ -7,7 +7,7 @@ processors:
       ignore_missing: true
   - set:
       field: ecs.version
-      value: '8.7.0'
+      value: '8.8.0'
   #
   # Parse the syslog header
   #
@@ -42,7 +42,6 @@ processors:
           facility['code'] = ctx.log.syslog.priority>>3;
           ctx.log.syslog['facility'] = facility;
         }
-
   #
   # Parse FTD/ASA style message
   #
@@ -57,7 +56,6 @@ processors:
         FTD_SUFFIX: "[^0-9-]+"
         # Before version 6.3, FTD used ASA prefix in syslog messages
         FTD_PREFIX: "%{DATA}%(?:[A-Z]+)"
-
   #
   # Create missing fields when no %FTD label is present
   #
@@ -66,7 +64,6 @@ processors:
       field: _temp_.cisco.message_id
       value: ""
       if: "ctx?._temp_?.cisco?.message_id == null"
-
   #
   # set default event.severity to 7 (debug):
   #
@@ -76,7 +73,6 @@ processors:
       field: event.severity
       value: 7
       if: "ctx?.event?.severity == null"
-
   # Time zone can come from three sources, choose in order: log, config, locale, default to UTC.
   - set:
       field: _temp_.tz
@@ -154,7 +150,6 @@ processors:
               - append:
                   field: error.message
                   value: "{{{ _ingest.on_failure_message }}}"
-
   #
   # Set log.level
   #
@@ -190,7 +185,6 @@ processors:
       field: "log.level"
       if: "ctx.event.severity == 7"
       value: debug
-
   #
   # Firewall messages
   #
@@ -355,7 +349,7 @@ processors:
       if: "ctx._temp_.cisco.message_id == '113005'"
       description: "113005"
       field: "message"
-      patterns: 
+      patterns:
         - "AAA user authentication Rejected: reason = %{REASON}: server = %{IP:destination.address} : user = ?%{CISCO_USER:source.user.name}: user IP = %{IP:source.address}"
       pattern_definitions:
         REASON: (AAA failure|Account has been disabled)
@@ -825,7 +819,7 @@ processors:
       if: "ctx._temp_.cisco.message_id == '713202'"
       field: "message"
       pattern: "IP = %{source.address}, %{event.reason}. %{} packet."
-# Support masked user
+  # Support masked user
   - grok:
       if: "ctx._temp_.cisco.message_id == '716039'"
       field: "message"
@@ -841,7 +835,7 @@ processors:
       field: "message"
       patterns:
         - "^(Group = %{IP}, )?(IP = %{IP:source.address}, )?%{GREEDYDATA:event.reason}$"
-   # Handle ecs action outcome protocol
+  # Handle ecs action outcome protocol
   - set:
       if: '["434002", "434004"].contains(ctx._temp_.cisco.message_id)'
       field: "event.outcome"
@@ -922,7 +916,6 @@ processors:
       if: '["750003", "713905", "713904", "713906", "713902", "713901"].contains(ctx._temp_.cisco.message_id)'
       field: "event.type"
       value: "error"
-
   #
   # Handle 302xxx messages (Flow expiration a.k.a "Teardown")
   #
@@ -952,7 +945,6 @@ processors:
         MAPPEDSRC: "(?:%{IPORHOST:_temp_.natsrcip}|%{HOSTNAME})"
         DURATION: "%{INT}:%{MINUTE}:%{SECOND}"
         CISCO_USER: ((LOCAL\\)?(%{HOSTNAME}\\)?%{USERNAME}(@%{HOSTNAME})?(, *%{NUMBER})?)
-
   #
   # Decode FTD's Security Event Syslog Messages
   #
@@ -970,7 +962,6 @@ processors:
       trim_key: " "
       trim_value: " "
       ignore_failure: true
-
   #
   # Remove _temp_.full_message.
   #
@@ -983,7 +974,6 @@ processors:
         - _temp_.full_message
         - _conf
       ignore_missing: true
-
   #
   # Populate ECS fields from Security Events
   #
@@ -1367,7 +1357,6 @@ processors:
   #*******************************************************************************
   # End of generated code.
   #*******************************************************************************
-
   #
   # Normalize ECS field values
   #
@@ -1450,7 +1439,6 @@ processors:
       if: 'ctx._temp_.cisco.message_id == "430005"'
       field: event.action
       value: malware-detected
-
   #
   # Handle event.duration
   #
@@ -1468,7 +1456,6 @@ processors:
       if: "ctx.source?.bytes != null"
       field: "source.bytes"
       type: "integer"
-
   #
   # Ensure destination.bytes is integer
   #
@@ -1476,7 +1463,6 @@ processors:
       if: "ctx.destination?.bytes != null"
       field: "destination.bytes"
       type: "integer"
-
   #
   # Sum source.bytes and destination.bytes in network.bytes
   #
@@ -1484,7 +1470,6 @@ processors:
       lang: painless
       source: "ctx.network.bytes = ctx.source.bytes + ctx.destination.bytes"
       if: ctx.source?.bytes != null && ctx.destination?.bytes != null && ctx.network != null && ctx.network.bytes == null
-
   #
   # Process the flow duration "hh:mm:ss" present in some messages
   # This will fill event.start, event.end and event.duration
@@ -1517,7 +1502,6 @@ processors:
         ctx.event['start'] = ZonedDateTime.ofInstant(
             Instant.parse(end).minusNanos(nanos),
             ZoneOffset.UTC);
-  #
   # Parse Source/Dest Username/Domain
   #
   - grok:
@@ -1576,7 +1560,6 @@ processors:
       pattern_definitions:
         CISCO_USER: "%{USERNAME:destination.user.name}(@%{HOSTNAME:destination.user.domain})?"
         CISCO_DOMAIN: (LOCAL\\)?(%{HOSTNAME:destination.user.domain}\\)?
-
   #
   # Normalize protocol names
   #
@@ -1645,7 +1628,6 @@ processors:
           net['iana_number'] = net.transport;
           net['transport'] = trans;
         }
-  #
   # Normalize event.outcome
   #
   - lowercase:
@@ -1943,13 +1925,11 @@ processors:
             !ctx._temp_.internal_zones.contains(ctx.observer.ingress.zone)
           )
         )
-
   - set:
       field: _temp_.url_domain
       value: "{{{url.domain}}}"
       ignore_failure: true
       if: ctx?.url?.domain != null
-
   - uri_parts:
       field: url.original
       ignore_failure: true
@@ -1960,7 +1940,6 @@ processors:
       ignore_failure: true
       allow_duplicates: false
       if: ctx?._temp_?.url_domain != null
-
   #
   # Populate ECS event.code
   #
@@ -1974,7 +1953,6 @@ processors:
         - event.code
       if: 'ctx._temp_.cisco.message_id == ""'
       ignore_failure: true
-      
   #
   # Populate ECS dns
   #
@@ -1986,7 +1964,6 @@ processors:
   - remove:
       field: dns.question.domain
       ignore_missing: true
-  
   #
   # Copy _temp_.cisco to its final destination, cisco.asa or cisco.ftd.
   #
@@ -2138,8 +2115,6 @@ processors:
             ctx.event.type.add('allowed');
           }
         }
-
-  # Malware event kind is classified as alert when sha_disposition is "Malware", "Custom Detection" not for other cases.
   - set:
       if: 'ctx?.event?.code == "430005" && ["Malware", "Custom Detection"].contains(ctx.cisco.ftd.security.sha_disposition)'
       field: event.kind
@@ -2148,21 +2123,18 @@ processors:
       if: 'ctx?.event?.code == "430005" && !["Malware", "Custom Detection"].contains(ctx.cisco.ftd.security.sha_disposition)'
       field: event.category
       value: file
-
   # Remove user.name if FTD reports "Not Found" or "No Authentication Required".
   - remove:
-      field: 
+      field:
         - user.id
         - user.name
       if: ctx.user?.name == 'Not Found' || ctx.user?.name == 'No Authentication Required'
-
   # Remove custom domain identifier from FTD events.
   - grok:
       field: user.name
       patterns:
         - "(?:%{DATA}\\\\)?%{GREEDYDATA:user.name}"
       if: ctx.user?.name != null && ctx.user?.name.contains('\\') && ["430001", "430002", "430003", "430004", "430005", ""].contains(ctx?.event?.code)
-
   # Set user.name if only destination.user.name is set.
   - set:
       description: copy destination.user.name to user.name if it is not set
@@ -2170,14 +2142,12 @@ processors:
       value: "{{{destination.user.name}}}"
       ignore_empty_value: true
       if: ctx?.user?.name == null
-  
   # Remove user field if present and empty
   - remove:
       field:
         - user
       if: ctx.user instanceof Map && ctx.user.size() == 0
       ignore_failure: true
-
   # Configures observer fields with a copy from cisco and host fields. Later on these might replace host.hostname.
   - set:
       field: observer.hostname
@@ -2317,12 +2287,17 @@ on_failure:
       field: _temp_.cisco
       target_field: "cisco.ftd"
       ignore_failure: true
-  # Remove _temp_/_conf to avoid adding a lot of unnecessary fields to the index.
   - remove:
       field:
         - _temp_
         - _conf
       ignore_missing: true
   - append:
-      field: "error.message"
-      value: "{{{ _ingest.on_failure_message }}}"
+      field: error.message
+      value: >-
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+  - set:
+      field: event.kind
+      value: pipeline_error
