@@ -3,7 +3,7 @@ description: Pipeline for processing Hashicorp Vault audit logs.
 processors:
   - set:
       field: ecs.version
-      value: '8.7.0'
+      value: '8.8.0'
   - rename:
       field: message
       target_field: event.original
@@ -13,7 +13,6 @@ processors:
       field: event.original
       target_field: hashicorp_vault.audit
       ignore_failure: true
-
   #
   # @timestamp
   #
@@ -25,7 +24,6 @@ processors:
       field:
         - hashicorp_vault.audit.time
       ignore_missing: true
-
   #
   # event categorization.
   #
@@ -63,7 +61,6 @@ processors:
   - set:
       field: event.action
       copy_from: hashicorp_vault.audit.request.operation
-
   #
   # event.outcome
   #
@@ -75,7 +72,6 @@ processors:
       if: ctx?.hashicorp_vault?.audit?.error != null
       field: event.outcome
       value: failure
-
   - set:
       field: event.id
       copy_from: hashicorp_vault.audit.request.id
@@ -94,7 +90,6 @@ processors:
       target_field: source.port
       type: long
       ignore_missing: true
-
   # OIDC auth metadata.
   - set:
       field: user.email
@@ -104,7 +99,6 @@ processors:
       field: user.id
       copy_from: hashicorp_vault.audit.auth.metadata.account_id
       ignore_failure: true
-
   # Nomad auth metadata. (Recognize it by the presence of all four fields.)
   - set:
       if: >
@@ -142,7 +136,6 @@ processors:
       field: nomad.task.name
       copy_from: hashicorp_vault.audit.auth.metadata.Task
       ignore_failure: true
-
   # IP Geolocation Lookup
   - geoip:
       field: source.ip
@@ -165,13 +158,11 @@ processors:
       field: source.as.organization_name
       target_field: source.as.organization.name
       ignore_missing: true
-
   - append:
       field: related.ip
       value: '{{{source.ip}}}'
       allow_duplicates: false
       if: ctx?.source?.ip != null
-
   #
   # event.original - keep or drop
   #
@@ -183,4 +174,10 @@ processors:
 on_failure:
 - set:
     field: error.message
-    value: '{{ _ingest.on_failure_message }}'
+    value: >-
+      Processor '{{ _ingest.on_failure_processor_type }}'
+      {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+      {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+- set:
+    field: event.kind
+    value: pipeline_error

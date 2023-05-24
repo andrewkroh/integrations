@@ -4,7 +4,6 @@ processors:
   - json:
       field: event.original
       target_field: hashicorp_vault.log
-
   #
   # @timestamp
   #
@@ -16,7 +15,6 @@ processors:
       field:
         - hashicorp_vault.log.@timestamp
       ignore_missing: true
-
   #
   # Rename standard fields to ECS.
   #
@@ -42,7 +40,6 @@ processors:
         if (ctx.hashicorp_vault.isEmpty()) {
           ctx.remove("hashicorp_vault");
         }
-
   #
   # Copy structured fields to ECS fields. Retain the originals for easy reference.
   #
@@ -53,4 +50,10 @@ processors:
 on_failure:
 - set:
     field: error.message
-    value: '{{ _ingest.on_failure_message }}'
+    value: >-
+      Processor '{{ _ingest.on_failure_processor_type }}'
+      {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+      {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+- set:
+    field: event.kind
+    value: pipeline_error
