@@ -1,9 +1,9 @@
 ---
 description: Pipeline for ForgeRock am-core debug logs
-processors: 
+processors:
   - set:
       field: ecs.version
-      value: '8.7.0'
+      value: '8.8.0'
   - set:
       field: observer.vendor
       value: ForgeRock Identity Platform
@@ -17,12 +17,10 @@ processors:
   - rename:
       field: json.payload
       target_field: forgerock
-
-  - set: 
+  - set:
       field: transaction.id
       copy_from: forgerock.transactionId
       ignore_failure: true
-
   - date:
       field: forgerock.timestamp
       formats:
@@ -33,7 +31,6 @@ processors:
         - append:
             field: error.message
             value: '{{ _ingest.on_failure_message }}'
-
   # am-core processing
   - set:
       field: event.reason
@@ -55,7 +52,6 @@ processors:
       field: error.stack_trace
       copy_from: forgerock.exception
       ignore_failure: true
-
   # cleaning up
   - remove:
       field:
@@ -63,7 +59,6 @@ processors:
         - json.type
         - forgerock.mdc.transactionId
       ignore_failure: true
-
   - remove:
       if: ctx.tags == null || !(ctx.tags.contains('preserve_duplicate_custom_fields'))
       field:
@@ -77,13 +72,11 @@ processors:
         - forgerock.exception
       ignore_failure: true
       ignore_missing: true
-
   - remove:
       field: event.original
       if: ctx.tags == null || !(ctx.tags.contains('preserve_original_event'))
       ignore_failure: true
       ignore_missing: true
-
   - script:
       description: Drops null/empty values recursively
       lang: painless
@@ -102,11 +95,13 @@ processors:
           return false;
         }
         drop(ctx);
-
 on_failure:
   - append:
       field: error.message
-      value: "{{ _ingest.on_failure_message }}"
+      value: >-
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
   - set:
       field: event.kind
       value: pipeline_error
