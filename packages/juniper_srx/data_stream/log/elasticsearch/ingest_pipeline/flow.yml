@@ -52,7 +52,6 @@ processors:
     field: event.action
     value: flow_deny
     if: "ctx.juniper?.srx?.tag.endsWith('DENY') || ctx.juniper?.srx?.tag.endsWith('DENY_LS')"
-
 ####################################
 ## ECS Server/Destination Mapping ##
 ####################################
@@ -142,7 +141,6 @@ processors:
     ignore_failure: true
     ignore_missing: true
     if: "ctx.server?.packets != null"
-
 ###############################
 ## ECS Client/Source Mapping ##
 ###############################
@@ -242,7 +240,6 @@ processors:
     target_field: source.user.name
     ignore_missing: true
     if: "ctx.juniper?.srx?.username != null"
-
 ######################
 ## ECS Rule Mapping ##
 ######################
@@ -251,7 +248,6 @@ processors:
     target_field: rule.name
     ignore_missing: true
     if: "ctx.juniper?.srx?.policy_name != null"
-
 #############################
 ## ECS Network/Geo Mapping ##
 #############################
@@ -340,7 +336,6 @@ processors:
     source: "ctx.network.packets = ctx.client.packets + ctx.server.packets"
     if: "ctx?.client?.packets != null && ctx?.server?.packets != null"
     ignore_failure: true
-
 #############
 ## Cleanup ##
 #############
@@ -356,8 +351,13 @@ processors:
     - juniper.srx.bytes_from_server
     - juniper.srx.packets_from_server
     ignore_missing: true
-
 on_failure:
 - set:
     field: error.message
-    value: '{{ _ingest.on_failure_message }}'
+    value: >-
+      Processor '{{ _ingest.on_failure_processor_type }}'
+      {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+      {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+- set:
+    field: event.kind
+    value: pipeline_error

@@ -39,8 +39,6 @@ processors:
     field: event.action
     value: malware_detected
     if: "ctx.juniper?.srx?.action == 'BLOCK' || ctx.juniper?.srx?.tag == 'AAMW_MALWARE_EVENT_LOG'"
-
-
 ####################################
 ## ECS Server/Destination Mapping ##
 ####################################
@@ -130,7 +128,6 @@ processors:
     ignore_failure: true
     ignore_missing: true
     if: "ctx.server?.packets != null"
-
 ###############################
 ## ECS Client/Source Mapping ##
 ###############################
@@ -240,7 +237,6 @@ processors:
     target_field: source.ip
     ignore_missing: true
     if: "ctx.juniper?.srx?.client_ip != null"
-
 ######################
 ## ECS URL Mapping ##
 ######################
@@ -249,7 +245,6 @@ processors:
     target_field: url.domain
     ignore_missing: true
     if: "ctx.juniper?.srx?.http_host != null"
-
 #############################
 ## ECS Network/Geo Mapping ##
 #############################
@@ -342,7 +337,6 @@ processors:
      - remove:
         field:
           - juniper.srx.timestamp
-
 #############
 ## Cleanup ##
 #############
@@ -357,8 +351,13 @@ processors:
     - juniper.srx.bytes_from_server
     - juniper.srx.packets_from_server
     ignore_missing: true
-
 on_failure:
 - set:
     field: error.message
-    value: '{{ _ingest.on_failure_message }}'
+    value: >-
+      Processor '{{ _ingest.on_failure_processor_type }}'
+      {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+      {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+- set:
+    field: event.kind
+    value: pipeline_error
