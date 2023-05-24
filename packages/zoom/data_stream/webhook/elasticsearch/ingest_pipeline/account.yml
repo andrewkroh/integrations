@@ -49,7 +49,6 @@ processors:
     field: user.target.email
     value: '{{zoom.account.owner_email}}'
     ignore_empty_value: true
-
 #
 # set user.target from old_values.account_* fields (updated account).
 #
@@ -69,7 +68,6 @@ processors:
     field: user.target.name
     value: '{{zoom.old_values.account_alias}}'
     if: 'ctx.zoom?.old_values?.account_alias != null'
-
 #
 # set user.changes from account.account_* fields (updated account).
 #
@@ -89,7 +87,6 @@ processors:
     field: user.changes.name
     value: '{{zoom.account.account_alias}}'
     if: 'ctx.zoom?.account?.account_alias != null && ctx.zoom?.old_values?.account_alias != ctx.zoom?.account?.account_alias'
-
 #
 # Append to related.user array
 #
@@ -108,7 +105,6 @@ processors:
     value: "{{user.changes.id}}"
     allow_duplicates: false
     if: ctx.user?.changes?.id != null
-
 #
 # Cleanup
 #
@@ -118,4 +114,10 @@ processors:
 on_failure:
 - set:
     field: error.message
-    value: '{{ _ingest.on_failure_message }}'
+    value: >-
+      Processor '{{ _ingest.on_failure_processor_type }}'
+      {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+      {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+- set:
+    field: event.kind
+    value: pipeline_error
