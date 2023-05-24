@@ -3,7 +3,7 @@ description: Pipeline for parsing MySQL Enterprise Audit logs
 processors:
   - set:
       field: ecs.version
-      value: '8.7.0'
+      value: '8.8.0'
   - set:
       field: event.original
       copy_from: message
@@ -13,8 +13,7 @@ processors:
       # rather than as a JSON stream, and so has comma separators. We
       # don't have the array open token, so remove the commas.
       lang: painless
-      source:
-        ctx.message = ctx.message.substring(0, ctx.message.length() - 1);
+      source: ctx.message = ctx.message.substring(0, ctx.message.length() - 1);
       if: ctx.message instanceof String && ctx.message.endsWith(',')
   - json:
       field: message
@@ -176,7 +175,6 @@ processors:
         - user
         - deletion
       if: 'ctx.mysqlenterprise?.audit?.general_data?.sql_command == "drop_user" || ctx.mysqlenterprise?.audit?.general_data?.sql_command == "delete_user"'
-
   # Attributes starting with _ is only supported by MySQL 8.0.19 and above.
   - convert:
       field: mysqlenterprise.audit.connection_data.connection_attributes._pid
@@ -244,4 +242,10 @@ processors:
 on_failure:
   - set:
       field: error.message
-      value: "{{ _ingest.on_failure_message }}"
+      value: >-
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+  - set:
+      field: event.kind
+      value: pipeline_error
