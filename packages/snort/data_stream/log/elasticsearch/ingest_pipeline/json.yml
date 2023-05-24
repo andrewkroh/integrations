@@ -46,7 +46,7 @@ processors:
       target_field: snort.eth.length
       type: long
       ignore_missing: true
-## Rule
+  ## Rule
   - rename:
       field: json.class
       target_field: rule.category
@@ -70,7 +70,7 @@ processors:
       target_field: snort.gid
       type: long
       ignore_missing: true
-## ICMP
+  ## ICMP
   - convert:
       field: json.icmp_type
       target_field: snort.icmp.type
@@ -91,7 +91,7 @@ processors:
       target_field: snort.icmp.seq
       type: long
       ignore_missing: true
-## TCP
+  ## TCP
   - rename:
       field: json.tcp_flags
       target_field: snort.tcp.flags
@@ -112,12 +112,12 @@ processors:
       field: json.tcp_win
       target_field: snort.tcp.window
       ignore_missing: true
-## UDP
+  ## UDP
   - rename:
       field: json.udp_len
       target_field: snort.udp.length
       ignore_missing: true
-## IP
+  ## IP
   - convert:
       field: json.ip_id
       target_field: snort.ip.id
@@ -133,7 +133,7 @@ processors:
       target_field: snort.ip.ttl
       type: long
       ignore_missing: true
-## Network
+  ## Network
   - convert:
       field: json.pkt_num
       target_field: network.packets
@@ -159,7 +159,7 @@ processors:
       type: string
       ignore_missing: true
       if: ctx.json?.vlan != 0
-## Other
+  ## Other
   - convert:
       field: json.priority
       target_field: event.severity
@@ -173,8 +173,13 @@ processors:
       field: json.iface
       target_field: observer.ingress.interface.name
       ignore_missing: true
-
 on_failure:
   - set:
       field: error.message
-      value: '{{ _ingest.on_failure_message }}'
+      value: >-
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+  - set:
+      field: event.kind
+      value: pipeline_error
