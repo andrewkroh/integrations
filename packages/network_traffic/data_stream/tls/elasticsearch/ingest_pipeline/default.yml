@@ -3,7 +3,7 @@ description: Pipeline for processing tls traffic
 processors:
 - set:
     field: ecs.version
-    value: '8.7.0'
+    value: '8.8.0'
 ##
 # Set host.mac to dash separated upper case value
 # as per ECS recommendation
@@ -40,7 +40,6 @@ processors:
 - remove:
     if: ctx.host != null && ctx.tags != null && ctx.tags.contains('forwarded')
     field: host
-
 - pipeline:
     if: ctx._conf?.geoip_enrich != null && ctx._conf.geoip_enrich
     name: '{{ IngestPipeline "geoip" }}'
@@ -48,7 +47,6 @@ processors:
 - remove:
     field: _conf
     ignore_missing: true
-
 ##
 # Make tls.{client,server}.x509.version_number a string as per ECS.
 ##
@@ -62,23 +60,21 @@ processors:
     type: string
     ignore_missing: true
     tag: convert_tls_server_x509_version_number
-
 ##
 # This handles legacy TLS fields from Packetbeat 7.17.
 ##
 - remove:
     description: Remove legacy fields from Packetbeat 7.17 that are duplicated.
     field:
-      - tls.client.x509.issuer.province  # Duplicated as tls.client.x509.issuer.state_or_province.
+      - tls.client.x509.issuer.province # Duplicated as tls.client.x509.issuer.state_or_province.
       - tls.client.x509.subject.province # Duplicated as tls.client.x509.subject.state_or_province.
-      - tls.client.x509.version          # Duplicated as tls.client.x509.version_number.
-      - tls.detailed.client_certificate  # Duplicated as tls.client.x509.
-      - tls.detailed.server_certificate  # Duplicated as tls.server.x509.
-      - tls.server.x509.issuer.province  # Duplicated as tls.server.x509.issuer.state_or_province.
+      - tls.client.x509.version # Duplicated as tls.client.x509.version_number.
+      - tls.detailed.client_certificate # Duplicated as tls.client.x509.
+      - tls.detailed.server_certificate # Duplicated as tls.server.x509.
+      - tls.server.x509.issuer.province # Duplicated as tls.server.x509.issuer.state_or_province.
       - tls.server.x509.subject.province # Duplicated as tls.server.x509.subject.state_or_province.
-      - tls.server.x509.version          # Duplicated as tls.server.x509.version_number.
+      - tls.server.x509.version # Duplicated as tls.server.x509.version_number.
     ignore_missing: true
-
 - append:
     field: related.hash
     value: "{{tls.server.ja3s}}"
@@ -88,12 +84,13 @@ processors:
     value: "{{tls.client.ja3}}"
     if: "ctx?.tls?.client?.ja3 != null"
     allow_duplicates: false
-    
 on_failure:
 - set:
     field: error.message
-    value: |-
-        Processor "{{ _ingest.on_failure_processor_type }}" with tag "{{ _ingest.on_failure_processor_tag }}" in pipeline "{{ _ingest.on_failure_pipeline }}" failed with message "{{ _ingest.on_failure_message }}"
+    value: >-
+      Processor '{{ _ingest.on_failure_processor_type }}'
+      {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+      {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
 - set:
     field: event.kind
     value: pipeline_error
