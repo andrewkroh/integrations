@@ -3,7 +3,7 @@ description: Pipeline for Google Cloud DNS logs
 processors:
   - set:
       field: ecs.version
-      value: '8.7.0'
+      value: '8.8.0'
   - rename:
       field: message
       target_field: event.original
@@ -36,18 +36,18 @@ processors:
       field: json.severity
       target_field: log.level
       ignore_missing: true
-  - set: 
+  - set:
       field: event.id
       copy_from: json.insertId
       ignore_empty_value: true
       ignore_failure: true
-  - convert: 
+  - convert:
       field: json.resource.labels.project_id
       target_field: cloud.project.id
       type: string
       ignore_missing: true
       ignore_failure: true
-  - convert: 
+  - convert:
       field: json.resource.labels.location
       target_field: cloud.region
       type: string
@@ -126,7 +126,7 @@ processors:
       field: json.jsonPayload.rdata
       target_field: gcp.dns.rdata
       ignore_missing: true
-### Internal DNS query parsing
+  ### Internal DNS query parsing
   - script:
       if: ctx?.gcp?.dns?.rdata != null
       lang: painless
@@ -173,7 +173,7 @@ processors:
             ]);
         }
         ctx.dns.answers = dns_answers;
-### External DNS query parsing
+  ### External DNS query parsing
   - script:
       lang: painless
       ignore_failure: true
@@ -251,11 +251,11 @@ processors:
       field: dns.response_code
       copy_from: gcp.dns.response_code
       ignore_failure: true
-  - set: 
+  - set:
       field: event.outcome
       value: success
       if: ctx?.gcp?.dns?.response_code != null && ctx?.gcp?.dns?.response_code == "NOERROR"
-  - set: 
+  - set:
       field: event.outcome
       value: failure
       if: ctx?.gcp?.dns?.response_code != null && ctx?.gcp?.dns?.response_code != "NOERROR"
@@ -313,11 +313,11 @@ processors:
       field: cloud.availability_zone
       copy_from: gcp.dns.vm_zone_name
       ignore_failure: true
-  - rename: 
+  - rename:
       field: json.resource.labels.target_type
       target_field: gcp.dns.target_type
       ignore_missing: true
-  - rename: 
+  - rename:
       field: json.resource.labels.source_type
       target_field: gcp.dns.source_type
       ignore_missing: true
@@ -372,4 +372,10 @@ processors:
 on_failure:
   - set:
       field: error.message
-      value: "{{ _ingest.on_failure_message }}"
+      value: >-
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+  - set:
+      field: event.kind
+      value: pipeline_error

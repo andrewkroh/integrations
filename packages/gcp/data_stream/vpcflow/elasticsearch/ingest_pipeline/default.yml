@@ -1,10 +1,9 @@
 ---
 description: Pipeline for Google Cloud VPC Flow Logs
-
 processors:
   - set:
       field: ecs.version
-      value: '8.7.0'
+      value: '8.8.0'
   - rename:
       field: message
       target_field: event.original
@@ -32,7 +31,7 @@ processors:
   - set:
       field: event.type
       value: connection
-  - set: 
+  - set:
       field: event.id
       copy_from: json.insertId
       ignore_empty_value: true
@@ -284,26 +283,26 @@ processors:
       type: long
       target_field: network.packets
       ignore_missing: true
-  - set: 
+  - set:
       field: network.direction
       value: internal
       if: ctx?.gcp?.source?.instance != null && ctx?.gcp?.destination?.instance != null
-  - set: 
+  - set:
       field: network.direction
       value: outbound
       if: ctx?.gcp?.source?.instance != null && ctx?.gcp?.destination?.instance == null
-  - set: 
+  - set:
       field: network.direction
       value: inbound
       if: ctx?.gcp?.source?.instance == null && ctx?.gcp?.destination?.instance != null
-  - set: 
+  - set:
       field: network.direction
       value: unknown
       if: ctx?.network?.direction == null
   - set:
       field: network.type
       value: ipv4
-      if: ctx?.source?.ip != null && ctx?.source?.ip.contains(".") 
+      if: ctx?.source?.ip != null && ctx?.source?.ip.contains(".")
   - set:
       field: network.type
       value: ipv6
@@ -368,4 +367,10 @@ processors:
 on_failure:
   - set:
       field: error.message
-      value: '{{ _ingest.on_failure_message }}'
+      value: >-
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+  - set:
+      field: event.kind
+      value: pipeline_error
