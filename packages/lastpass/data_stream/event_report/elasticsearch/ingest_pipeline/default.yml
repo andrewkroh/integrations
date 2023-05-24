@@ -3,7 +3,7 @@ description: Pipeline for processing Event Report logs.
 processors:
   - set:
       field: ecs.version
-      value: '8.7.0'
+      value: '8.8.0'
   - rename:
       field: message
       target_field: event.original
@@ -69,7 +69,7 @@ processors:
   - set:
       field: event.type
       if: ctx.event?.action?.contains('create group') || ctx.event?.action?.contains('adding user to group')
-      value: [group,creation]
+      value: [group, creation]
   - set:
       field: event.type
       if: ctx.event?.action?.contains('login verification email sent') || ctx.event?.action?.contains('get shared folder data') || ctx.event?.action?.contains('get user data') || ctx.event?.action?.contains('employee invited') || ctx.event?.action?.contains('reporting') || ctx.event?.action?.contains('require password change') || ctx.event?.action?.contains('multifactor enabled')
@@ -145,12 +145,7 @@ processors:
   - script:
         description: Separate Shared Folder Name and User Email with comma(',') in Limit Shared Folder Event Type.
         lang: painless
-        source:
-          if (ctx.event?.action?.contains('limit shared folder')) {
-            int indx = ctx.lastpass.event_report.data.original.lastIndexOf(' ');
-            String str = ctx.lastpass.event_report.data.original.substring(0,indx)+ ',' + ctx.lastpass.event_report.data.original.substring(indx+1);
-            ctx._temp = str;
-          }
+        source: if (ctx.event?.action?.contains('limit shared folder')) { int indx = ctx.lastpass.event_report.data.original.lastIndexOf(' '); String str = ctx.lastpass.event_report.data.original.substring(0,indx)+ ',' + ctx.lastpass.event_report.data.original.substring(indx+1); ctx._temp = str; }
   - grok:
       field: lastpass.event_report.data.original
       if: ctx.event?.action?.contains('log in')
@@ -338,21 +333,14 @@ processors:
   - script:
         description: Drops null/empty values recursively.
         lang: painless
-        source:
-          boolean dropEmptyFields(Object object) {
-            if (object == null || object == "") {
-              return true;
-            } else if (object instanceof Map) {
-              ((Map) object).values().removeIf(value -> dropEmptyFields(value));
-              return (((Map) object).size() == 0);
-            } else if (object instanceof List) {
-              ((List) object).removeIf(value -> dropEmptyFields(value));
-              return (((List) object).length == 0);
-            }
-            return false;
-          }
-          dropEmptyFields(ctx);
+        source: boolean dropEmptyFields(Object object) { if (object == null || object == "") { return true; } else if (object instanceof Map) { ((Map) object).values().removeIf(value -> dropEmptyFields(value)); return (((Map) object).size() == 0); } else if (object instanceof List) { ((List) object).removeIf(value -> dropEmptyFields(value)); return (((List) object).length == 0); } return false; } dropEmptyFields(ctx);
 on_failure:
 - append:
     field: error.message
-    value: '{{{ _ingest.on_failure_message }}}'
+    value: >-
+      Processor '{{ _ingest.on_failure_processor_type }}'
+      {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+      {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+- set:
+    field: event.kind
+    value: pipeline_error
