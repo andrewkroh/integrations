@@ -3,7 +3,7 @@ description: Pipeline for parsing google_workspace logs
 processors:
   - set:
       field: ecs.version
-      value: '8.7.0'
+      value: '8.8.0'
   - append:
       field: event.category
       value: file
@@ -108,27 +108,27 @@ processors:
         ctx.source.user.name = splitmail[0];
         ctx.user.domain = splitmail[1];
         ctx.source.user.domain = splitmail[1];
-  - append: 
+  - append:
       field: event.type
       value: change
       if: '["add_to_folder", "edit", "add_lock", "move", "remove_from_folder", "rename", "remove_lock", "sheets_import_range", "approval_canceled", "approval_comment_added", "approval_requested", "approval_reviewer_responded", "change_acl_editors", "change_document_access_scope", "change_document_visibility", "shared_drive_membership_change", "shared_drive_settings_change", "sheets_import_range_access_change", "change_user_access"].contains(ctx?.event?.action)'
-  - append: 
+  - append:
       field: event.category
       value: iam
       if: '["approval_canceled", "approval_comment_added", "approval_requested", "approval_reviewer_responded", "change_acl_editors", "change_document_access_scope", "change_document_visibility", "shared_drive_membership_change", "shared_drive_settings_change", "sheets_import_range_access_change", "change_user_access"].contains(ctx?.event?.action)'
-  - append: 
+  - append:
       field: event.category
       value: configuration
       if: '["approval_canceled", "approval_comment_added", "approval_requested", "approval_reviewer_responded", "change_acl_editors", "change_document_access_scope", "change_document_visibility", "shared_drive_membership_change", "shared_drive_settings_change", "sheets_import_range_access_change", "change_user_access"].contains(ctx?.event?.action)'
-  - append: 
+  - append:
       field: event.type
       value: creation
       if: '["create", "untrash", "upload"].contains(ctx?.event?.action)'
-  - append: 
+  - append:
       field: event.type
       value: deletion
       if: '["delete", "trash"].contains(ctx?.event?.action)'
-  - append: 
+  - append:
       field: event.type
       value: info
       if: '["download", "preview", "print", "view"].contains(ctx?.event?.action)'
@@ -262,7 +262,7 @@ processors:
       target_field: source.as.organization.name
       ignore_missing: true
   - remove:
-      field: 
+      field:
         - json
       ignore_missing: true
   - remove:
@@ -273,4 +273,10 @@ processors:
 on_failure:
   - set:
       field: error.message
-      value: "{{ _ingest.on_failure_message }}"
+      value: >-
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+  - set:
+      field: event.kind
+      value: pipeline_error

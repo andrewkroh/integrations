@@ -3,7 +3,7 @@ description: Pipeline for parsing google_workspace logs
 processors:
   - set:
       field: ecs.version
-      value: '8.7.0'
+      value: '8.8.0'
   - rename:
       field: message
       target_field: event.original
@@ -199,11 +199,11 @@ processors:
       formats:
         - UNIX_MS
       if: ctx?._temp_?.start != null
-  - set: 
+  - set:
       field: event.outcome
       value: success
       if: 'ctx?.google_workspace?.login?.challenge_status != null && ctx?.event?.outcome == null && ctx?.google_workspace?.login?.challenge_status == "Challenge Passed"'
-  - set: 
+  - set:
       field: event.outcome
       value: failure
       if: 'ctx?.google_workspace?.login?.challenge_status != null && ctx?.event?.outcome == null'
@@ -251,7 +251,7 @@ processors:
       target_field: source.as.organization.name
       ignore_missing: true
   - remove:
-      field: 
+      field:
         - json
         - _temp_
       ignore_missing: true
@@ -263,4 +263,10 @@ processors:
 on_failure:
   - set:
       field: error.message
-      value: "{{ _ingest.on_failure_message }}"
+      value: >-
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+  - set:
+      field: event.kind
+      value: pipeline_error
