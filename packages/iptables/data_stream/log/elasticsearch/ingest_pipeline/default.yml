@@ -3,8 +3,7 @@ description: Pipeline for iptables logs.
 processors:
   - set:
       field: ecs.version
-      value: '8.7.0'
-
+      value: '8.8.0'
   # These two fields are treated as immutable in the case reindexing.
   - set:
       field: event.original
@@ -14,7 +13,6 @@ processors:
       field: event.created
       copy_from: '@timestamp'
       override: false
-
   # Journald input field cleanup.
   - remove:
       field:
@@ -33,7 +31,6 @@ processors:
       description: Cleanup an empty syslog object.
       if: ctx?.syslog != null && ctx.syslog instanceof Map && ctx.syslog.isEmpty()
       field: syslog
-
   # Parse the header if it is syslog, otherwise treat the whole value as 'message'.
   - grok:
       description: Parse syslog header.
@@ -48,7 +45,6 @@ processors:
         - set:
             field: message
             copy_from: event.original
-
   - grok:
       field: message
       patterns:
@@ -65,33 +61,24 @@ processors:
         ETHTYPE: (?:[A-Fa-f0-9]{2}):(?:[A-Fa-f0-9]{2})
         ETHTYPE_DISCARD: (?::[A-Fa-f0-9]{2})*
         NETFILTERMAC: (?:%{MAC:destination.mac}:%{MAC:source.mac}:%{ETHTYPE:iptables.ether_type}?%{ETHTYPE_DISCARD}|%{MAC:destination.mac}%{ETHTYPE_DISCARD}:%{ETHTYPE:iptables.ether_type}?)
-        IPTABLES_ETHERNET: 'IN=%{DATA:iptables.input_device} OUT=%{DATA:iptables.output_device}?(?:
-          MAC=%{NETFILTERMAC})?'
+        IPTABLES_ETHERNET: 'IN=%{DATA:iptables.input_device} OUT=%{DATA:iptables.output_device}?(?: MAC=%{NETFILTERMAC})?'
         IPTABLES_PORT_PAIR: SPT=%{UNSIGNED_INT:source.port:int} DPT=%{UNSIGNED_INT:destination.port:int}
         IPTABLES_TCP_FLAGS: (CWR |ECE |URG |ACK |PSH |RST |SYN |FIN )*
         IPTABLES_TCP_SEQ: SEQ=%{UNSIGNED_INT:iptables.tcp.seq:int} ACK=%{UNSIGNED_INT:iptables.tcp.ack:int}
-        IPTABLES_TCP_DETAILS: (?:%{IPTABLES_TCP_SEQ} )?WINDOW=%{UNSIGNED_INT:iptables.tcp.window:int}
-          RES=0x%{BASE16NUM:iptables.tcp_reserved_bits} %{IPTABLES_TCP_FLAGS:iptables.tcp.flags}
-        IPTABLES_INCOMPLETE_PACKET: INCOMPLETE \[%{UNSIGNED_INT:iptables.incomplete_bytes:int}
-          bytes\]
+        IPTABLES_TCP_DETAILS: (?:%{IPTABLES_TCP_SEQ} )?WINDOW=%{UNSIGNED_INT:iptables.tcp.window:int} RES=0x%{BASE16NUM:iptables.tcp_reserved_bits} %{IPTABLES_TCP_FLAGS:iptables.tcp.flags}
+        IPTABLES_INCOMPLETE_PACKET: INCOMPLETE \[%{UNSIGNED_INT:iptables.incomplete_bytes:int} bytes\]
         IPTABLES_UDP_DETAILS: LEN=%{UNSIGNED_INT:iptables.udp.length:int}
         IPTABLES_ICMP_EXTRA_ECHO: ID=%{UNSIGNED_INT:iptables.icmp.id:int} SEQ=%{UNSIGNED_INT:iptables.icmp.seq:int}
         IPTABLES_ICMP_EXTRA_PARAM: PARAMETER=%{UNSIGNED_INT:iptables.icmp.parameter:int}
         IPTABLES_ICMP_EXTRA_REDIRECT: GATEWAY=%{IP:iptables.icmp.redirect}
         IPTABLES_ICMP_EXTRA: ( (?:%{IPTABLES_ICMP_EXTRA_ECHO}|%{IPTABLES_ICMP_EXTRA_PARAM}|%{IPTABLES_ICMP_EXTRA_REDIRECT}))*
-        IPTABLES_ICMP_DETAILS: TYPE=%{UNSIGNED_INT:iptables.icmp.type:int} CODE=%{UNSIGNED_INT:iptables.icmp.code:int}((
-          %{IPTABLES_INCOMPLETE_PACKET})|%{IPTABLES_ICMP_EXTRA})
+        IPTABLES_ICMP_DETAILS: TYPE=%{UNSIGNED_INT:iptables.icmp.type:int} CODE=%{UNSIGNED_INT:iptables.icmp.code:int}(( %{IPTABLES_INCOMPLETE_PACKET})|%{IPTABLES_ICMP_EXTRA})
         IPTABLES_PROTOCOL: PROTO=(?<network.transport>[a-zA-Z0-9]+)
         IPTABLES_IP_PAYLOAD: '%{IPTABLES_PROTOCOL}( %{IPTABLES_PORT_PAIR})?( (%{IPTABLES_TCP_DETAILS}|%{IPTABLES_UDP_DETAILS}|%{IPTABLES_ICMP_DETAILS}|%{IPTABLES_INCOMPLETE_PACKET}))?'
         IPTABLES_IP_FRAGFLAG: ((?<= )(CE|DF|MF))*
-        IPTABLES_IP_START: 'SRC=%{IPV4:source.ip} DST=%{IPV4:destination.ip} LEN=%{UNSIGNED_INT:iptables.length:int}
-          TOS=(?:0x)?%{BASE16NUM:iptables.tos} PREC=0x%{BASE16NUM:iptables.precedence_bits}
-          TTL=%{UNSIGNED_INT:iptables.ttl:int} ID=%{UNSIGNED_INT:iptables.id:int}(?:
-          %{IPTABLES_IP_FRAGFLAG:iptables.fragment_flags})?(?: FRAG: %{UNSIGNED_INT:iptables.fragment_offset:int})?'
+        IPTABLES_IP_START: 'SRC=%{IPV4:source.ip} DST=%{IPV4:destination.ip} LEN=%{UNSIGNED_INT:iptables.length:int} TOS=(?:0x)?%{BASE16NUM:iptables.tos} PREC=0x%{BASE16NUM:iptables.precedence_bits} TTL=%{UNSIGNED_INT:iptables.ttl:int} ID=%{UNSIGNED_INT:iptables.id:int}(?: %{IPTABLES_IP_FRAGFLAG:iptables.fragment_flags})?(?: FRAG: %{UNSIGNED_INT:iptables.fragment_offset:int})?'
         IPTABLES_IP: '%{IPTABLES_IP_START} %{IPTABLES_IP_PAYLOAD}'
-        IPTABLES_IPV6_START: SRC=%{IPV6:source.ip} DST=%{IPV6:destination.ip} LEN=%{UNSIGNED_INT:iptables.length:int}
-          TC=%{UNSIGNED_INT:iptables.tos} HOPLIMIT=%{UNSIGNED_INT:iptables.ttl:int}
-          FLOWLBL=%{UNSIGNED_INT:iptables.flow_label:int}
+        IPTABLES_IPV6_START: SRC=%{IPV6:source.ip} DST=%{IPV6:destination.ip} LEN=%{UNSIGNED_INT:iptables.length:int} TC=%{UNSIGNED_INT:iptables.tos} HOPLIMIT=%{UNSIGNED_INT:iptables.ttl:int} FLOWLBL=%{UNSIGNED_INT:iptables.flow_label:int}
         IPTABLES_IPV6: '%{IPTABLES_IPV6_START} %{IPTABLES_IP_PAYLOAD}'
         IPTABLES: '%{IPTABLES_ETHERNET} (:?%{IPTABLES_IP}|%{IPTABLES_IPV6})'
         UBIQUITI_FIELD: '[^-\]]*'
@@ -146,7 +133,6 @@ processors:
   - lowercase:
       field: event.action
       ignore_missing: true
-
   # GeoIP and Autonomous System Enrichment
   - geoip:
       field: source.ip
@@ -188,7 +174,6 @@ processors:
       field: destination.as.organization_name
       target_field: destination.as.organization.name
       ignore_missing: true
-
   - script:
       description: Enrich event with ECS fields.
       lang: painless
@@ -328,7 +313,6 @@ processors:
       if: ctx?.iptables?.ubiquiti?.rule_set != null
       field: rule.name
       copy_from: iptables.ubiquiti.rule_set
-
   # Format source.mac address.
   - gsub:
       field: source.mac
@@ -343,7 +327,6 @@ processors:
   - uppercase:
       field: source.mac
       ignore_missing: true
-
   # Format destination.mac address.
   - gsub:
       field: destination.mac
@@ -358,7 +341,6 @@ processors:
   - uppercase:
       field: destination.mac
       ignore_missing: true
-
   - remove:
       field:
         - _tmp
@@ -375,4 +357,10 @@ on_failure:
       ignore_failure: true
   - append:
       field: error.message
-      value: '{{{ _ingest.on_failure_message }}}'
+      value: >-
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+  - set:
+      field: event.kind
+      value: pipeline_error
