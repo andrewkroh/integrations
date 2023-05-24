@@ -1,10 +1,9 @@
 ---
 description: Pipeline for Netscreen
-
 processors:
   - set:
       field: ecs.version
-      value: '8.7.0'
+      value: '8.8.0'
   # User agent
   - user_agent:
       field: user_agent.original
@@ -18,7 +17,6 @@ processors:
       field: destination.ip
       target_field: destination.geo
       ignore_missing: true
-
   # Canonicalise MAC addresses
   - gsub:
       field: destination.mac
@@ -44,7 +42,6 @@ processors:
   - uppercase:
       field: host.mac
       ignore_missing: true
-
   # IP Autonomous System (AS) Lookup
   - geoip:
       database_file: GeoLite2-ASN.mmdb
@@ -91,4 +88,10 @@ processors:
 on_failure:
   - append:
       field: error.message
-      value: "{{ _ingest.on_failure_message }}"
+      value: >-
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+  - set:
+      field: event.kind
+      value: pipeline_error
