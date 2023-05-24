@@ -3,8 +3,8 @@ description: Pipeline for Netskope alerts.
 processors:
   - set:
       field: ecs.version
-      value: '8.7.0'
-  - json: 
+      value: '8.8.0'
+  - json:
       field: message
       add_to_root: true
       add_to_root_conflict_strategy: replace
@@ -1350,4 +1350,10 @@ processors:
 on_failure:
 - append:
     field: error.message
-    value: '{{{ _ingest.on_failure_message }}}'
+    value: >-
+      Processor '{{ _ingest.on_failure_processor_type }}'
+      {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+      {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+- set:
+    field: event.kind
+    value: pipeline_error
