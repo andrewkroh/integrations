@@ -3,7 +3,7 @@ description: Pipeline for parsing GitHub audit logs
 processors:
 - set:
     field: ecs.version
-    value: "8.7.0"
+    value: "8.8.0"
 - set:
     field: event.action
     value: "dependabot"
@@ -17,11 +17,11 @@ processors:
 - json:
     field: event.original
     target_field: github.dependabot
-- set: 
+- set:
     field: _temp.updated_at
     value: "{{{_ingest.timestamp}}}"
 - fingerprint:
-    fields: 
+    fields:
         - github.dependabot.repository.owner.login
         - github.dependabot.repository.name
         - github.dependabot.number
@@ -40,7 +40,7 @@ processors:
     - ISO8601
     timezone: UTC
     target_field: "event.created"
-    if: ctx.github.dependabot?.created_at != null 
+    if: ctx.github.dependabot?.created_at != null
 - rename:
     field: github.dependabot.dependabotUpdate
     target_field: github.dependabot.dependabot_update
@@ -114,7 +114,7 @@ processors:
     field: github.dependabot.security_advisory.updatedAt
     target_field: github.dependabot.security_advisory.updated_at
     ignore_missing: true
-- set: 
+- set:
     field: _temp.cwes
     copy_from: github.dependabot.security_advisory.cwes.nodes
     if: ctx.github.dependabot?.security_advisory?.cwes?.nodes != null
@@ -153,7 +153,6 @@ processors:
     field: github.dependabot.vulnerableRequirements
     target_field: github.dependabot.vulnerable_requirements
     ignore_missing: true
-
   ############################
   # Vulnerability ECS Fields #
   ############################
@@ -164,7 +163,7 @@ processors:
     target_field: vulnerability.description
     field: github.dependabot.security_advisory.description
     ignore_missing: true
-- script: 
+- script:
     lang: painless
     description: Set vulnerability.enumeration and vulnerability.id ECS fields. Defaults to GHSA
     if: ctx.github.dependabot.security_advisory?.identifiers != null
@@ -181,7 +180,6 @@ processors:
         }
         ctx.vulnerability.enumeration = enumeration;
         ctx.vulnerability.id = id;
-
 - script:
     lang: painless
     description: Set vulnerability.reference ECS field
@@ -221,19 +219,18 @@ processors:
     field: github.dependabot.security_vulnerability.severity
     target_field: vulnerability.severity
     ignore_missing: true
-
   ############################
   # Event ECS Fields #
   ############################
-- set: 
+- set:
     field: "event.start"
     copy_from: github.dependabot.created_at
     if: ctx.github.dependabot?.created_at != null
-- set: 
+- set:
     field: "event.end"
     copy_from: github.dependabot.fixed_at
     if: ctx.github.dependabot?.fixed_at != null
-- set: 
+- set:
     field: "event.end"
     copy_from: github.dependabot.dismissed_at
     if: ctx.event?.end == null && ctx.github.dependabot?.dismissed_at != null
@@ -245,8 +242,6 @@ processors:
       ZonedDateTime start = ZonedDateTime.parse(ctx.event.start);
       ZonedDateTime end = ZonedDateTime.parse(ctx.event.end);
       ctx.event.duration = ChronoUnit.SECONDS.between(start, end);
-
-  #################################
   # For Github Overview Dashboard #
   #################################
 - lowercase:
@@ -255,11 +250,11 @@ processors:
 - lowercase:
     field: vulnerability.severity
     ignore_missing: true
-- set: 
+- set:
     field: github.state
     copy_from: github.dependabot.state
     if: ctx.github.dependabot?.state != null
-- set: 
+- set:
     field: github.severity
     copy_from: vulnerability.severity
     if: ctx.vulnerability?.severity != null
@@ -271,7 +266,6 @@ processors:
     field: github.dependabot.repository
     target_field: github.repository
     ignore_missing: true
-
   ###########
   # Cleanup #
   ###########
@@ -312,4 +306,10 @@ processors:
 on_failure:
 - set:
     field: error.message
-    value: "{{ _ingest.on_failure_message }}"
+    value: >-
+      Processor '{{ _ingest.on_failure_processor_type }}'
+      {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+      {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+- set:
+    field: event.kind
+    value: pipeline_error

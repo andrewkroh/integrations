@@ -6,10 +6,10 @@ processors:
     value: event
 - set:
     field: ecs.version
-    value: '8.7.0'
+    value: '8.8.0'
 - append:
     field: event.category
-    value: 
+    value:
     - configuration
     - web
 - rename:
@@ -20,7 +20,7 @@ processors:
     field: event.original
     target_field: json
 - fingerprint:
-    fields: 
+    fields:
         - json._document_id
     target_field: "_id"
     ignore_missing: true
@@ -125,7 +125,7 @@ processors:
     if: '["team","org"].contains(ctx.github.category)'
 - append:
     field: event.type
-    value: 
+    value:
       - group
       - user
     if: '["team","org"].contains(ctx.github.category)'
@@ -145,7 +145,7 @@ processors:
     field:
       - json
       - _temp
-    ignore_missing: true  
+    ignore_missing: true
 - remove:
     field: event.original
     if: "ctx.tags == null || !(ctx.tags.contains('preserve_original_event'))"
@@ -179,4 +179,10 @@ processors:
 on_failure:
 - set:
     field: error.message
-    value: "{{ _ingest.on_failure_message }}"
+    value: >-
+      Processor '{{ _ingest.on_failure_processor_type }}'
+      {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+      {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+- set:
+    field: event.kind
+    value: pipeline_error

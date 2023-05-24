@@ -3,7 +3,7 @@ description: Pipeline for parsing GitHub audit logs
 processors:
 - set:
     field: ecs.version
-    value: '8.7.0'
+    value: '8.8.0'
 - set:
     field: event.action
     value: "event"
@@ -19,7 +19,7 @@ processors:
     target_field: github.issues
 - fingerprint:
     if: ctx.github?.issues?.url != null
-    fields: 
+    fields:
         - github.issues.url
     target_field: "_id"
     ignore_missing: true
@@ -68,7 +68,7 @@ processors:
     field: github.repository.owner.login
     value: "{{_temp_.owner}}"
     if: "ctx._temp_?.owner != null"
-- set: 
+- set:
     field: github.state
     value: "{{github.issues.state}}"
     if: ctx.github.issues?.state != null
@@ -139,7 +139,6 @@ processors:
             labels.add(label);
         }
         ctx.github.issues.labels = labels;
-
 - script:
     lang: painless
     description: Calculate time taken to close an issue
@@ -154,12 +153,10 @@ processors:
         long closedAtEpoch = zdt.toEpochSecond();
         time_to_close.put("sec", closedAtEpoch - createdAtEpoch);
         ctx.github.issues.time_to_close = time_to_close;
-
-
   ###################
   # User ECS fields #
   ###################
-- set: 
+- set:
     field: user.name
     copy_from: github.issues.user.login
     if: ctx.github?.issues?.user?.login != null
@@ -168,16 +165,15 @@ processors:
     type: string
     target_field: user.id
     ignore_missing: true
-- append: 
+- append:
     field: user.roles
     value: ['site_admin']
     if: 'ctx.github?.issues?.user?.site_admin != null && ctx.github?.issues?.user?.site_admin == true'
     allow_duplicates: false
-
   ###################
   # Related ECS fields #
   ###################
-- append: 
+- append:
     field: related.user
     value: "{{user.name}}"
     if: ctx.user?.name != null
@@ -190,7 +186,6 @@ processors:
         field: related.user
         value: "{{_ingest._value.login}}"
         allow_duplicates: false
-
   ###########
   # Cleanup #
   ###########
@@ -236,4 +231,10 @@ processors:
 on_failure:
 - append:
     field: error.message
-    value: "{{ _ingest.on_failure_message }}"
+    value: >-
+      Processor '{{ _ingest.on_failure_processor_type }}'
+      {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+      {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+- set:
+    field: event.kind
+    value: pipeline_error
