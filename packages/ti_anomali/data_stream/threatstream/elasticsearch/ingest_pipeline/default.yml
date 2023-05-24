@@ -6,7 +6,7 @@ processors:
   #
   - set:
       field: ecs.version
-      value: '8.7.0'
+      value: '8.8.0'
   - set:
       field: event.kind
       value: enrichment
@@ -16,7 +16,6 @@ processors:
   - set:
       field: event.type
       value: indicator
-
   #
   # Map itype field to STIX 2.0 Cyber Observable values (threat.indicator.type).
   #
@@ -115,12 +114,10 @@ processors:
         - append:
             field: error.message
             value: 'Unable to determine indicator type from "{{{ json.itype }}}": {{{ _ingest.on_failure_message }}}'
-
   - rename:
       field: threatintel_indicator_type
       target_field: threat.indicator.type
       ignore_missing: true
-
   #
   # Detect ipv6 for ipv4-addr types.
   #
@@ -128,8 +125,7 @@ processors:
       field: threat.indicator.type
       value: ipv6-addr
       if: 'ctx.threat?.indicator?.type == "ipv4-addr" && ctx.json?.srcip != null && ctx.json.srcip.contains(":")'
-
-# Add default deleted_at to expire all IOCs after duration: ioc_expiration_duration. If value not in d, h, or m, default to 90d.
+  # Add default deleted_at to expire all IOCs after duration: ioc_expiration_duration. If value not in d, h, or m, default to 90d.
   - script:
       lang: painless
       tag: script-default-deleted_at
@@ -152,9 +148,6 @@ processors:
             ctx.json.deleted_at = ZonedDateTime.parse(added_at, DateTimeFormatter.ISO_LOCAL_DATE_TIME.withZone(ZoneId.of('Z'))).plusDays(90L);
           }        
         }
-
-
-# Map added_at
   - date:
       field: json.added_at
       target_field: json.added_at
@@ -165,8 +158,7 @@ processors:
         - append:
             field: error.message
             value: 'Error parsing added_at field value "{{{ json.added_at }}}": {{{ _ingest.on_failure_message }}}'
-
-# Map deleted_at
+  # Map deleted_at
   - date:
       field: json.deleted_at
       target_field: json.deleted_at
@@ -177,7 +169,6 @@ processors:
         - append:
             field: error.message
             value: 'Error parsing deleted_at field value "{{{ json.deleted_at }}}": {{{ _ingest.on_failure_message }}}'
-
   #
   # Map first and last seen dates.
   #
@@ -191,7 +182,6 @@ processors:
         - append:
             field: error.message
             value: 'Error parsing date_first field value "{{{ json.date_first }}}": {{{ _ingest.on_failure_message }}}'
-
   - date:
       field: json.date_last
       target_field: threat.indicator.last_seen
@@ -202,7 +192,6 @@ processors:
         - append:
             field: error.message
             value: 'Error parsing date_last field value "{{{ json.date_last }}}": {{{ _ingest.on_failure_message }}}'
-
   #
   # Map IP geolocation fields.
   #
@@ -224,7 +213,6 @@ processors:
         - append:
             field: error.message
             value: 'Cannot convert lon field "{{{ json.lon }}}" to double: {{{ _ingest.on_failure_message }}}'
-
   #
   # Map classification field to Traffic Light Protocol (TLP).
   # Currently:
@@ -239,7 +227,6 @@ processors:
       field: threat.indicator.marking.tlp
       value: WHITE
       if: 'ctx.json?.classification == "public"'
-
   #
   # Convert confidence field (-1..100) to ECS confidence (0..10).
   #
@@ -270,12 +257,10 @@ processors:
         - append:
             field: error.message
             value: "failed to normalize confidence value `{{{ json.confidence }}}`: {{{ _ingest.on_failure_message }}}"
-
   - rename:
       field: threatintel_indicator_confidence
       target_field: threat.indicator.confidence
       ignore_missing: true
-
   #
   # Convert asn field.
   #
@@ -288,22 +273,18 @@ processors:
         - append:
             field: error.message
             value: "Cannot convert asn field `{{{ json.asn }}}` to long: {{{ _ingest.on_failure_message }}}"
-
   - rename:
       field: json.org
       target_field: threat.indicator.as.organization.name
       ignore_missing: true
-
   - rename:
       field: json.email
       target_field: threat.indicator.email.address
       ignore_missing: true
-
   - rename:
       field: json.srcip
       target_field: threat.indicator.ip
       ignore_missing: true
-
   - uri_parts:
       field: json.url
       target_field: threat.indicator.url
@@ -327,7 +308,6 @@ processors:
       field: json.country
       target_field: threat.indicator.geo.country_iso_code
       ignore_missing: true
-
   #
   # md5 field can actually contain different kinds of hash.
   # Map to file.hash.* depending on hash length.
@@ -336,27 +316,22 @@ processors:
       field: json.md5
       target_field: threat.indicator.file.hash.md5
       if: "ctx.json?.md5 != null && ctx.json.md5.length() == 32"
-
   - rename:
       field: json.md5
       target_field: threat.indicator.file.hash.sha1
       if: "ctx.json?.md5 != null && ctx.json.md5.length() == 40"
-
   - rename:
       field: json.md5
       target_field: threat.indicator.file.hash.sha256
       if: "ctx.json?.md5 != null && ctx.json.md5.length() == 64"
-
   - rename:
       field: json.md5
       target_field: threat.indicator.file.hash.sha512
       if: "ctx.json?.md5 != null && ctx.json.md5.length() == 128"
-
   - rename:
       field: json.source
       target_field: threat.indicator.provider
       ignore_missing: true
-
   #
   # Map field severity to event severity as follows:
   #   low       => 3
@@ -368,22 +343,18 @@ processors:
       field: event.severity
       value: 3
       if: 'ctx.json?.severity == "low"'
-
   - set:
       field: event.severity
       value: 5
       if: 'ctx.json?.severity == "medium"'
-
   - set:
       field: event.severity
       value: 7
       if: 'ctx.json?.severity == "high"'
-
   - set:
       field: event.severity
       value: 9
       if: 'ctx.json?.severity == "very-high"'
-
   #
   # Field trusted_circles_ids is a comma-separated string
   # that can contain leading and trailing separators (i.e. ",123,").
@@ -402,7 +373,6 @@ processors:
         } else {
           ctx.json.remove('trusted_circle_ids');
         }
-  #
   # Split detail field and append each component to ECS tags field.
   #
   - split:
@@ -413,7 +383,6 @@ processors:
         - append:
             field: error.message
             value: "failed to split detail field '{{{json.detail}}}': {{{_ingest.on_failure_message}}}"
-
   - foreach:
       field: json.detail
       ignore_missing: true
@@ -458,15 +427,19 @@ processors:
         - json.lat
         - json.lon
       ignore_missing: true
-
   #
   # Save fields without an ECS mapping under `threatintel.anomalithreatstream`.
   #
   - rename:
       field: json
       target_field: anomali.threatstream
-
 on_failure:
   - append:
       field: error.message
-      value: "{{ _ingest.on_failure_message }}"
+      value: >-
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+  - set:
+      field: event.kind
+      value: pipeline_error
