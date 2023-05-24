@@ -3,7 +3,7 @@ description: Pipeline for PFsense Unbound DNS logs
 processors:
   - grok:
       field: message
-      patterns:        
+      patterns:
         - '%{LOGLEVEL:log.level}: %{IP:source.address} %{HOSTNAME:_tmp.question.name}(\.) %{WORD:_tmp.question.type} %{WORD:_tmp.question.class}'
       on_failure:
         - drop:
@@ -54,4 +54,10 @@ processors:
 on_failure:
   - append:
       field: error.message
-      value: '{{ _ingest.on_failure_message }}'
+      value: >-
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+  - set:
+      field: event.kind
+      value: pipeline_error
