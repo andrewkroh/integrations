@@ -3,7 +3,7 @@ description: Pipeline for Snyk vulnerability logs
 processors:
 - set:
     field: ecs.version
-    value: '8.7.0'
+    value: '8.8.0'
 - rename:
     field: message
     target_field: event.original
@@ -11,7 +11,7 @@ processors:
     field: event.original
     target_field: json
 - fingerprint:
-    fields: 
+    fields:
       - json.issue.id
     target_field: _id
 - set:
@@ -145,7 +145,7 @@ processors:
     field: snyk.vulnerabilities.patches
     processor:
       rename:
-        field: "{{ _ingest._value.modificationTime }}"
+        field: "{{ _ingest._value.modificationTime\u00a0}}"
         target_field: "{{ _ingest._value.modification_time }}"
         ignore_missing: true
     ignore_failure: true
@@ -197,4 +197,10 @@ processors:
 on_failure:
 - set:
     field: error.message
-    value: '{{ _ingest.on_failure_message }}'
+    value: >-
+      Processor '{{ _ingest.on_failure_processor_type }}'
+      {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+      {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+- set:
+    field: event.kind
+    value: pipeline_error
