@@ -3,7 +3,7 @@ description: Pipeline for processing FireEye NX logs
 processors:
   - set:
       field: ecs.version
-      value: '8.7.0'
+      value: '8.8.0'
   - set:
       field: observer.vendor
       value: "Fireeye"
@@ -74,7 +74,6 @@ processors:
   - user_agent:
       field: user_agent.original
       ignore_missing: true
-
   - append:
       field: event.category
       value: network
@@ -90,7 +89,6 @@ processors:
   - set:
       field: event.type
       value: [info]
-
   #
   # Normalize protocol names
   #
@@ -182,4 +180,10 @@ processors:
 on_failure:
   - set:
       field: error.message
-      value: "{{ _ingest.on_failure_message }}"
+      value: >-
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+  - set:
+      field: event.kind
+      value: pipeline_error
