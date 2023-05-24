@@ -8,7 +8,7 @@ processors:
       ignore_failure: true
   - set:
       field: ecs.version
-      value: '8.7.0'
+      value: '8.8.0'
   # Parsing of payload json
   - json:
       field: event.original
@@ -89,7 +89,6 @@ processors:
       formats:
         - "yyyy-MM-dd'T'HH:mm:ss.SSSSSSSZ"
         - "ISO8601"
-
   # IP Geolocation Lookup
   - geoip:
       field: source.ip
@@ -132,7 +131,6 @@ processors:
       field: destination.as.organization_name
       target_field: destination.as.organization.name
       ignore_missing: true
-
   # Extraction of domain
   - grok:
       field: email.from.address
@@ -185,7 +183,6 @@ processors:
       value: '{{{email.from.address}}}'
       allow_duplicates: false
       if: ctx.email?.from?.address != null && ctx.email.from.address != ""
-
   - dissect:
       field: "email.to.address"
       pattern: '%{_temp_.to_user_name}@%{_temp_.to_user_domain}'
@@ -195,7 +192,6 @@ processors:
       value: '{{{_temp_.to_user_name}}}'
       allow_duplicates: false
       if: ctx._temp_?.to_user_name != null && ctx._temp_.to_user_name != ""
-
   - dissect:
       field: "email.from.address"
       pattern: '%{_temp_.from_user_name}@%{_temp_.from_user_domain}'
@@ -205,7 +201,6 @@ processors:
       value: '{{{_temp_.from_user_name}}}'
       allow_duplicates: false
       if: ctx._temp_?.from_user_name != null && ctx._temp_.from_user_name != ""
-
   - append:
       field: user.name
       value: '{{{_temp_.to_user_name}}}'
@@ -249,7 +244,6 @@ processors:
         if (ctx.user?.id != null && ctx.user.id.length == 1) {
           ctx.user.id = ctx.user.id[0];
         }
-
   - set:
       field: destination.user.name
       copy_from: _temp_.to_user_name
@@ -266,7 +260,6 @@ processors:
       field: source.user.domain
       copy_from: _temp_.from_user_domain
       if: ctx._temp_?.from_user_domain != null && ctx._temp_.from_user_domain != ""
-
   # Add unique fingerprint for deduplication
   - fingerprint:
       fields:
@@ -296,21 +289,14 @@ processors:
   - script:
       description: Drops null/empty values recursively.
       lang: painless
-      source:
-        boolean dropEmptyFields(Object object) {
-          if (object == null || object == "") {
-            return true;
-          } else if (object instanceof Map) {
-            ((Map) object).values().removeIf(value -> dropEmptyFields(value));
-            return (((Map) object).size() == 0);
-          } else if (object instanceof List) {
-            ((List) object).removeIf(value -> dropEmptyFields(value));
-            return (((List) object).length == 0);
-          }
-          return false;
-        }
-        dropEmptyFields(ctx);
+      source: boolean dropEmptyFields(Object object) { if (object == null || object == "") { return true; } else if (object instanceof Map) { ((Map) object).values().removeIf(value -> dropEmptyFields(value)); return (((Map) object).size() == 0); } else if (object instanceof List) { ((List) object).removeIf(value -> dropEmptyFields(value)); return (((List) object).length == 0); } return false; } dropEmptyFields(ctx);
 on_failure:
   - set:
       field: error.message
-      value: '{{ _ingest.on_failure_message }}'
+      value: >-
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+  - set:
+      field: event.kind
+      value: pipeline_error
