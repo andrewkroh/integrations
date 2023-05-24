@@ -3,7 +3,7 @@ description: Pipeline for Okta system logs.
 processors:
   - set:
       field: ecs.version
-      value: '8.7.0'
+      value: '8.8.0'
   # Keep message as event.original.
   # Warn if event.original has already been set. This is most likely due to logstash ecs_compatibility setting.
   - append:
@@ -315,7 +315,6 @@ processors:
   - remove:
       field: okta.debug_context.debug_data.flattened.risk_object
       if: ctx._risk_object != null
-
   # Make heroic efforts to capture risk level and reason if kv could not get them.
   - grok:
       field: okta.debug_context.debug_data.flattened.risk
@@ -332,7 +331,6 @@ processors:
         KEY: '%{NOTSPACE}='
       if: ctx.okta?.debug_context?.debug_data?.flattened?.risk_object != null && ctx.okta?.debug_context?.debug_data?.flattened?.risk != null
       ignore_failure: true
-
   - remove:
       field: okta.debug_context.debug_data.flattened.risk
       if: ctx._risk_object != null
@@ -700,4 +698,10 @@ processors:
 on_failure:
   - append:
       field: error.message
-      value: "{{ _ingest.on_failure_message }}"
+      value: >-
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+  - set:
+      field: event.kind
+      value: pipeline_error
