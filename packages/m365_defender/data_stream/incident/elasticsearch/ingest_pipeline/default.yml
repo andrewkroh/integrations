@@ -3,7 +3,7 @@ description: Pipeline for processing Incident logs.
 processors:
   - set:
       field: ecs.version
-      value: '8.7.0'
+      value: '8.8.0'
   - rename:
       field: message
       target_field: event.original
@@ -2048,156 +2048,12 @@ processors:
       description: Map ecs fields based on evidence type.
       lang: painless
       if: ctx.json?.alerts?.evidence instanceof List
-      source:
-        def convertToOrderedArray(def list) {
-          def result = new ArrayList();
-          for (element in list) {
-            result.add(element);
-          }
-          Collections.sort(result);
-          return result;
-        }
-        if (!(ctx.cloud instanceof HashMap)) {
-          ctx.cloud = new HashMap();
-        }
-        def cloudProvider = new HashSet();
-        if (!(ctx.group instanceof HashMap)) {
-          ctx.group = new HashMap();
-        }
-        def groupName = new HashSet();
-        if (!(ctx.host instanceof HashMap)) {
-          ctx.host = new HashMap();
-        }
-        def hostId = new HashSet();
-        if (!(ctx.user instanceof HashMap)) {
-          ctx.user = new HashMap();
-        }
-        def userDomain = new HashSet();
-        def userId = new HashSet();
-        def userName = new HashSet();
-        def userEmail = new HashSet();
-        if (!(ctx.process instanceof HashMap)) {
-          ctx.process = new HashMap();
-        }
-        ctx.process.user = new HashMap();
-        def processUserId = new HashSet();
-        def processUserName = new HashSet();
-        for (evidence in ctx.json.alerts.evidence) {
-          if (evidence?.odata_type != null) {
-            if (evidence.odata_type == '#microsoft.graph.security.securityGroupEvidence') {
-              if (evidence?.display_name != null) {
-                groupName.add(evidence.display_name);
-              }
-            }
-            if (evidence.odata_type == '#microsoft.graph.security.deviceEvidence') {
-              if (evidence?.mde_device_id != null) {
-                hostId.add(evidence.mde_device_id);
-              }
-            }
-            if (['#microsoft.graph.security.mailboxEvidence', '#microsoft.graph.security.userEvidence'].contains(evidence.odata_type)) {
-              if (evidence?.user_account?.domain_name != null) {
-                userDomain.add(evidence.user_account.domain_name);
-              }
-              if (evidence?.user_account?.azure_ad_user_id != null) {
-                userId.add(evidence.user_account.azure_ad_user_id);
-              }
-              if (evidence?.user_account?.user_principal_name != null) {
-                userEmail.add(evidence.user_account.user_principal_name);
-              }
-              if (evidence?.user_account?.account_name != null) {
-                userName.add(evidence.user_account.account_name);
-              }
-            }
-            if (evidence.odata_type == '#microsoft.graph.security.processEvidence') {
-              if (evidence?.user_account?.azure_ad_user_id != null) {
-                processUserId.add(evidence.user_account.azure_ad_user_id);
-              }
-              if (evidence?.user_account?.account_name != null) {
-                processUserName.add(evidence.user_account.account_name);
-              }
-            }
-          }
-          if (evidence?.vm_metadata?.cloud_provider != null && evidence.vm_metadata.cloud_provider.toLowerCase() == 'azure') {
-            cloudProvider.add('azure');
-          }
-        }
-        if (!cloudProvider.isEmpty()) {
-          ctx.cloud.provider = convertToOrderedArray(cloudProvider);
-        }
-        if (!groupName.isEmpty()) {
-          ctx.group.name = convertToOrderedArray(groupName);
-        }
-        if (!hostId.isEmpty()) {
-          ctx.host.id = convertToOrderedArray(hostId);
-        }
-        if (!userDomain.isEmpty()) {
-          ctx.user.domain = convertToOrderedArray(userDomain);
-        }
-        if (!userId.isEmpty()) {
-          ctx.user.id = convertToOrderedArray(userId);
-        }
-        if (!userName.isEmpty()) {
-          ctx.user.name = convertToOrderedArray(userName);
-        }
-        if (!userEmail.isEmpty()) {
-          ctx.user.email = convertToOrderedArray(userEmail);
-        }
-        if (!processUserId.isEmpty()) {
-          ctx.process.user.id = convertToOrderedArray(processUserId);
-        }
-        if (!processUserName.isEmpty()) {
-          ctx.process.user.name = convertToOrderedArray(processUserName);
-        }
+      source: def convertToOrderedArray(def list) { def result = new ArrayList(); for (element in list) { result.add(element); } Collections.sort(result); return result; } if (!(ctx.cloud instanceof HashMap)) { ctx.cloud = new HashMap(); } def cloudProvider = new HashSet(); if (!(ctx.group instanceof HashMap)) { ctx.group = new HashMap(); } def groupName = new HashSet(); if (!(ctx.host instanceof HashMap)) { ctx.host = new HashMap(); } def hostId = new HashSet(); if (!(ctx.user instanceof HashMap)) { ctx.user = new HashMap(); } def userDomain = new HashSet(); def userId = new HashSet(); def userName = new HashSet(); def userEmail = new HashSet(); if (!(ctx.process instanceof HashMap)) { ctx.process = new HashMap(); } ctx.process.user = new HashMap(); def processUserId = new HashSet(); def processUserName = new HashSet(); for (evidence in ctx.json.alerts.evidence) { if (evidence?.odata_type != null) { if (evidence.odata_type == '#microsoft.graph.security.securityGroupEvidence') { if (evidence?.display_name != null) { groupName.add(evidence.display_name); } } if (evidence.odata_type == '#microsoft.graph.security.deviceEvidence') { if (evidence?.mde_device_id != null) { hostId.add(evidence.mde_device_id); } } if (['#microsoft.graph.security.mailboxEvidence', '#microsoft.graph.security.userEvidence'].contains(evidence.odata_type)) { if (evidence?.user_account?.domain_name != null) { userDomain.add(evidence.user_account.domain_name); } if (evidence?.user_account?.azure_ad_user_id != null) { userId.add(evidence.user_account.azure_ad_user_id); } if (evidence?.user_account?.user_principal_name != null) { userEmail.add(evidence.user_account.user_principal_name); } if (evidence?.user_account?.account_name != null) { userName.add(evidence.user_account.account_name); } } if (evidence.odata_type == '#microsoft.graph.security.processEvidence') { if (evidence?.user_account?.azure_ad_user_id != null) { processUserId.add(evidence.user_account.azure_ad_user_id); } if (evidence?.user_account?.account_name != null) { processUserName.add(evidence.user_account.account_name); } } } if (evidence?.vm_metadata?.cloud_provider != null && evidence.vm_metadata.cloud_provider.toLowerCase() == 'azure') { cloudProvider.add('azure'); } } if (!cloudProvider.isEmpty()) { ctx.cloud.provider = convertToOrderedArray(cloudProvider); } if (!groupName.isEmpty()) { ctx.group.name = convertToOrderedArray(groupName); } if (!hostId.isEmpty()) { ctx.host.id = convertToOrderedArray(hostId); } if (!userDomain.isEmpty()) { ctx.user.domain = convertToOrderedArray(userDomain); } if (!userId.isEmpty()) { ctx.user.id = convertToOrderedArray(userId); } if (!userName.isEmpty()) { ctx.user.name = convertToOrderedArray(userName); } if (!userEmail.isEmpty()) { ctx.user.email = convertToOrderedArray(userEmail); } if (!processUserId.isEmpty()) { ctx.process.user.id = convertToOrderedArray(processUserId); } if (!processUserName.isEmpty()) { ctx.process.user.name = convertToOrderedArray(processUserName); }
   - script:
       description: Set file.size, process.id, process.parent.id fields.
       lang: painless
       if: ctx.json?.alerts?.evidence instanceof List
-      source:
-        def convertToOrderedArray(def list) {
-          def result = new ArrayList();
-          for (element in list) {
-            result.add(element);
-          }
-          Collections.sort(result);
-          return result;
-        }
-        if (!(ctx.file instanceof HashMap)) {
-          ctx.file = new HashMap();
-        }
-        if (!(ctx.process instanceof HashMap)) {
-          ctx.process = new HashMap();
-        }
-        if (!(ctx.process.parent instanceof HashMap)) {
-          ctx.process.parent = new HashMap();
-        }
-        def fileSize = new HashSet();
-        def processPid = new HashSet();
-        def processParentPid = new HashSet();
-        for (evidence in ctx.json.alerts.evidence) {
-          if (evidence?.odata_type != null) {
-            if (evidence.odata_type == '#microsoft.graph.security.fileEvidence') {
-              if (evidence?.file_details?.size != null) {
-                fileSize.add(evidence.file_details.size);
-              }
-            } else if (evidence.odata_type == '#microsoft.graph.security.processEvidence') {
-              if (evidence?.process?.id != null) {
-                processPid.add(evidence.process.id);
-              }
-              if (evidence?.parent_process?.id != null) {
-                processParentPid.add(evidence.parent_process.id);
-              }
-            }
-          }
-        }
-        if (!fileSize.isEmpty()) {
-          ctx.file.size = convertToOrderedArray(fileSize);
-        }
-        if (!processPid.isEmpty()) {
-          ctx.process.pid = convertToOrderedArray(processPid);
-        }
-        if (!processParentPid.isEmpty()) {
-          ctx.process.parent.pid = convertToOrderedArray(processParentPid);
-        }
+      source: def convertToOrderedArray(def list) { def result = new ArrayList(); for (element in list) { result.add(element); } Collections.sort(result); return result; } if (!(ctx.file instanceof HashMap)) { ctx.file = new HashMap(); } if (!(ctx.process instanceof HashMap)) { ctx.process = new HashMap(); } if (!(ctx.process.parent instanceof HashMap)) { ctx.process.parent = new HashMap(); } def fileSize = new HashSet(); def processPid = new HashSet(); def processParentPid = new HashSet(); for (evidence in ctx.json.alerts.evidence) { if (evidence?.odata_type != null) { if (evidence.odata_type == '#microsoft.graph.security.fileEvidence') { if (evidence?.file_details?.size != null) { fileSize.add(evidence.file_details.size); } } else if (evidence.odata_type == '#microsoft.graph.security.processEvidence') { if (evidence?.process?.id != null) { processPid.add(evidence.process.id); } if (evidence?.parent_process?.id != null) { processParentPid.add(evidence.parent_process.id); } } } } if (!fileSize.isEmpty()) { ctx.file.size = convertToOrderedArray(fileSize); } if (!processPid.isEmpty()) { ctx.process.pid = convertToOrderedArray(processPid); } if (!processParentPid.isEmpty()) { ctx.process.parent.pid = convertToOrderedArray(processParentPid); }
   - foreach:
       field: json.alerts.evidence
       if: ctx.json?.alerts?.evidence instanceof List
@@ -2292,21 +2148,14 @@ processors:
   - script:
       description: Drops null/empty values recursively.
       lang: painless
-      source:
-        boolean dropEmptyFields(Object object) {
-          if (object == null || object == "") {
-            return true;
-          } else if (object instanceof Map) {
-            ((Map) object).values().removeIf(value -> dropEmptyFields(value));
-            return (((Map) object).size() == 0);
-          } else if (object instanceof List) {
-            ((List) object).removeIf(value -> dropEmptyFields(value));
-            return (((List) object).length == 0);
-          }
-          return false;
-        }
-        dropEmptyFields(ctx);
+      source: boolean dropEmptyFields(Object object) { if (object == null || object == "") { return true; } else if (object instanceof Map) { ((Map) object).values().removeIf(value -> dropEmptyFields(value)); return (((Map) object).size() == 0); } else if (object instanceof List) { ((List) object).removeIf(value -> dropEmptyFields(value)); return (((List) object).length == 0); } return false; } dropEmptyFields(ctx);
 on_failure:
   - append:
       field: error.message
-      value: '{{{ _ingest.on_failure_message }}}'
+      value: >-
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+  - set:
+      field: event.kind
+      value: pipeline_error
