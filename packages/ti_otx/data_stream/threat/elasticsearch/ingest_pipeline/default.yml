@@ -6,7 +6,7 @@ processors:
   ####################
   - set:
       field: ecs.version
-      value: '8.7.0'
+      value: '8.8.0'
   - set:
       field: event.kind
       value: enrichment
@@ -16,7 +16,6 @@ processors:
   - set:
       field: event.type
       value: indicator
-
   ######################
   # General ECS fields #
   ######################
@@ -43,7 +42,6 @@ processors:
       fields:
         - otx.id
       target_field: "_id"
-
   #####################
   # Threat ECS Fields #
   #####################
@@ -77,7 +75,6 @@ processors:
       target_field: threat.indicator.file.hash.imphash
       ignore_missing: true
       if: "ctx.otx?.type == 'FileHash-IMPHASH'"
-
   ## IP indicator operations
   - set:
       field: threat.indicator.type
@@ -92,7 +89,6 @@ processors:
       target_field: threat.indicator.ip
       ignore_missing: true
       if: "ctx.threat?.indicator?.type != null && ['ipv4-addr', 'ipv6-addr'].contains(ctx.threat?.indicator?.type)"
-
   ## URL indicator operations
   - set:
       field: threat.indicator.type
@@ -109,7 +105,6 @@ processors:
       value: "{{{threat.indicator.url.original}}}"
       ignore_empty_value: true
       if: "ctx.otx?.type == 'URL'"
-
   ## Email indicator operations
   - set:
       field: threat.indicator.type
@@ -120,7 +115,6 @@ processors:
       target_field: threat.indicator.email.address
       ignore_missing: true
       if: "ctx.threat?.indicator?.type == 'email-addr'"
-
   ## Domain indicator operations
   - set:
       field: threat.indicator.type
@@ -131,7 +125,6 @@ processors:
       target_field: threat.indicator.url.domain
       ignore_missing: true
       if: "ctx.threat?.indicator?.type == 'domain-name' && ctx.threat?.indicator?.url?.domain == null"
-
   ######################
   # Cleanup processors #
   ######################
@@ -191,4 +184,10 @@ processors:
 on_failure:
   - set:
       field: error.message
-      value: "{{ _ingest.on_failure_message }}"
+      value: >-
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+  - set:
+      field: event.kind
+      value: pipeline_error
