@@ -11,7 +11,7 @@
     },
     "@timestamp": "2023-05-05T17:13:02.616098338Z",
     "ecs": {
-        "version": "8.7.0"
+        "version": "8.8.0"
     },
     "related": {
         "hosts": [

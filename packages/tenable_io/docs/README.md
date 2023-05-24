@@ -80,7 +80,7 @@ An example event for `asset` looks as following:
         "type": "logs"
     },
     "ecs": {
-        "version": "8.7.0"
+        "version": "8.8.0"
     },
     "elastic_agent": {
         "id": "0791a1ea-4606-45a6-9528-d1a202b6a144",
@@ -377,7 +377,7 @@ An example event for `plugin` looks as following:
         "type": "logs"
     },
     "ecs": {
-        "version": "8.7.0"
+        "version": "8.8.0"
     },
     "elastic_agent": {
         "id": "0791a1ea-4606-45a6-9528-d1a202b6a144",
@@ -682,7 +682,7 @@ An example event for `vulnerability` looks as following:
         "type": "logs"
     },
     "ecs": {
-        "version": "8.7.0"
+        "version": "8.8.0"
     },
     "elastic_agent": {
         "id": "0791a1ea-4606-45a6-9528-d1a202b6a144",
@@ -1087,7 +1087,7 @@ An example event for `scanner` looks as following:
     },
     "@timestamp": "2023-05-05T17:13:02.616098338Z",
     "ecs": {
-        "version": "8.7.0"
+        "version": "8.8.0"
     },
     "related": {
         "hosts": [
@@ -1302,7 +1302,7 @@ An example event for `scan` looks as following:
 ```json
 {
     "ecs": {
-        "version": "8.7.0"
+        "version": "8.8.0"
     },
     "event": {
         "category": [
