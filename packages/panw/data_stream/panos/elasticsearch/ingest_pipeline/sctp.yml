@@ -64,8 +64,7 @@ processors:
         - panw.panos.packets_received
         - panw.panos.rule_uuid
         - _temp_.high_res_timestamp
-
-# Set event.category.
+  # Set event.category.
   - set:
       field: event.kind
       value: event
@@ -73,8 +72,7 @@ processors:
       field: event.category
       value:
         - network
-
-# Set custom fields to ECS fields
+  # Set custom fields to ECS fields
   - set:
       field: destination.ip
       copy_from: panw.panos.destination.ip
@@ -139,12 +137,13 @@ processors:
       field: source.port
       copy_from: panw.panos.source.port
       ignore_failure: true
-
 on_failure:
   - append:
       field: error.message
       value: >-
-        error in SCTP pipeline:
-        error in [{{{_ingest.on_failure_processor_type}}}] processor{{{#_ingest.on_failure_processor_tag}}}
-        with tag [{{{_ingest.on_failure_processor_tag}}}]{{{/_ingest.on_failure_processor_tag}}}
-        {{{_ingest.on_failure_message}}}
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+  - set:
+      field: event.kind
+      value: pipeline_error

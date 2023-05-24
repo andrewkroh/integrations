@@ -93,8 +93,7 @@ processors:
         - panw.panos.application.container
         - panw.panos.application.is_saas
         - panw.panos.application.is_sanctioned
-
-# Set event.kind & event.category field.
+  # Set event.kind & event.category field.
   - set:
       field: event.kind
       value: event
@@ -103,8 +102,7 @@ processors:
       value:
         - network
         - malware
-
-# Set custom fields to ECS fields
+  # Set custom fields to ECS fields
   - set:
       field: panw.panos.destination.location
       copy_from: _temp_.dstloc
@@ -173,12 +171,13 @@ processors:
       field: source.port
       copy_from: panw.panos.source.port
       ignore_failure: true
-
 on_failure:
   - append:
       field: error.message
       value: >-
-        error in GTP pipeline:
-        error in [{{{_ingest.on_failure_processor_type}}}] processor{{{#_ingest.on_failure_processor_tag}}}
-        with tag [{{{_ingest.on_failure_processor_tag}}}]{{{/_ingest.on_failure_processor_tag}}}
-        {{{_ingest.on_failure_message}}}
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+  - set:
+      field: event.kind
+      value: pipeline_error

@@ -32,8 +32,7 @@ processors:
         - panw.panos.user_by_source
         - panw.panos.tag.name
         - _temp_.high_res_timestamp
-
-# Set event.category.
+  # Set event.category.
   - set:
       field: event.kind
       value: event
@@ -42,8 +41,7 @@ processors:
       value:
         - network
         - iam
-
-# Set custom fields to ECS fields
+  # Set custom fields to ECS fields
   - set:
       field: destination.port
       copy_from: panw.panos.destination.port
@@ -72,7 +70,6 @@ processors:
       field: source.user.name
       copy_from: panw.panos.user_by_source
       ignore_failure: true
-
   - date:
       if: ctx.panw?.panos?.factorcompletiontime != null && ctx.event?.timezone == null
       field: panw.panos.factorcompletiontime
@@ -88,12 +85,13 @@ processors:
         - 'yyyy/MM/dd HH:mm:ss'
       timezone: '{{{ event.timezone }}}'
       on_failure: [{'append': {'field': 'error.message', 'value': '{{{ _ingest.on_failure_message }}}'}}]
-
 on_failure:
   - append:
       field: error.message
       value: >-
-        error in User ID pipeline:
-        error in [{{{_ingest.on_failure_processor_type}}}] processor{{{#_ingest.on_failure_processor_tag}}}
-        with tag [{{{_ingest.on_failure_processor_tag }}}]{{{/_ingest.on_failure_processor_tag}}}
-        {{{ _ingest.on_failure_message }}}}
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+  - set:
+      field: event.kind
+      value: pipeline_error

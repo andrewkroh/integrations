@@ -106,7 +106,6 @@ processors:
         - panw.panos.application.tunneled
         - panw.panos.application.is_saas
         - panw.panos.application.is_sanctioned
-
   - rename:
       field: _temp_.config_version
       target_field: panw.panos.config_version
@@ -165,8 +164,7 @@ processors:
         - append:
             field: error.message
             value: '{{{_ingest.on_failure_message}}}'
-
-# Set event.kind & event.category field.
+  # Set event.kind & event.category field.
   - set:
       field: event.kind
       value: event
@@ -174,8 +172,7 @@ processors:
       field: event.category
       value:
         - network
-
-# Set event.outcome from panw.panos.error_message: a non-empty error would indicate a failure.
+  # Set event.outcome from panw.panos.error_message: a non-empty error would indicate a failure.
   - set:
       if: ctx.panw?.panos?.error_message == null || ctx.panw.panos.error_message == ""
       field: event.outcome
@@ -184,8 +181,7 @@ processors:
       if: ctx.panw?.panos?.error_message != ""
       field: event.outcome
       value: failure
-
-# Set custom fields to ECS fields
+  # Set custom fields to ECS fields
   - set:
       field: panw.panos.hash
       copy_from: _temp_.hash
@@ -298,7 +294,6 @@ processors:
       field: tls.curve
       copy_from: panw.panos.elliptic_curve
       ignore_failure: true
-
   - script:
       description: Dynamically map fingerprint hash to MD5, SHA1 and SHA256 hash.
       lang: painless
@@ -308,7 +303,6 @@ processors:
         if (ctx._temp_.hash.length() == 32) {ctx.tls.client.hash.md5 = ctx._temp_.hash}
         else if (ctx._temp_.hash.length() == 40) {ctx.tls.client.hash.sha1 = ctx._temp_.hash}
         else if (ctx._temp_.hash.length() == 64) {ctx.tls.client.hash.sha256 = ctx._temp_.hash}
-
   - script:
       description: Dynamically map fingerprint hash to MD5, SHA1 and SHA256 hash.
       lang: painless
@@ -321,7 +315,9 @@ on_failure:
   - append:
       field: error.message
       value: >-
-        error in Decryption pipeline:
-        error in [{{{_ingest.on_failure_processor_type}}}] processor{{{#_ingest.on_failure_processor_tag}}}
-        with tag [{{{_ingest.on_failure_processor_tag}}}]{{{/_ingest.on_failure_processor_tag}}}
-        {{{_ingest.on_failure_message}}}
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+  - set:
+      field: event.kind
+      value: pipeline_error

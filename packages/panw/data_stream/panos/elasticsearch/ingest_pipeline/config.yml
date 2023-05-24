@@ -25,7 +25,6 @@ processors:
         - panw.panos.device_name
         - panw.panos.device_group_id
         - panw.panos.comment
-
   - script:
       description: Set Event Action.
       lang: painless
@@ -40,8 +39,7 @@ processors:
         move: cmd-move
         rename: cmd-rename
         set: cmd-set
-      source:
-        ctx.event.action = params.get(ctx.panw.panos.cmd);
+      source: ctx.event.action = params.get(ctx.panw.panos.cmd);
   - set:
       field: event.outcome
       value: success
@@ -57,8 +55,7 @@ processors:
       value: unknown
       ignore_failure: true
       if: '!["Succeeded", "Failed"].contains(ctx.panw.panos.action)'
-
-# Set event.kind & event.category field.
+  # Set event.kind & event.category field.
   - set:
       field: event.kind
       value: event
@@ -66,8 +63,7 @@ processors:
       field: event.category
       value:
         - configuration
-
-# Set custom fields to ECS fields
+  # Set custom fields to ECS fields
   - set:
       field: host.ip
       copy_from: panw.panos.host.ip
@@ -76,8 +72,7 @@ processors:
       field: observer.hostname
       copy_from: panw.panos.device_name
       ignore_failure: true
-
-# Set event.outcome from panw.panos.result: documented allowed values are Submitted, Succeeded, Failed, and Unauthorized
+  # Set event.outcome from panw.panos.result: documented allowed values are Submitted, Succeeded, Failed, and Unauthorized
   - set:
       if: ctx.panw?.panos?.result == "Succeeded"
       field: event.outcome
@@ -90,12 +85,13 @@ processors:
       if: ctx.event?.outcome == null || ctx.event.outcome == ""
       field: event.outcome
       value: unknown
-
 on_failure:
   - append:
       field: error.message
       value: >-
-        error in Config pipeline:
-        error in [{{{_ingest.on_failure_processor_type}}}] processor{{{#_ingest.on_failure_processor_tag}}}
-        with tag [{{{_ingest.on_failure_processor_tag}}}]{{{/_ingest.on_failure_processor_tag}}}
-        {{{_ingest.on_failure_message}}}
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+  - set:
+      field: event.kind
+      value: pipeline_error

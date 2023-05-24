@@ -3,7 +3,7 @@ description: Pipeline for Palo Alto Networks PAN-OS Logs.
 processors:
   - set:
       field: ecs.version
-      value: '8.7.0'
+      value: '8.8.0'
   - set:
       field: observer.vendor
       value: Palo Alto Networks
@@ -13,13 +13,11 @@ processors:
   - set:
       field: observer.type
       value: firewall
-
   - set:
       field: event.timezone
       value: '{{{_conf.tz_offset}}}'
       if: ctx._conf?.tz_offset != null && ctx._conf.tz_offset != 'local'
-
-# Collects the first few parts of the message to be used for conditional parsing later
+  # Collects the first few parts of the message to be used for conditional parsing later
   - set:
       field: event.original
       copy_from: message
@@ -35,71 +33,67 @@ processors:
         TIMESTAMP: "%{PANW_DATE}|%{TIMESTAMP_ISO8601}"
         PANW_DATE: "%{YEAR}/%{MONTHNUM}/%{MONTHDAY} %{TIME}"
         FIELD: "[^,]*"
-
-## TRAFFIC
+  ## TRAFFIC
   - pipeline:
       if: ctx.panw?.panos?.type == 'TRAFFIC'
       name: '{{ IngestPipeline "traffic" }}'
-## THREAT
+  ## THREAT
   - pipeline:
       if: ctx.panw?.panos?.type == 'THREAT'
       name: '{{ IngestPipeline "threat" }}'
-## HIPMATCH
+  ## HIPMATCH
   - pipeline:
       if: ctx.panw?.panos?.type == 'HIPMATCH' || ctx.panw.panos.type == 'HIP-MATCH'
       name: '{{ IngestPipeline "hipmatch" }}'
-## USER ID
+  ## USER ID
   - pipeline:
       if: ctx.panw?.panos?.type == 'USERID'
       name: '{{ IngestPipeline "userid" }}'
-## GLOBAL PROTECT
+  ## GLOBAL PROTECT
   - pipeline:
       if: ctx.panw?.panos?.type == 'GLOBALPROTECT'
       name: '{{ IngestPipeline "globalprotect" }}'
-## CONFIG
+  ## CONFIG
   - pipeline:
       if: ctx.panw?.panos?.type == 'CONFIG'
       name: '{{ IngestPipeline "config" }}'
-## DECRYPTION
+  ## DECRYPTION
   - pipeline:
       if: ctx.panw?.panos?.type == 'DECRYPTION'
       name: '{{ IngestPipeline "decryption" }}'
-## SYSTEM
+  ## SYSTEM
   - pipeline:
       if: ctx.panw?.panos?.type == 'SYSTEM'
       name: '{{ IngestPipeline "system" }}'
-## AUTHENTICATION
+  ## AUTHENTICATION
   - pipeline:
       if: ctx.panw?.panos?.type == 'AUTHENTICATION'
       name: '{{ IngestPipeline "authentication" }}'
-## CORRELATED EVENTS
+  ## CORRELATED EVENTS
   - pipeline:
       if: ctx.panw?.panos?.type == 'CORRELATION'
       name: '{{ IngestPipeline "correlated_event" }}'
-## GTP
+  ## GTP
   - pipeline:
       if: ctx.panw?.panos?.type == 'GTP'
       name: '{{ IngestPipeline "gtp" }}'
-## IP TAG
+  ## IP TAG
   - pipeline:
       if: ctx.panw?.panos?.type == 'IPTAG'
       name: '{{ IngestPipeline "ip_tag" }}'
-## SCTP
+  ## SCTP
   - pipeline:
       if: ctx.panw?.panos?.type == 'SCTP'
       name: '{{ IngestPipeline "sctp" }}'
-## TUNNEL INSPECTION
+  ## TUNNEL INSPECTION
   - pipeline:
       if: ctx.panw?.panos?.type == 'START' || ctx.panw.panos.type == 'END'
       name: '{{ IngestPipeline "tunnel_inspection" }}'
-
   - set:
       field: panw.panos.observer.serial_number
       copy_from: observer.serial_number
       ignore_failure: true
-
-# Extract user domain from source and destination user
-
+  # Extract user domain from source and destination user
   - grok:
       field: _temp_.srcuser
       ignore_missing: true
@@ -111,7 +105,6 @@ processors:
       pattern_definitions:
         USERNAMEM: '%{USERNAME}[$]?'
       if: ctx._temp_?.srcuser != null
-
   - grok:
       field: _temp_.dstuser
       ignore_missing: true
@@ -123,24 +116,20 @@ processors:
       pattern_definitions:
         USERNAMEM: '%{USERNAME}[$]?'
       if: ctx._temp_?.dstuser != null
-
   - set:
       field: panw.panos.source.user
       copy_from: source.user.name
       if: ctx.source?.user?.name != null
-
   - set:
       field: panw.panos.destination.user
       copy_from: destination.user.name
       if: ctx.destination?.user?.name != null
-
-# Set user ECS field from source.user
+  # Set user ECS field from source.user
   - set:
       field: user
       copy_from: source.user
       if: ctx.source?.user != null
-
-# Set @timestamp to the time when the entry was generated at the data plane.
+  # Set @timestamp to the time when the entry was generated at the data plane.
   - date:
       if: ctx.event?.timezone == null
       field: '_temp_.generated_time'
@@ -160,8 +149,7 @@ processors:
       field: panw.panos.generated_time
       copy_from: '@timestamp'
       ignore_failure: true
-
-# event.created is the time the event was received at the management plane.
+  # event.created is the time the event was received at the management plane.
   - date:
       if: ctx.event?.timezone == null && ctx.event.created != null
       field: 'event.created'
@@ -183,8 +171,7 @@ processors:
       field: panw.panos.received_time
       copy_from: event.created
       ignore_failure: true
-
-# convert date fields as the output of the CSV processor is always a string.
+  # convert date fields as the output of the CSV processor is always a string.
   - date:
       if: ctx.event?.timezone == null && ctx._temp_?.logged_time != null
       field: _temp_.logged_time
@@ -330,8 +317,7 @@ processors:
         - append:
             field: error.message
             value: '{{{_ingest.on_failure_message}}}'
-
-# convert IP fields as the output of the CSV processor is always a string.
+  # convert IP fields as the output of the CSV processor is always a string.
   - convert:
       field: source.ip
       type: ip
@@ -532,8 +518,7 @@ processors:
         - append:
             field: error.message
             value: '{{{_ingest.on_failure_message}}}'
-
-# convert integer fields as the output of the CSV processor is always a string.
+  # convert integer fields as the output of the CSV processor is always a string.
   - convert:
       field: source.bytes
       type: long
@@ -999,8 +984,7 @@ processors:
         - append:
             field: error.message
             value: '{{{_ingest.on_failure_message}}}'
-
-# Add '-' in Mac Address and convert it into uppercase
+  # Add '-' in Mac Address and convert it into uppercase
   - gsub:
       field: panw.panos.src.mac
       pattern: '[:.]'
@@ -1033,9 +1017,7 @@ processors:
   - uppercase:
       field: panw.panos.machine.mac_address
       ignore_missing: true
-
-
-# Convert Network fields into lowercase.
+  # Convert Network fields into lowercase.
   - lowercase:
       field: network.application
       ignore_missing: true
@@ -1045,15 +1027,13 @@ processors:
   - lowercase:
       field: network.protocol
       ignore_missing: true
-
-# Remove PCAP ID when zero (no packet capture).
+  # Remove PCAP ID when zero (no packet capture).
   - remove:
       if: ctx.panw?.panos?.network?.pcap_id == '0'
       field:
         - panw.panos.network.pcap_id
-
-# Extract 'flags' bitfield into labels.
-# https://docs.paloaltonetworks.com/pan-os/10-2/pan-os-admin/monitoring/use-syslog-for-monitoring/syslog-field-descriptions/decryption-log-fields
+  # Extract 'flags' bitfield into labels.
+  # https://docs.paloaltonetworks.com/pan-os/10-2/pan-os-admin/monitoring/use-syslog-for-monitoring/syslog-field-descriptions/decryption-log-fields
   - script:
       lang: painless
       if: ctx._temp_?.labels != null && ctx._temp_.labels != 0
@@ -1096,8 +1076,6 @@ processors:
               labels[entry.getKey()] = true;
           }
         }
-
-# normalize event.duration and determine event.end.
   - script:
       lang: painless
       if: ctx.event?.duration != null
@@ -1110,8 +1088,6 @@ processors:
         if (start != null) {
           ctx.event['end'] = ZonedDateTime.parse(start).plusNanos(nanos);
         }
-
-# Set event.category.
   - append:
       field: event.type
       value: allowed
@@ -1120,8 +1096,7 @@ processors:
       field: event.type
       value: denied
       if: ctx.panw?.panos?.action != null && ['deny', 'drop', 'reset-client', 'reset-server', 'reset-both', 'block-url', 'block-ip', 'random-drop', 'sinkhole', 'block'].contains(ctx.panw.panos.action)
-
-# event.action for traffic, gtp and tunnel inspection logs.
+  # event.action for traffic, gtp and tunnel inspection logs.
   - set:
       field: event.action
       value: flow_started
@@ -1162,8 +1137,7 @@ processors:
         - denied
         - connection
       if: ctx.panw?.panos?.sub_type == 'deny'
-
-# event.action for threat and global-protect logs.
+  # event.action for threat and global-protect logs.
   - set:
       field: event.action
       value: data_match
@@ -1208,8 +1182,7 @@ processors:
       field: event.action
       value: wildfire_virus_detected
       if: ctx.panw?.panos?.sub_type == 'wildfire-virus'
-
-# Set numeric log.level from event.severity.
+  # Set numeric log.level from event.severity.
   - set:
       field: event.severity
       if: ctx.log?.level == 'critical'
@@ -1230,9 +1203,8 @@ processors:
       field: event.severity
       if: ctx.log?.level == 'informational'
       value: 5
-
-# Normalize event.outcome.
-# These values appear in the TRAFFIC docs but look like a mistake.
+  # Normalize event.outcome.
+  # These values appear in the TRAFFIC docs but look like a mistake.
   - set:
       field: panw.panos.action
       value: 'drop-icmp'
@@ -1249,8 +1221,7 @@ processors:
       field: panw.panos.action
       value: 'reset-server'
       if: ctx.panw?.panos?.action == 'reset server'
-
-# set network.type from source.ip
+  # set network.type from source.ip
   - set:
       field: network.type
       value: 'ipv4'
@@ -1259,8 +1230,7 @@ processors:
       field: network.type
       value: 'ipv6'
       if: ctx.network?.type == null && ctx.source?.ip != null && ctx.source.ip.contains(':')
-
-# Build related.ip array from src/dest/NAT IPs.
+  # Build related.ip array from src/dest/NAT IPs.
   - append:
       if: ctx.source?.ip != null
       field: related.ip
@@ -1324,8 +1294,7 @@ processors:
       if: ctx.panw?.panos?.end_ip_address != null
       allow_duplicates: false
       ignore_failure: true
-
-# Geolocation for source.
+  # Geolocation for source.
   - geoip:
       if: ctx.source?.ip != null
       field: source.ip
@@ -1334,8 +1303,7 @@ processors:
       if: ctx.source?.nat?.ip != null && ctx.source.geo == null
       field: source.nat.ip
       target_field: source.geo
-
-# Geolocation for destination.
+  # Geolocation for destination.
   - geoip:
       if: ctx.destination?.ip != null
       field: destination.ip
@@ -1344,13 +1312,11 @@ processors:
       if: ctx.destination?.nat?.ip != null && ctx.destination.geo == null
       field: destination.nat.ip
       target_field: destination.geo
-
-# User Agent processor
+  # User Agent processor
   - user_agent:
       field: _temp_.user_agent
       ignore_missing: true
-
-# IP Autonomous System (AS) Lookup
+  # IP Autonomous System (AS) Lookup
   - geoip:
       database_file: GeoLite2-ASN.mmdb
       field: source.ip
@@ -1401,7 +1367,7 @@ processors:
       field: destination.as.organization_name
       target_field: destination.as.organization.name
       ignore_missing: true
-# Set source|destination.geo.name from panw's srcloc|dstloc
+  # Set source|destination.geo.name from panw's srcloc|dstloc
   - rename:
       if: ctx.source?.geo?.name == null
       field: _temp_.srcloc
@@ -1428,8 +1394,7 @@ processors:
       field: destination.nat.port
       type: integer
       if: ctx.destination?.nat?.port != null
-
-# Set community network ID's
+  # Set community network ID's
   - community_id:
       target_field: network.community_id
       if: ctx.source?.port != null && ctx.source.port != 0 && ctx.destination?.port != null && ctx.destination.port != 0
@@ -1440,8 +1405,7 @@ processors:
       destination_ip: destination.nat.ip
       destination_port: destination.nat.port
       if: ctx.source?.nat?.port != null && ctx.source.nat.port != 0 && ctx.destination?.nat?.port != null && ctx.destination.nat.port != 0
-
-# Append NAT community_id to network.community_id
+  # Append NAT community_id to network.community_id
   - append:
       if: ctx.panw?.panos?.network?.nat?.community_id != null && ctx.panw.panos.network.nat.community_id != ctx.network?.community_id
       field: network.community_id
@@ -1535,14 +1499,13 @@ processors:
       if: ctx.panw?.panos?.src?.host != null && ctx.panw.panos.src.host != ''
       allow_duplicates: false
       ignore_failure: true
-
-# Remove temporary fields.
+  # Remove temporary fields.
   - remove:
       field:
         - _temp_
         - _conf
       ignore_missing: true
-# Remove NAT fields when translation was not done.
+  # Remove NAT fields when translation was not done.
   - remove:
       field:
         - source.nat.ip
@@ -1553,8 +1516,7 @@ processors:
         - destination.nat.ip
         - destination.nat.port
       if: ctx.destination?.nat?.ip == '0.0.0.0' && ctx.destination.nat.port == 0
-
-# Remove panw.panos fields that are copied into an ECS field.
+  # Remove panw.panos fields that are copied into an ECS field.
   - remove:
       if: ctx.tags == null || !(ctx.tags.contains('preserve_duplicate_custom_fields'))
       field:
@@ -1636,38 +1598,28 @@ processors:
         - panw.panos.hash
       ignore_failure: true
       ignore_missing: true
-
   - remove:
       field: event.original
       if: ctx.tags == null || !(ctx.tags.contains('preserve_original_event'))
       ignore_failure: true
       ignore_missing: true
-
   - script:
       description: Drops null/empty values recursively.
       lang: painless
-      source:
-        boolean dropEmptyFields(Object object) {
-          if (object == null || object == '') {
-            return true;
-          } else if (object instanceof Map) {
-            ((Map) object).values().removeIf(value -> dropEmptyFields(value));
-            return (((Map) object).size() == 0);
-          } else if (object instanceof List) {
-            ((List) object).removeIf(value -> dropEmptyFields(value));
-            return (((List) object).length == 0);
-          }
-          return false;
-        }
-        dropEmptyFields(ctx);
-
+      source: boolean dropEmptyFields(Object object) { if (object == null || object == '') { return true; } else if (object instanceof Map) { ((Map) object).values().removeIf(value -> dropEmptyFields(value)); return (((Map) object).size() == 0); } else if (object instanceof List) { ((List) object).removeIf(value -> dropEmptyFields(value)); return (((List) object).length == 0); } return false; } dropEmptyFields(ctx);
 on_failure:
   - append:
-      field: 'error.message'
-      value: '{{{ _ingest.on_failure_message }}} {{{ _ingest.on_failure_processor_type }}}'
+      field: error.message
+      value: >-
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
   - remove:
       field:
         - _temp_
         - _conf
         - message
       ignore_missing: true
+  - set:
+      field: event.kind
+      value: pipeline_error
