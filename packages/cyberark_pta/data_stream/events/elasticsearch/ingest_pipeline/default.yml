@@ -1,10 +1,9 @@
 ---
 description: Pipeline for CyberArk PTA
-
 processors:
   - set:
       field: ecs.version
-      value: '8.7.0'
+      value: '8.8.0'
   - set:
       field: event.action
       value: "{{cef.extensions.deviceCustomString5}}"
@@ -26,7 +25,7 @@ processors:
       field: event.url
       value: "{{cef.extensions.deviceCustomString4}}"
       if: "ctx?.cef?.extensions?.deviceCustomString4 != null && ctx?.cef?.extensions?.deviceCustomString4 != ''"
-  - set: 
+  - set:
       field: cyberark_pta.log.event_type
       value: "{{cef.device.event_class_id}}"
       if: "ctx?.cef?.device?.event_class_id != null && ctx?.cef?.device?.event_class_id != ''"
@@ -34,17 +33,18 @@ processors:
       field: message
       target_field: event.reason
       if: 'ctx.event?.reason == null'
-
   # cleanup 'None' for source or destination ip
   - remove:
-      field: 
+      field:
         - error
       if: "ctx?.cef?.extensions?.sourceAddress == null || ctx?.cef?.extensions?.destinationAddress == null"
-
 on_failure:
   - append:
       field: error.message
-      value: "{{ _ingest.on_failure_message }}"
+      value: >-
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
   - set:
       field: event.kind
       value: pipeline_error
