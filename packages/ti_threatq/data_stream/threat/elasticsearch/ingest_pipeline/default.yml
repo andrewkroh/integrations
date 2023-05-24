@@ -6,7 +6,7 @@ processors:
   ####################
   - set:
       field: ecs.version
-      value: '8.7.0'
+      value: '8.8.0'
   - set:
       field: event.kind
       value: enrichment
@@ -16,7 +16,6 @@ processors:
   - set:
       field: event.type
       value: indicator
-
   ###############
   # Parse dates #
   ###############
@@ -68,7 +67,6 @@ processors:
         - "yyyy-MM-dd HH:mm:ss"
       if: "ctx.json.published_at != null"
       ignore_failure: true
-
   #####################
   # Threat ECS Fields #
   #####################
@@ -111,11 +109,9 @@ processors:
       field: json.value
       target_field: threatq.indicator_value
       ignore_missing: true
-
   #########################################
   # Map indicator types and values to ECS #
   #########################################
-
   # Indicator type: Email Address
   - set:
       field: threat.indicator.email.address
@@ -126,7 +122,6 @@ processors:
       field: threat.indicator.type
       value: email-addr
       if: "ctx.threat?.indicator?.type != null && ctx.threat?.indicator?.type == 'Email Address'"
-
   # Indicator type: FQDN
   - set:
       field: threat.indicator.domain
@@ -137,19 +132,16 @@ processors:
       field: threat.indicator.type
       value: domain-name
       if: "ctx.threat?.indicator?.type != null && ctx.threat?.indicator?.type == 'FQDN'"
-
   # Indicator type: IP Address
   - set:
       field: threat.indicator.ip
       copy_from: threatq.indicator_value
       if: "ctx.threat?.indicator?.type != null && ctx.threat?.indicator?.type == 'IP Address'"
       ignore_empty_value: true
-
   - set:
       field: threat.indicator.type
       value: ipv4-addr
       if: "ctx.threat?.indicator?.type != null && ctx.threat?.indicator?.type == 'IP Address'"
-
   # Indicator type: IPv6 Address
   - set:
       field: threat.indicator.domain
@@ -160,7 +152,6 @@ processors:
       field: threat.indicator.type
       value: ipv6-addr
       if: "ctx.threat?.indicator?.type != null && ctx.threat?.indicator?.type == 'IPv6 Address'"
-
   # Indicator type: MD5
   - set:
       field: threat.indicator.file.hash.md5
@@ -171,7 +162,6 @@ processors:
       field: threat.indicator.type
       value: file
       if: "ctx.threat?.indicator?.type != null && ctx.threat?.indicator?.type == 'MD5'"
-
   # Indicator type: SHA-1
   - set:
       field: threat.indicator.file.hash.sha1
@@ -182,7 +172,6 @@ processors:
       field: threat.indicator.type
       value: file
       if: "ctx.threat?.indicator?.type != null && ctx.threat?.indicator?.type == 'SHA-1'"
-
   # Indicator type: SHA-256
   - set:
       field: threat.indicator.file.hash.sha256
@@ -193,7 +182,6 @@ processors:
       field: threat.indicator.type
       value: file
       if: "ctx.threat?.indicator?.type != null && ctx.threat?.indicator?.type == 'SHA-256'"
-
   # Indicator type: SHA-512
   - set:
       field: threat.indicator.file.hash.sha512
@@ -204,7 +192,6 @@ processors:
       field: threat.indicator.type
       value: file
       if: "ctx.threat?.indicator?.type != null && ctx.threat?.indicator?.type == 'SHA-512'"
-
   # Indicator type: URL
   - uri_parts:
       field: threatq.indicator_value
@@ -215,14 +202,12 @@ processors:
       field: threat.indicator.type
       value: url
       if: "ctx.threat?.indicator?.type != null && ctx.threat?.indicator?.type == 'URL'"
-
   # Indicator type: x509 Serial
   - set:
       field: threat.indicator.x509.serial_number
       copy_from: threatq.indicator_value
       if: "ctx.threat?.indicator?.type != null && ctx.threat?.indicator?.type == 'x509 Serial'"
       ignore_empty_value: true
-
   ###################################
   # Map indicator providers and TLP #
   ###################################
@@ -257,7 +242,6 @@ processors:
           }
           ctx.threat.indicator.provider = providers;
         }
-
   ############################
   # Map indicator attributes #
   ############################
@@ -285,7 +269,6 @@ processors:
         append:
           field: threatq.attributes.{{{ _ingest._value.name }}}
           value: "{{{ _ingest._value.value }}}"
-
   #############################
   # Map indicator adversaries #
   #############################
@@ -296,7 +279,6 @@ processors:
         append:
           field: threatq.adversaries
           value: "{{{ _ingest._value.name }}}"
-
   ######################
   # Cleanup processors #
   ######################
@@ -329,7 +311,6 @@ processors:
           }
         }
         handleMap(ctx);
-
   # Removing fields not needed anymore, either because its copied somewhere else, or is not relevant to this event
   - remove:
       field: event.original
@@ -344,4 +325,10 @@ processors:
 on_failure:
   - set:
       field: error.message
-      value: "{{ _ingest.on_failure_message }}"
+      value: >-
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+  - set:
+      field: event.kind
+      value: pipeline_error
