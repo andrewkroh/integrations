@@ -46,7 +46,6 @@ processors:
       - denied
       - connection
     if: "ctx.sophos?.xg?.status == 'Deny'"
-
 ####################################
 ## ECS Server/Destination Mapping ##
 ####################################
@@ -93,7 +92,6 @@ processors:
     ignore_failure: true
     ignore_missing: true
     if: "ctx.sophos?.xg?.packets_received !=null"
-
 ###############################
 ## ECS Client/Source Mapping ##
 ###############################
@@ -166,7 +164,6 @@ processors:
     target_field: source.user.group.name
     ignore_missing: true
     if: "ctx.sophos?.xg?.user_gp != null"
-
 ######################
 ## ECS Rule Mapping ##
 ######################
@@ -180,7 +177,6 @@ processors:
     target_field: rule.ruleset
     ignore_missing: true
     if: "ctx.sophos?.xg?.policy_type != null"
-
 ######################
 ## ECS Network Mapping
 ######################
@@ -208,7 +204,6 @@ processors:
     field: network.direction
     value: external
     if: "ctx.observer?.ingress?.zone == 'WAN' && ctx.observer?.egress?.zone == 'WAN'"
-
 #############
 ## Cleanup ##
 #############
@@ -229,4 +224,10 @@ processors:
 on_failure:
 - set:
     field: error.message
-    value: '{{ _ingest.on_failure_message }}'
+    value: >-
+      Processor '{{ _ingest.on_failure_processor_type }}'
+      {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+      {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+- set:
+    field: event.kind
+    value: pipeline_error

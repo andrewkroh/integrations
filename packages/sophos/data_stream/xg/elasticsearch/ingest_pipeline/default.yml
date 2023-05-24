@@ -3,8 +3,7 @@ description: Pipeline for parsing Sophos XG firewall logs.
 processors:
 - set:
     field: ecs.version
-    value: '8.7.0'
-
+    value: '8.8.0'
 - set:
     field: event.original
     copy_from: message
@@ -16,7 +15,6 @@ processors:
     - '^%{SYSLOG5424PRI}%{GREEDYDATA:message}$'
     - '^%{SYSLOGTIMESTAMP} %{HOSTNAME:observer.hostname} %{GREEDYDATA:message}$'
     - '%{GREEDYDATA:message}$'
-
 # split Sophos-XG fields
 - kv:
     field: message
@@ -26,7 +24,6 @@ processors:
     ignore_missing: true
     ignore_failure: false
     trim_value: "\""
-
 - script:
     description: Lowercase sophos.xg key name names.
     tag: lowercase-sophos-keys
@@ -37,7 +34,6 @@ processors:
         lowercaseMap.put(entry.getKey().toLowerCase(), entry.getValue());
       }
       ctx.sophos.xg = lowercaseMap;
-
 # Parse the date
 - set:
     field: _temp_.time
@@ -67,7 +63,6 @@ processors:
     - yyyy-MM-dd HH:mm:ss Z
     - yyyy-MM-dd HH:mm:ss z
     - ISO8601
-
 # Sets starts, end and duration when start and duration is known
 - script:
     lang: painless
@@ -77,8 +72,6 @@ processors:
       ctx.event.start = ctx['@timestamp'];
       ZonedDateTime start = ZonedDateTime.parse(ctx.event.start);
       ctx.event.end = start.plus(ctx.event.duration, ChronoUnit.NANOS);
-
-# Removes all empty fields
 - script:
     description: Remove empty fields.
     tag: remove-empty-fields
@@ -90,11 +83,8 @@ processors:
         - "N/A"
     source: >-
       ctx.sophos?.xg.entrySet().removeIf(entry -> params.values.contains(entry.getValue()));
-
-#######################
 ## ECS Event Mapping ##
 #######################
-
 # log_id consists of (example: 010101600001):
 #   log type: 2 digits
 #   log component: 2 digits
@@ -119,7 +109,6 @@ processors:
     pattern: '^.{7}(.{5})$'
     replacement: '$1'
     ignore_failure: true
-
 #####################
 ## ECS Log Mapping ##
 #####################
@@ -155,12 +144,10 @@ processors:
     if: ctx.event?.severity == 7
     field: log.level
     value: debug
-
 - set:
     field: log.level
     copy_from: sophos.xg.severity
     ignore_empty_value: true
-
 ##########################
 ## ECS Observer Mapping ##
 ##########################
@@ -213,7 +200,6 @@ processors:
     field: sophos.xg.dstzonetype
     target_field: sophos.xg.dst_zone_type
     ignore_missing: true
-
 ###################
 ## Set host.name ##
 ###################
@@ -237,8 +223,6 @@ processors:
           ctx.host = new HashMap();
         }
         ctx.host.name = name;
-
-#############
 ## Cleanup ##
 #############
 - remove:
@@ -258,7 +242,6 @@ processors:
     - sophos.xg.out_display_interface
     - syslog5424_pri
     ignore_missing: true
-
 - convert:
     field: sophos.xg.sent_bytes
     target_field: source.bytes
@@ -287,7 +270,6 @@ processors:
     ignore_failure: true
     ignore_missing: true
     if: "ctx.sophos?.xg?.bytes_received != null"
-
 #############################
 ## ECS Source/Destination MAC
 #############################
@@ -308,7 +290,6 @@ processors:
     pattern: '(..)(?!$)'
     replacement: '$1-'
     ignore_missing: true
-
 - rename:
     field: sophos.xg.dst_mac
     target_field: destination.mac
@@ -326,7 +307,6 @@ processors:
     pattern: '(..)(?!$)'
     replacement: '$1-'
     ignore_missing: true
-
 ###############################
 ## Product Specific Pipelines ##
 ###############################
@@ -363,7 +343,6 @@ processors:
 - pipeline:
     name: '{{ IngestPipeline "wifi" }}'
     if: "ctx.sophos?.xg?.log_type == 'Wireless Protection'"
-
 ##################
 # GeoIP Enrichment
 ##################
@@ -437,7 +416,6 @@ processors:
     field: destination.as.organization_name
     target_field: destination.as.organization.name
     ignore_missing: true
-
 ##############
 ## ECS Network
 ##############
@@ -464,7 +442,6 @@ processors:
     ignore_failure: true
 - community_id:
     ignore_failure: true
-
 ####################
 ## ECS Related Hosts
 ####################
@@ -488,7 +465,6 @@ processors:
     field: related.hosts
     value: '{{{destination.domain}}}'
     allow_duplicates: false
-
 #################
 ## ECS Related IP
 #################
@@ -512,7 +488,6 @@ processors:
     field: related.ip
     value: '{{{destination.nat.ip}}}'
     allow_duplicates: false
-
 ###################
 ## ECS Related User
 ###################
@@ -521,7 +496,6 @@ processors:
     field: related.user
     value: "{{{source.user.name}}}"
     allow_duplicates: false
-
 ###################
 ## ECS Related Hash
 ###################
@@ -535,7 +509,6 @@ processors:
     field: related.hash
     value: "{{{file.hash.sha256}}}"
     allow_duplicates: false
-
 #############
 ## Cleanup ##
 #############
@@ -543,7 +516,6 @@ processors:
     field: sophos.xg.reason
     target_field: event.reason
     ignore_failure: true
-
 - remove:
     field:
       - sophos.xg.bytes_received
@@ -564,5 +536,10 @@ processors:
 on_failure:
 - set:
     field: error.message
-    value: |-
-      Processor "{{ _ingest.on_failure_processor_type }}" with tag "{{ _ingest.on_failure_processor_tag }}" failed with message "{{ _ingest.on_failure_message }}"
+    value: >-
+      Processor '{{ _ingest.on_failure_processor_type }}'
+      {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+      {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+- set:
+    field: event.kind
+    value: pipeline_error

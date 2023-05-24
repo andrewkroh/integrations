@@ -43,7 +43,6 @@ processors:
       - denied
       - connection
     if: '["13001", "13002", "13004", "13005", "13006", "13009", "13012", "13014", "14001", "14002", "15001", "15002"].contains(ctx.event?.code)'
-
 ####################################
 ## ECS Destination Mapping
 ####################################
@@ -59,7 +58,6 @@ processors:
     ignore_failure: true
     ignore_missing: true
     if: "ctx.sophos?.xg?.dst_port != null"
-
 ###############################
 ## ECS Source Mapping
 ###############################
@@ -78,7 +76,6 @@ processors:
      field: sophos.xg.src_domainname
      target_field: source.domain
      ignore_missing: true
-
 #######################
 ## ECS Email Mapping ##
 #######################
@@ -106,7 +103,6 @@ processors:
     field: email.subject
     copy_from: sophos.xg.subject
     if: "ctx?.sophos.xg?.subject != null && ctx.email?.subject == null"
-
 ######################
 ## ECS Network Mapping
 ######################
@@ -118,7 +114,6 @@ processors:
     field: sophos.xg.log_component
     target_field: network.protocol
     ignore_missing: true
-
 #############
 ## Cleanup ##
 #############
@@ -132,4 +127,10 @@ processors:
 on_failure:
 - set:
     field: error.message
-    value: '{{ _ingest.on_failure_message }}'
+    value: >-
+      Processor '{{ _ingest.on_failure_processor_type }}'
+      {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+      {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+- set:
+    field: event.kind
+    value: pipeline_error

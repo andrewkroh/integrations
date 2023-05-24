@@ -47,7 +47,6 @@ processors:
       - denied
       - connection
     if: 'ctx.sophos?.xg?.reason != "-"'
-
 - convert:
     field: sophos.xg.responsetime
     type: long
@@ -62,7 +61,6 @@ processors:
       if (ctx.sophos?.xg?.responsetime != null && ctx.sophos.xg.responsetime > 0) {
         ctx.event.duration = ctx.sophos.xg.responsetime * 1000; 
       }
-
 ####################################
 ## ECS Server/Destination Mapping ##
 ####################################
@@ -78,7 +76,6 @@ processors:
     ignore_failure: true
     ignore_missing: true
     if: "ctx.sophos?.xg?.bytessent != null"
-
 ###############################
 ## ECS Client/Source Mapping ##
 ###############################
@@ -104,7 +101,6 @@ processors:
     target_field: source.user.group.name
     ignore_missing: true
     if: "ctx.sophos?.xg?.user_gp != null"
-
 #####################
 ## ECS URL Mapping ##
 #####################
@@ -118,7 +114,6 @@ processors:
     target_field: url.domain
     ignore_missing: true
     if: "ctx.sophos?.xg?.domain != null"
-
 ############################
 ## ECS User Agent Mapping ##
 ############################
@@ -149,7 +144,6 @@ processors:
     target_field: user_agent.original
     ignore_missing: true
     if: "ctx.sophos?.xg?.useragent != null"
-
 #############
 ## Cleanup ##
 #############
@@ -171,4 +165,10 @@ processors:
 on_failure:
 - set:
     field: error.message
-    value: '{{ _ingest.on_failure_message }}'
+    value: >-
+      Processor '{{ _ingest.on_failure_processor_type }}'
+      {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+      {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+- set:
+    field: event.kind
+    value: pipeline_error
