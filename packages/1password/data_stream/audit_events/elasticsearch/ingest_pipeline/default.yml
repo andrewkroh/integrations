@@ -10,7 +10,6 @@ processors:
   - drop:
       description: Drop if no timestamp (invalid json)
       if: "ctx?.onepassword?.timestamp == null"
-
   #######################
   ## ECS Event Mapping ##
   #######################
@@ -34,7 +33,6 @@ processors:
       field: onepassword.action
       target_field: event.action
       ignore_missing: true
-
   #########################
   ## ECS Related Mapping ##
   #########################
@@ -68,7 +66,6 @@ processors:
       value: "{{{onepassword.session.ip}}}"
       allow_duplicates: false
       if: ctx.onepassword?.session?.ip != null
-
   ######################
   ## ECS User Mapping ##
   ######################
@@ -76,7 +73,6 @@ processors:
       field: onepassword.actor_uuid
       target_field: user.id
       ignore_missing: true
-
   ########################
   ## ECS Source Mapping ##
   ########################
@@ -103,7 +99,6 @@ processors:
       field: source.as.organization_name
       target_field: source.as.organization.name
       ignore_missing: true
-
   ######################
   ## ECS Base Mapping ##
   ######################
@@ -111,7 +106,6 @@ processors:
       field: onepassword.timestamp
       formats:
         - ISO8601
-
   #############
   ## Cleanup ##
   #############
@@ -132,4 +126,8 @@ on_failure:
       value: pipeline_error
   - append:
       field: error.message
-      value: "{{ _ingest.on_failure_message }}"
+      value: >-
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+
