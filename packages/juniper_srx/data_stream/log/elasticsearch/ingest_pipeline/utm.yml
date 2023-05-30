@@ -57,8 +57,6 @@ processors:
     field: event.action
     value: virus_detected
     if: '["AV_VIRUS_DETECTED_MT", "AV_VIRUS_DETECTED_MT_LS"].contains(ctx.juniper?.srx?.tag)'
-
-
 ####################################
 ## ECS Server/Destination Mapping ##
 ####################################
@@ -148,7 +146,6 @@ processors:
     ignore_failure: true
     ignore_missing: true
     if: "ctx.server?.packets != null"
-
 ###############################
 ## ECS Client/Source Mapping ##
 ###############################
@@ -248,7 +245,6 @@ processors:
     target_field: source.user.name
     ignore_missing: true
     if: "ctx.juniper?.srx?.username != null"
-
 ######################
 ## ECS Rule Mapping ##
 ######################
@@ -257,7 +253,6 @@ processors:
     target_field: rule.name
     ignore_missing: true
     if: "ctx.juniper?.srx?.policy_name != null"
-
 #####################
 ## ECS URL Mapping ##
 #####################
@@ -271,7 +266,6 @@ processors:
     target_field: url.path
     ignore_missing: true
     if: "ctx.juniper?.srx?.obj != null"
-
 ######################
 ## ECS File Mapping ##
 ######################
@@ -280,7 +274,6 @@ processors:
     target_field: file.name
     ignore_missing: true
     if: "ctx.juniper?.srx?.filename != null"
-
 #########################
 ## ECS Network Mapping ##
 #########################
@@ -289,7 +282,6 @@ processors:
     target_field: network.protocol
     ignore_missing: true
     if: "ctx.juniper?.srx?.protocol != null"
-
 #############################
 ## ECS Network/Geo Mapping ##
 #############################
@@ -368,7 +360,6 @@ processors:
     field: destination.as.organization_name
     target_field: destination.as.organization.name
     ignore_missing: true
-
 #############
 ## Cleanup ##
 #############
@@ -384,8 +375,14 @@ processors:
     - juniper.srx.packets_from_server
     - juniper.srx.urlcategory_risk
     ignore_missing: true
-
 on_failure:
 - set:
     field: error.message
-    value: '{{ _ingest.on_failure_message }}'
+    value: >-
+      Processor '{{ _ingest.on_failure_processor_type }}'
+      {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+      {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+- set:
+    field: event.kind
+    value: pipeline_error
+

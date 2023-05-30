@@ -43,8 +43,6 @@ processors:
     field: event.action
     value: security_threat
     if: '["IDP_ATTACK_LOG_EVENT", "IDP_ATTACK_LOG_EVENT_LS"].contains(ctx.juniper?.srx?.tag)'
-
-
 ####################################
 ## ECS Server/Destination Mapping ##
 ####################################
@@ -134,7 +132,6 @@ processors:
     ignore_failure: true
     ignore_missing: true
     if: "ctx.server?.packets != null"
-
 ###############################
 ## ECS Client/Source Mapping ##
 ###############################
@@ -234,7 +231,6 @@ processors:
     target_field: source.user.name
     ignore_missing: true
     if: "ctx.juniper?.srx?.username != null"
-
 ######################
 ## ECS Rule Mapping ##
 ######################
@@ -248,7 +244,6 @@ processors:
     target_field: rule.id
     ignore_missing: true
     if: "ctx.juniper?.srx?.rule_name != null"
-
 #########################
 ## ECS Network Mapping ##
 #########################
@@ -257,7 +252,6 @@ processors:
     target_field: network.protocol
     ignore_missing: true
     if: "ctx.juniper?.srx?.protocol_name != null"
-
 #########################
 ## ECS message Mapping ##
 #########################
@@ -266,7 +260,6 @@ processors:
     target_field: message
     ignore_missing: true
     if: "ctx.juniper?.srx?.message != null"
-
 #############
 ## Cleanup ##
 #############
@@ -281,8 +274,14 @@ processors:
     - juniper.srx.inbound_bytes
     - juniper.srx.inbound_packets
     ignore_missing: true
-
 on_failure:
 - set:
     field: error.message
-    value: '{{ _ingest.on_failure_message }}'
+    value: >-
+      Processor '{{ _ingest.on_failure_processor_type }}'
+      {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+      {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+- set:
+    field: event.kind
+    value: pipeline_error
+
