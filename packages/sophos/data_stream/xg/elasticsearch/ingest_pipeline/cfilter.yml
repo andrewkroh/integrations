@@ -42,7 +42,6 @@ processors:
       - denied
       - connection
     if: "ctx.sophos?.xg?.log_subtype == 'Denied'"
-
 ##########################
 ## ECS Destination Mapping
 ##########################
@@ -58,7 +57,6 @@ processors:
     ignore_failure: true
     ignore_missing: true
     if: "ctx.sophos?.xg?.dst_port != null"
-
 #####################
 ## ECS Source Mapping
 #####################
@@ -84,7 +82,6 @@ processors:
     target_field: source.user.group.name
     ignore_missing: true
     if: "ctx.sophos?.xg?.user_gp != null"
-
 #####################
 ## ECS URL Mapping ##
 #####################
@@ -105,7 +102,6 @@ processors:
     target_field: url.domain
     ignore_missing: true
     if: ctx.url?.domain == null
-
 ############################
 ## ECS User Agent Mapping ##
 ############################
@@ -134,7 +130,6 @@ processors:
     field: user_agent.original
     target_field: user_agent
     ignore_missing: true
-
 ######################
 ## ECS Network Mapping
 ######################
@@ -147,7 +142,6 @@ processors:
     copy_from: url.scheme
     override: false
     ignore_empty_value: true
-
 #############
 ## Cleanup ##
 #############
@@ -165,4 +159,11 @@ processors:
 on_failure:
 - set:
     field: error.message
-    value: '{{ _ingest.on_failure_message }}'
+    value: >-
+      Processor '{{ _ingest.on_failure_processor_type }}'
+      {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+      {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+- set:
+    field: event.kind
+    value: pipeline_error
+

@@ -51,13 +51,11 @@ processors:
       - denied
       - connection
     if: "ctx.sophos?.xg?.log_subtype == 'Denied'"
-
 - rename:
     if: ctx.sophos?.xg?.log_component == "Web"
     field: sophos.xg.source
     target_field: url.domain
     ignore_missing: true
-
 ########################
 ## ECS Source Mapping ##
 ########################
@@ -71,7 +69,6 @@ processors:
     target_field: source.user.name
     ignore_missing: true
     if: "ctx.sophos?.xg?.user_name != null"
-
 #############################
 ## ECS Destination Mapping ##
 #############################
@@ -85,7 +82,6 @@ processors:
           field: destination.domain
           copy_from: url.domain
           ignore_empty_value: true
-
 ######################
 ## ECS File Mapping ##
 ######################
@@ -106,7 +102,6 @@ processors:
     target_field: file.mime_type
     ignore_missing: true
     if: "ctx.sophos?.xg?.filetype != null"
-
 # In 18.0 and later the sha1sum contains the sha256 checksum of the file.
 - rename:
     field: sophos.xg.sha1sum
@@ -118,7 +113,6 @@ processors:
     target_field: file.hash.sha256
     ignore_missing: true
     if: "ctx.sophos?.xg?.sha1sum != null && ctx.sophos.xg.sha1sum.length() == 64"
-
 #############
 ## Cleanup ##
 #############
@@ -130,4 +124,11 @@ processors:
 on_failure:
 - set:
     field: error.message
-    value: '{{ _ingest.on_failure_message }}'
+    value: >-
+      Processor '{{ _ingest.on_failure_processor_type }}'
+      {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+      {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+- set:
+    field: event.kind
+    value: pipeline_error
+

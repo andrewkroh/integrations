@@ -57,7 +57,6 @@ processors:
     - host
     - malware
     if: 'ctx.event?.code == "17819"'
-
 ####################################
 ## ECS Server/Destination Mapping ##
 ####################################
@@ -71,7 +70,6 @@ processors:
     target_field: destination.ip
     ignore_missing: true
     if: "ctx.sophos?.xg?.localinterfaceip != null"
-
 ###############################
 ## ECS Client/Source Mapping ##
 ###############################
@@ -104,7 +102,6 @@ processors:
     target_field: source.user.group.name
     ignore_missing: true
     if: "ctx.sophos?.xg?.usergroupname != null"
-
 #########################
 ## ECS Message Mapping ##
 #########################
@@ -112,7 +109,6 @@ processors:
     field: sophos.xg.message
     target_field: message
     ignore_missing: true
-
 #############
 ## Cleanup ##
 #############
@@ -125,5 +121,11 @@ processors:
 on_failure:
 - set:
     field: error.message
-    value: '{{ _ingest.on_failure_message }}'
+    value: >-
+      Processor '{{ _ingest.on_failure_processor_type }}'
+      {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+      {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+- set:
+    field: event.kind
+    value: pipeline_error
 

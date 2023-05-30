@@ -93,7 +93,6 @@ processors:
       - remove:
           field:
             - sophos.xg.configuration
-
 - gsub:
     field: sophos.xg.reports
     pattern: "%$"
@@ -175,8 +174,14 @@ processors:
     on_failure:
       - remove:
           field: sophos.xg.transmitteddrops
-
 on_failure:
 - set:
     field: error.message
-    value: '{{ _ingest.on_failure_message }}'
+    value: >-
+      Processor '{{ _ingest.on_failure_processor_type }}'
+      {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+      {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+- set:
+    field: event.kind
+    value: pipeline_error
+
