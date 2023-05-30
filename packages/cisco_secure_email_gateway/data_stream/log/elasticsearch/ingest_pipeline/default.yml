@@ -30,7 +30,6 @@ processors:
   - lowercase:
       field: log.level
       ignore_failure: true
-
   # Time zone can come from two sources, choose in order: config, locale, default to UTC.
   - set:
       field: _tmp.tz
@@ -48,7 +47,6 @@ processors:
   - set:
       field: event.timezone
       copy_from: _tmp.tz
-
   - date:
       field: _tmp.timestamp
       timezone: "{{{ event.timezone }}}"
@@ -75,7 +73,6 @@ processors:
               - MMM  d HH:mm:ss
               - MMM dd HH:mm:ss
               - MMM d HH:mm:ss
-
   - pipeline:
       name: '{{ IngestPipeline "pipeline_authentication" }}'
       if: ctx.cisco_secure_email_gateway?.log?.category?.name == 'authentication'
@@ -138,4 +135,11 @@ processors:
 on_failure:
 - append:
     field: error.message
-    value: '{{{ _ingest.on_failure_message }}}'
+    value: >-
+      Processor '{{ _ingest.on_failure_processor_type }}'
+      {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+      {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+- set:
+    field: event.kind
+    value: pipeline_error
+
