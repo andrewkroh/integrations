@@ -36,7 +36,6 @@ processors:
     formats:
       - UNIX
     ignore_failure: true
-
 #######################
 ## ECS Event Mapping ##
 #######################
@@ -91,7 +90,7 @@ processors:
 - date:
     field: cisco.secure_endpoint.start_timestamp
     target_field: event.start
-    formats: 
+    formats:
       - UNIX
     ignore_failure: true
     if: ctx?.cisco?.secure_endpoint?.start_timestamp != null
@@ -175,7 +174,6 @@ processors:
             }
         }
     if: ctx?.cisco?.secure_endpoint?.tactics != null
-
 ######################
 ## ECS Host Mapping ##
 ######################
@@ -231,7 +229,6 @@ processors:
     target_field: user.name
     ignore_missing: true
     if: ctx?.user?.name == null && ctx?.cisco?.secure_endpoint?.computer?.user != null
-
 #########################
 ## ECS Network Mapping ##
 #########################
@@ -247,7 +244,6 @@ processors:
     field: network.direction
     value: ingress
     if: "ctx?.cisco?.secure_endpoint?.network_info?.nfm?.direction != null && ctx?.cisco?.secure_endpoint?.network_info?.nfm?.direction != 'Outgoing connection from'"
-
 #####################
 ## ECS URL Mapping ##
 #####################
@@ -261,7 +257,6 @@ processors:
     field: cisco.secure_endpoint.network_info.dirty_url
     target_field: url.original
     ignore_missing: true
-
 ########################
 ## ECS Source Mapping ##
 ########################
@@ -273,7 +268,6 @@ processors:
     field: cisco.secure_endpoint.network_info.local_port
     target_field: source.port
     ignore_missing: true
-
 #############################
 ## ECS Destination Mapping ##
 #############################
@@ -285,7 +279,6 @@ processors:
     field: cisco.secure_endpoint.network_info.remote_port
     target_field: destination.port
     ignore_missing: true
-
 ######################
 ## ECS File Mapping ##
 ######################
@@ -309,7 +302,6 @@ processors:
     field: cisco.secure_endpoint.file.identity.md5
     target_field: file.hash.md5
     ignore_missing: true
-
 #####################
 ## ECS OS Mapping ##
 #####################
@@ -321,7 +313,6 @@ processors:
     field: host.os.platform
     value: windows
     if: 'ctx?.file?.path != null && ctx?.file?.path.contains("\\\\")'
-
 #########################
 ## ECS Process Mapping ##
 #########################
@@ -401,7 +392,6 @@ processors:
       if (ctx.process.args.length > 0) {
         ctx.process.executable = ctx.process.args[0];
       }
-
 #########################
 ## ECS Related Mapping ##
 #########################
@@ -518,7 +508,6 @@ processors:
         value: "{{ _ingest._value.cve }}"
         allow_duplicates: false
     if: ctx?.cisco?.secure_endpoint?.vulnerabilities != null
-
 #############
 ## GeoIP ##
 #############
@@ -564,21 +553,20 @@ processors:
     field: destination.as.organization_name
     target_field: destination.as.organization.name
     ignore_missing: true
-
 #############
 ## Cleanup ##
 #############
 - date:
     field: cisco.secure_endpoint.threat_hunting.incident_start_time
     target_field: cisco.secure_endpoint.threat_hunting.incident_start_time
-    formats: 
+    formats:
       - UNIX
     ignore_failure: true
     if: ctx?.cisco?.secure_endpoint?.threat_hunting?.incident_start_time != null
 - date:
     field: cisco.secure_endpoint.threat_hunting.incident_end_time
     target_field: cisco.secure_endpoint.threat_hunting.incident_end_time
-    formats: 
+    formats:
       - UNIX
     ignore_failure: true
     if: ctx?.cisco?.secure_endpoint?.threat_hunting?.incident_end_time != null
@@ -635,5 +623,11 @@ on_failure:
     ignore_missing: true
 - set:
     field: error.message
-    value: |-
-      Processor "{{{ _ingest.on_failure_processor_type }}}" with tag "{{{ _ingest.on_failure_processor_tag }}}" failed with message "{{{ _ingest.on_failure_message }}}"
+    value: >-
+      Processor '{{ _ingest.on_failure_processor_type }}'
+      {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+      {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+- set:
+    field: event.kind
+    value: pipeline_error
+
