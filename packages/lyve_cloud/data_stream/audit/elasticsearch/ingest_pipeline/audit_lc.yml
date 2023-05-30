@@ -1,15 +1,12 @@
 ---
 description: Pipeline for Lyve Cloud audit logs
-
 processors:
   - json:
       field: event.original
       target_field: lyve_cloud.audit
-
   - rename:
       field: lyve_cloud.audit.serviceAccountName
       target_field: user.name
-
   - rename:
       field: lyve_cloud.audit.serviceAccountCreatorId
       target_field: user.id
@@ -26,12 +23,10 @@ processors:
       value: "{{user.id}}"
       allow_duplicates: false
       if: ctx.user?.name != null && ctx.user.name != ""
-
   - set:
       if: ctx?.log?.file?.path != null && ctx.log.file.path.contains("seagate.com")
       field: cloud.provider
       value: "lyvecloud"
-
   - date:
       field: lyve_cloud.audit.auditEntry.time
       formats:
@@ -59,19 +54,19 @@ processors:
       field: lyve_cloud.audit.auditEntry.api.timeToResponse
       pattern: "ns"
       replacement: ""
-  - convert: 
-      field: lyve_cloud.audit.auditEntry.api.timeToFirstByte      
+  - convert:
+      field: lyve_cloud.audit.auditEntry.api.timeToFirstByte
       type: long
       ignore_missing: true
-  - convert: 
-      field: lyve_cloud.audit.auditEntry.api.timeToResponse    
+  - convert:
+      field: lyve_cloud.audit.auditEntry.api.timeToResponse
       type: long
       ignore_missing: true
-  - convert: 
+  - convert:
       field: lyve_cloud.audit.auditEntry.responseHeader.Content-Length
       type: long
       ignore_missing: true
-  - convert: 
+  - convert:
       field: lyve_cloud.audit.auditEntry.requestHeader.Content-Length
       type: long
       ignore_missing: true
@@ -83,29 +78,25 @@ processors:
       field: lyve_cloud.audit.auditEntry.responseHeader.Content-Length
       target_field: http.response.body.bytes
       ignore_missing: true
-  - rename: 
+  - rename:
       field: lyve_cloud.audit.auditEntry.responseHeader.Content-Type
       target_field: http.response.mime_type
       ignore_missing: true
-
-  - set: 
+  - set:
       field: os.name
-      copy_from: user_agent.os.name 
+      copy_from: user_agent.os.name
       ignore_empty_value: true
       if: ctx.user_agent?.os?.name != null
-
-  - convert: 
+  - convert:
       field: lyve_cloud.audit.auditEntry.requestHeader.X-Forwarded-Port
       type: long
-      ignore_missing: true 
-
+      ignore_missing: true
   - rename:
       field: lyve_cloud.audit.auditEntry.responseHeader.X-Amz-Object-Lock-Retain-Until-Date
       target_field: lyve_cloud.audit.auditEntry.responseHeader.object_lock_retain_until_date
       ignore_missing: true
-
   - date:
-      if: ctx?.lyve_cloud?.audit?.auditEntry?.responseHeader?.ObjectLockRetainUntilDate != null && ctx.lyve_cloud.audit.auditEntry.responseHeader.ObjectLockRetainUntilDate!="" 
+      if: ctx?.lyve_cloud?.audit?.auditEntry?.responseHeader?.ObjectLockRetainUntilDate != null && ctx.lyve_cloud.audit.auditEntry.responseHeader.ObjectLockRetainUntilDate!=""
       field: lyve_cloud.audit.auditEntry.responseHeader.ObjectLockRetainUntilDate
       formats:
         - "yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS'Z'"
@@ -119,13 +110,11 @@ processors:
         - "yyyy-MM-dd'T'HH:mm:ss.S'Z'"
         - "yyyy-MM-dd'T'HH:mm:ss'Z'"
       target_field: lyve_cloud.audit.auditEntry.responseHeader.ObjectLockRetainUntilDate
-
   - append:
       field: related.hosts
       value: "{{lyve_cloud.audit.auditEntry.requestHeader.X-Forwarded-Host}}"
       allow_duplicates: false
       if: ctx.lyve_cloud?.audit?.auditEntry?.requestHeader != null && ctx.lyve_cloud.audit.auditEntry.requestHeader["X-Forwarded-Host"] != ""
-
   - split:
       field: lyve_cloud.audit.auditEntry.requestHeader.X-Forwarded-For
       target_field: related.ip
@@ -153,7 +142,6 @@ processors:
       lang: painless
       source: ctx.related.ip.removeAll(ctx["_failed_ips"]);
       if: ctx.related?.ip != null && ctx["_failed_ips"] != null;
-
   - script:
       description: "setting client's ip as the last element of the ' related.ip ' field ( the rest are proxies)"
       lang: painless
@@ -161,7 +149,6 @@ processors:
         ctx.client = new HashMap();
         ctx.client["ip"] = ctx.related.ip[-1];
       if: ctx.related?.ip != null && ctx.related.ip.length > 0
-
   - geoip:
       field: client.ip
       target_field: client.geo
@@ -186,9 +173,8 @@ processors:
       field: source
       copy_from: client
       if: ctx.client != null
-
   - remove:
-      field: 
+      field:
         - lyve_cloud.audit.auditEntry.time
         - lyve_cloud.audit.auditEntry.userAgent
         - lyve_cloud.audit.auditEntry.requestHeader.User-Agent
@@ -213,9 +199,14 @@ processors:
         - lyve_cloud.audit.auditEntry.requestHeader.Content-Md5
         - _failed_ips
       ignore_missing: true
-
 on_failure:
     - set:
         field: error.message
-        value: "{{ _ingest.on_failure_message }}"
-    
+        value: >-
+          Processor '{{ _ingest.on_failure_processor_type }}'
+          {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+          {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+    - set:
+        field: event.kind
+        value: pipeline_error
+
