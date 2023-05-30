@@ -1045,7 +1045,7 @@ processors:
     formats:
       - UNIX_MS
 - convert:
-    if:  ctx?.auth0?.logs?.data?.details?.elapsedTime != null
+    if: ctx?.auth0?.logs?.data?.details?.elapsedTime != null
     field: auth0.logs.data.details.elapsedTime
     target_field: auth0.logs.data.login.elapsedTime
     type: long
@@ -1060,7 +1060,7 @@ processors:
 # Clean up
 ##
 - remove:
-    field: 
+    field:
       - json
       - auth0.logs.data.ip
       - auth0.logs.data.user_name
@@ -1098,8 +1098,14 @@ processors:
         list.removeIf(v -> v == null || v == '' || (v instanceof Map && v.size() == 0) || (v instanceof List && v.size() == 0));
       }
       handleMap(ctx);
-
 on_failure:
 - set:
     field: error.message
-    value: '{{ _ingest.on_failure_message }}'
+    value: >-
+      Processor '{{ _ingest.on_failure_processor_type }}'
+      {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+      {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+- set:
+    field: event.kind
+    value: pipeline_error
+
