@@ -15,7 +15,7 @@ processors:
     field: event.original
     target_field: github.secret_scanning
 - fingerprint:
-    fields: 
+    fields:
         - github.secret_scanning.number
         - github.secret_scanning.updated_at
         - github.secret_scanning.resolved_at
@@ -106,7 +106,7 @@ processors:
     field: _temp.repository.owner.site_admin
     target_field: github.repository.owner.site_admin
     ignore_missing: true
-- rename: 
+- rename:
     target_field: _temp.resolved_by
     field: github.secret_scanning.resolved_by
     ignore_missing: true
@@ -176,7 +176,7 @@ processors:
 - lowercase:
     field: github.secret_scanning.state
     ignore_missing: true
-- set: 
+- set:
     field: github.state
     value: "{{github.secret_scanning.state}}"
     if: ctx.github.secret_scanning?.state != null
@@ -184,7 +184,7 @@ processors:
     field: github.severity
     value: "undefined"
     if: ctx.github.severity == null
-- rename: 
+- rename:
     target_field: _temp.push_protection_bypassed_by
     field: github.secret_scanning.push_protection_bypassed_by
     ignore_missing: true
@@ -236,7 +236,6 @@ processors:
         def masked_value = String.join("", Collections.nCopies(secret.length()-(num_start+num_end), "X"));
         masked_secret = secret.substring(0,num_start) + masked_value + secret.substring(secret.length()-num_end);
         ctx.github.secret_scanning.secret = masked_secret;
-
 - script:
     lang: painless
     description: Calculate time taken to resolve the secrets
@@ -251,8 +250,6 @@ processors:
         long resolvedAtEpoch = zdt.toEpochSecond();
         time_to_resolution.put("sec", resolvedAtEpoch - createdAtEpoch);
         ctx.github.secret_scanning.time_to_resolution = time_to_resolution;
-
-
   ###########
   # Cleanup #
   ###########
@@ -293,4 +290,11 @@ processors:
 on_failure:
 - set:
     field: error.message
-    value: "{{ _ingest.on_failure_message }}"
+    value: >-
+      Processor '{{ _ingest.on_failure_processor_type }}'
+      {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+      {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+- set:
+    field: event.kind
+    value: pipeline_error
+
