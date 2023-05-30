@@ -46,7 +46,6 @@ processors:
     target_field: url.full
     ignore_missing: true
     if: ctx?.url?.full == null
-
 #
 # Set user.* from participant, if any.
 #
@@ -63,7 +62,6 @@ processors:
     field: user.full_name
     value: '{{zoom.participant.user_name}}'
     ignore_empty_value: true
-
 #
 # Set user.id to be the meeting's host, unless already set.
 #
@@ -72,7 +70,6 @@ processors:
     value: '{{zoom.meeting.host_id}}'
     ignore_empty_value: true
     override: false
-
 #
 # Append to related.user
 #
@@ -86,7 +83,6 @@ processors:
     value: "{{zoom.meeting.host_id}}"
     allow_duplicates: false
     if: 'ctx.zoom?.meeting?.host_id != null'
-
 - date:
     field: zoom.meeting.start_time
     target_field: event.start
@@ -165,4 +161,11 @@ processors:
 on_failure:
 - set:
     field: error.message
-    value: '{{ _ingest.on_failure_message }}'
+    value: >-
+      Processor '{{ _ingest.on_failure_processor_type }}'
+      {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+      {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+- set:
+    field: event.kind
+    value: pipeline_error
+

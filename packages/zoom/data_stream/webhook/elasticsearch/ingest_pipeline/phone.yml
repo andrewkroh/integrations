@@ -73,8 +73,6 @@ processors:
       ZonedDateTime start = ZonedDateTime.parse(ctx.event.start);
       ZonedDateTime end = ZonedDateTime.parse(ctx.event.end);
       ctx.event.duration = ChronoUnit.NANOS.between(start, end);
-
-# Calculates duration when duration is unknown but start and end time is known (with answer_start_time)
 - script:
     lang: painless
     if: "ctx?.zoom?.phone?.ringing_start_time == null && ctx?.zoom?.phone?.answer_start_time != null && ctx?.zoom?.phone?.call_end_time != null && ctx?.zoom?.phone?.duration == null"
@@ -84,15 +82,11 @@ processors:
       ZonedDateTime start = ZonedDateTime.parse(ctx.event.start);
       ZonedDateTime end = ZonedDateTime.parse(ctx.event.end);
       ctx.event.duration = ChronoUnit.NANOS.between(start, end);
-
-# Duration is in minutes, so multiply by seconds and then multiply again to convert seconds to nano
 - script:
     lang: painless
     if: ctx?.zoom?.duration != null
     source: >-
       ctx.event.duration = ctx.zoom.phone.duration * 60L * 1000000000L;
-
-# Moving all voicemail related fields to their proper nested fields
 # that already exists for all other phone webhooks
 - rename:
     field: zoom.phone.callee_user_id
@@ -172,4 +166,11 @@ processors:
 on_failure:
 - set:
     field: error.message
-    value: '{{ _ingest.on_failure_message }}'
+    value: >-
+      Processor '{{ _ingest.on_failure_processor_type }}'
+      {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+      {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+- set:
+    field: event.kind
+    value: pipeline_error
+

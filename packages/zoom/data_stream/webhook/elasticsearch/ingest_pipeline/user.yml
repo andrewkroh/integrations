@@ -60,7 +60,6 @@ processors:
     - zoom.time_stamp
     - zoom.user.date_time
     ignore_missing: true
-
 #
 # set user.* from operator.
 #
@@ -72,7 +71,6 @@ processors:
     field: user.email
     value: '{{zoom.operator}}'
     ignore_empty_value: true
-
 #
 # set user.* from user object when there's no operator.
 #
@@ -91,7 +89,6 @@ processors:
     value: '{{zoom.user.first_name}} {{zoom.user.last_name}}'
     ignore_empty_value: true
     if: 'ctx.zoom?.operator == null && ctx.zoom?.operator_id == null && ctx.zoom?.user?.first_name != null'
-
 #
 # set user.target.* from old_values
 #
@@ -115,7 +112,6 @@ processors:
     field: user.target.full_name
     value: '{{zoom.old_values.first_name}} {{zoom.old_values.last_name}}'
     if: 'ctx.zoom?.old_values?.first_name != null'
-
 #
 # set user.target.* from user.* without overriding old_values.
 # This is necessary because some fields doesn't exist in old_values.
@@ -149,7 +145,6 @@ processors:
     value: '{{zoom.user.first_name}} {{zoom.user.last_name}}'
     if: '(ctx.zoom?.old_values != null || ctx.zoom?.operator != null || ctx.zoom?.operator_id != null) && ctx.zoom?.user?.first_name != null'
     override: false
-
 #
 # set user.changes.* from user object when there's old_values
 #
@@ -168,7 +163,6 @@ processors:
     value: '{{zoom.user.first_name}} {{zoom.user.last_name}}'
     ignore_empty_value: true
     if: 'ctx.zoom?.old_values?.first_name != null && ctx.zoom?.old_values?.last_name != null && (ctx.zoom?.old_values?.last_name != ctx.zoom?.user?.last_name || ctx.zoom?.old_values?.first_name != ctx.zoom?.user?.first_name)'
-
 #
 # append to related.user
 #
@@ -182,8 +176,14 @@ processors:
     value: "{{zoom.old_values.id}}"
     allow_duplicates: false
     if: "ctx.zoom?.old_values?.id != null"
-
 on_failure:
 - set:
     field: error.message
-    value: '{{ _ingest.on_failure_message }}'
+    value: >-
+      Processor '{{ _ingest.on_failure_processor_type }}'
+      {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+      {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+- set:
+    field: event.kind
+    value: pipeline_error
+

@@ -69,7 +69,6 @@ processors:
     - ISO_INSTANT
     if: ctx?.event?.action == 'webinar.participant_left'
     ignore_failure: true
-
 #
 # set user.* from participant
 #
@@ -83,7 +82,6 @@ processors:
     value: '{{zoom.participant.user_name}}'
     ignore_empty_value: true
     if: 'ctx.zoom?.participant != null'
-
 #
 # set user.* from registrant
 #
@@ -102,7 +100,6 @@ processors:
     value: '{{zoom.registrant.first_name}} {{zoom.registrant.last_name}}'
     ignore_empty_value: true
     if: 'ctx.zoom?.registrant != null'
-
 #
 # set user.* from operator
 #
@@ -116,7 +113,6 @@ processors:
     value: '{{zoom.operator}}'
     ignore_empty_value: true
     if: 'ctx.zoom?.registrant == null && ctx.zoom?.participant == null'
-
 #
 # append to related.user
 #
@@ -135,8 +131,14 @@ processors:
     value: "{{zoom.participant.id}}"
     allow_duplicates: false
     if: "ctx.zoom?.participant?.id != null"
-
 on_failure:
 - set:
     field: error.message
-    value: '{{ _ingest.on_failure_message }}'
+    value: >-
+      Processor '{{ _ingest.on_failure_processor_type }}'
+      {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+      {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+- set:
+    field: event.kind
+    value: pipeline_error
+
