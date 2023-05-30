@@ -2058,7 +2058,7 @@ processors:
       description: Map ecs fields based on evidence type.
       lang: painless
       if: ctx.json?.alerts?.evidence instanceof List
-      source:
+      source: |
         def convertToOrderedArray(def list) {
           def result = new ArrayList();
           for (element in list) {
@@ -2162,7 +2162,7 @@ processors:
       description: Set file.size, process.id, process.parent.id fields.
       lang: painless
       if: ctx.json?.alerts?.evidence instanceof List
-      source:
+      source: |
         def convertToOrderedArray(def list) {
           def result = new ArrayList();
           for (element in list) {
@@ -2305,7 +2305,7 @@ processors:
   - script:
       description: Drops null/empty values recursively.
       lang: painless
-      source:
+      source: |
         boolean dropEmptyFields(Object object) {
           if (object == null || object == "") {
             return true;
@@ -2322,4 +2322,11 @@ processors:
 on_failure:
   - append:
       field: error.message
-      value: '{{{ _ingest.on_failure_message }}}'
+      value: >-
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+  - set:
+      field: event.kind
+      value: pipeline_error
+

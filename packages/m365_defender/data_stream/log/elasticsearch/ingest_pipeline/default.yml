@@ -38,7 +38,6 @@ processors:
       formats:
         - ISO8601
       if: ctx.json?.alerts?.entities?.evidenceCreationTime != null && ctx.json?.alerts?.entities?.evidenceCreationTime != ""
-
   #########################
   ## ECS General Mapping ##
   #########################
@@ -58,7 +57,6 @@ processors:
       target_field: message
       ignore_missing: true
       if: ctx.message == null
-
   #######################
   ## ECS Event Mapping ##
   #######################
@@ -141,8 +139,6 @@ processors:
         Instant eventstart = ZonedDateTime.parse(ctx.event?.start).toInstant();
         Instant eventend = ZonedDateTime.parse(ctx.event?.end).toInstant();
         ctx.event['duration'] = ChronoUnit.NANOS.between(eventstart, eventend);
-
-  ########################
   ## ECS Threat Mapping ##
   ########################
   - set:
@@ -162,7 +158,6 @@ processors:
       target_field: rule.description
       ignore_missing: true
       if: ctx.json?.alerts?.description != null && ctx.json?.alerts?.description.length() < 1020
-
   ######################
   ## ECS File Mapping ##
   ######################
@@ -182,7 +177,6 @@ processors:
       field: json.alerts.entities.filePath
       target_field: file.path
       ignore_missing: true
-
   #########################
   ## ECS Process Mapping ##
   #########################
@@ -206,7 +200,6 @@ processors:
       field: json.alerts.entities.parentProcessCreationTime
       target_field: process.parent.start
       ignore_missing: true
-
   ##########################
   ## ECS Observer Mapping ##
   ##########################
@@ -220,7 +213,6 @@ processors:
       field: json.alerts.serviceSource
       target_field: observer.name
       ignore_missing: true
-
   #####################
   ## ECS URL Mapping ##
   #####################
@@ -233,7 +225,6 @@ processors:
       field: url.full
       ignore_failure: true
       if: ctx.url?.full != null
-
   ######################
   ## ECS User Mapping ##
   ######################
@@ -249,7 +240,6 @@ processors:
       field: json.alerts.entities.aadUserId
       target_field: user.id
       ignore_missing: true
-
   #########################
   ## ECS Related Mapping ##
   #########################
@@ -290,7 +280,6 @@ processors:
   - lowercase:
       field: host.name
       if: ctx.host?.name != null
-
   #############
   ## Cleanup ##
   #############
@@ -369,4 +358,11 @@ processors:
 on_failure:
   - set:
       field: error.message
-      value: "{{_ingest.on_failure_message}}"
+      value: >-
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+  - set:
+      field: event.kind
+      value: pipeline_error
+
