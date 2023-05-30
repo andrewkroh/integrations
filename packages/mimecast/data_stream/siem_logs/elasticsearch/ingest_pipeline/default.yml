@@ -20,14 +20,12 @@ processors:
         - mimecast.datetime
       target_field: "_id"
       ignore_missing: true
-
   - date:
       description: Use 'mimecast.datetime' as the '@timestamp'
       field: mimecast.datetime
       timezone: UTC
       formats:
         - yyyy-MM-dd'T'HH:mm:ssZ
-
   ### RECEIPT LOGS
   - rename:
       field: mimecast.aCode
@@ -142,7 +140,7 @@ processors:
   - rename:
       field: mimecast.Recipient
       target_field: email.to.address
-      ignore_missing: true  
+      ignore_missing: true
   - append:
       field: email.to.address
       value: "{{{mimecast.Recipient}}}"
@@ -258,7 +256,7 @@ processors:
       field: mimecast.log_type
       value: "{{mimecast.log_type_part1}}_{{mimecast.log_type_part2}}"
       if: 'ctx?.mimecast?.log_type_part1 =="ttp" && ctx?.mimecast?.log_type_part2 != null'
-      ignore_failure: true 
+      ignore_failure: true
   - set:
       field: event.created
       value: "{{mimecast.datetime}}"
@@ -320,11 +318,10 @@ processors:
        pattern: "<%{email.to.address}>"
        ignore_missing: true
        ignore_failure: true
-
   # Cleanup
   - remove:
       description: Cleanup of repeated/unwanted/temporary fields.
-      field: 
+      field:
         - mimecast.eventTime
         - mimecast.Content-Disposition
         - mimecast.datetime
@@ -364,11 +361,17 @@ processors:
       description: Remove 'event.original' if 'preserve_original_event' is not set.
       field: event.original
       if: "ctx?.tags == null || !(ctx.tags.contains('preserve_original_event'))"
-      ignore_failure: true  
+      ignore_failure: true
   ###
-
 # Error handling
 on_failure:
 - set:
     field: error.message
-    value: '{{ _ingest.on_failure_message }}'
+    value: >-
+      Processor '{{ _ingest.on_failure_processor_type }}'
+      {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+      {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+- set:
+    field: event.kind
+    value: pipeline_error
+

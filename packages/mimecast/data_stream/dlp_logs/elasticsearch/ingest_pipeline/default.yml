@@ -21,14 +21,12 @@ processors:
         - mimecast.eventTime
       target_field: "_id"
       ignore_missing: true
-
   - date:
       description: Use 'mimecast.eventTime' as the '@timestamp'
       field: mimecast.eventTime
       timezone: UTC
       formats:
         - yyyy-MM-dd'T'HH:mm:ssZ
-
   ###
   - append:
       field: email.from.address
@@ -47,7 +45,7 @@ processors:
        field: email.to.address
        pattern: "<%{email.to.address}>"
        ignore_missing: true
-       ignore_failure: true  
+       ignore_failure: true
   - rename:
       field: mimecast.action
       target_field: event.action
@@ -83,7 +81,7 @@ processors:
   # Cleanup
   - remove:
       description: Cleanup of repeated/unwanted/temporary fields.
-      field: 
+      field:
         - mimecast
       ignore_missing: true
   - remove:
@@ -91,9 +89,15 @@ processors:
       field: event.original
       if: "ctx?.tags == null || !(ctx.tags.contains('preserve_original_event'))"
       ignore_failure: true
-      
 # Error handling
 on_failure:
 - set:
     field: error.message
-    value: '{{ _ingest.on_failure_message }}'
+    value: >-
+      Processor '{{ _ingest.on_failure_processor_type }}'
+      {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+      {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+- set:
+    field: event.kind
+    value: pipeline_error
+

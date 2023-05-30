@@ -19,7 +19,6 @@ processors:
         - mimecast.id
       target_field: "_id"
       ignore_missing: true
-
   - date:
       description: Use 'mimecast.eventTime' as the '@timestamp'
       field: mimecast.eventTime
@@ -36,9 +35,7 @@ processors:
         - "yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSSz"
         - "yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSSZ"
         - "yyyy-MM-dd'T'HH:mm:ss z"
-
   ###
-
   # Convert 'mimecast.auditType' to a bone-cased event action.
   # ie: User Log On -> user-log-on
   - lowercase:
@@ -54,7 +51,6 @@ processors:
       target_field: event.action
       ignore_missing: true
   ###
-
   # User fields
   - rename:
       field: mimecast.user
@@ -139,25 +135,25 @@ processors:
       field: mimecast.event_info_parts.Reason
       target_field: event.reason
       ignore_missing: true
-  - rename: 
+  - rename:
       field: mimecast.info
       target_field: mimecast.filename
       ignore_missing: true
       if: 'ctx.event?.action == "threat-intel-feed-download"'
-  - rename: 
+  - rename:
       field: mimecast.event_info_parts.Processed
       target_field: email.origination_timestamp
       ignore_missing: true
-  - rename: 
+  - rename:
       field: mimecast.event_info_parts.Subject
       target_field: email.subject
       ignore_missing: true
-  - rename: 
+  - rename:
       field: mimecast.event_info_parts.2FA
       target_field: mimecast.2FA
       ignore_missing: true
   - dissect:
-       field:  mimecast.event_info_parts.From
+       field: mimecast.event_info_parts.From
        pattern: "<%{?drop}> %{email.from.address}"
        if: 'ctx.event?.action=="message-action"'
        ignore_missing: true
@@ -167,7 +163,7 @@ processors:
        pattern: "<%{?drop}> %{email.to.address}"
        if: 'ctx.event?.action=="message-action"'
        ignore_missing: true
-       ignore_failure: true     
+       ignore_failure: true
   - dissect:
       field: mimecast.eventInfo
       pattern: "[%{?key} : %{mimecast.export_type},%{?key} :%{mimecast.export_name},%{?key} :%{user.email},%{?key} :%{mimecast.weekday} %{mimecast.month} %{mimecast.monthday} %{mimecast.time} %{mimecast.timezone} %{mimecast.year},%{?key} :%{client.ip},%{?key} :%{mimecast.columns_exported},%{?key} : %{file.name},%{?key}: %{file.size},%{?key} : %{file.extension}], %{?key}: %{mimecast.date}, %{?key}: %{mimecast.time}, %{?key}: %{client.ip}, %{?key}: %{mimecast.application}"
@@ -198,7 +194,7 @@ processors:
        field: email.to.address
        pattern: "<%{email.to.address}>"
        ignore_missing: true
-       ignore_failure: true     
+       ignore_failure: true
   - convert:
       field: file.size
       type: long
@@ -216,7 +212,7 @@ processors:
       field: user.domain
       copy_from: user.parts.1
       if: 'ctx?.user?.parts !=null && ctx?.user?.parts.length > 1'
-  - rename: 
+  - rename:
       field: mimecast.filename
       target_field: file.name
       ignore_missing: true
@@ -228,7 +224,7 @@ processors:
       if: 'ctx?.file?.name != null && ctx?.event?.action == "threat-intel-feed-download"'
   - script:
       lang: painless
-      source: | 
+      source: |
         ctx.file.extension = ctx.file.parts[ctx.file.parts.length-1];
       if: 'ctx?.file?.parts !=null && ctx?.file?.parts.length > 1'
   - set:
@@ -296,7 +292,7 @@ processors:
   # Cleanup
   - remove:
       description: Cleanup of repeated/unwanted/temporary fields.
-      field: 
+      field:
         - mimecast.eventTime
         - user.parts
         - mimecast.date
@@ -324,7 +320,6 @@ processors:
         - mimecast.organization_name
         - mimecast.event_info_parts
         - mimecast.rest_of_event_info
-
       ignore_missing: true
   - remove:
       description: Remove 'event.original' if 'preserve_original_event' is not set.
@@ -336,12 +331,16 @@ processors:
       field: source.ip
       if: "ctx?.tags == null || !(ctx.tags.contains('preserve_original_event'))"
       ignore_failure: true
-    
-      
   ###
-
 # Error handling
 on_failure:
 - set:
     field: error.message
-    value: '{{ _ingest.on_failure_message }}'
+    value: >-
+      Processor '{{ _ingest.on_failure_processor_type }}'
+      {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+      {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+- set:
+    field: event.kind
+    value: pipeline_error
+
