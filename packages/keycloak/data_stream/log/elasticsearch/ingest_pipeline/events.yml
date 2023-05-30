@@ -126,7 +126,7 @@ processors:
     ignore_missing: true
 - grok:
     field: keycloak.admin.resource.path
-    patterns: 
+    patterns:
       - 'users/%{UUID:user.target.id}'
       - 'groups/%{UUID:group.id}'
     ignore_failure: true
@@ -138,7 +138,7 @@ processors:
     field: event.category
     value:
       - authentication
-    if: ctx.keycloak?.login != null 
+    if: ctx.keycloak?.login != null
 - append:
     field: event.type
     value:
@@ -147,28 +147,28 @@ processors:
     field: event.type
     value:
       - denied
-    if: ctx.keycloak?.login?.type == 'LOGIN_ERROR' 
+    if: ctx.keycloak?.login?.type == 'LOGIN_ERROR'
 - append:
     field: event.type
     value:
       - start
       - allowed
-    if: ctx.keycloak?.login?.type == 'LOGIN' 
+    if: ctx.keycloak?.login?.type == 'LOGIN'
 - append:
     field: event.type
     value:
       - end
-    if: ctx.keycloak?.login?.type == 'LOGOUT' 
+    if: ctx.keycloak?.login?.type == 'LOGOUT'
 - append:
     field: event.category
     value:
       - iam
-    if: ctx.keycloak?.admin != null 
+    if: ctx.keycloak?.admin != null
 - append:
     field: event.type
     value:
       - admin
-    if: ctx.keycloak?.admin != null 
+    if: ctx.keycloak?.admin != null
 - append:
     field: event.type
     value:
@@ -214,8 +214,15 @@ processors:
     field:
       - message
       - json
-    ignore_missing: true  
+    ignore_missing: true
 on_failure:
 - set:
     field: error.message
-    value: "{{ _ingest.on_failure_message }}"
+    value: >-
+      Processor '{{ _ingest.on_failure_processor_type }}'
+      {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+      {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+- set:
+    field: event.kind
+    value: pipeline_error
+
