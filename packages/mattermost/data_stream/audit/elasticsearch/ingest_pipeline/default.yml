@@ -305,7 +305,6 @@ processors:
         type:
           - group
           - change
-      
     source: >-
       ctx.event.kind = 'event';
       ctx.event.category = ['configuration'];
@@ -411,7 +410,7 @@ processors:
 - remove:
     field:
       - json
-    ignore_missing: true  
+    ignore_missing: true
 - remove:
     field: event.original
     if: "ctx?.tags == null || !(ctx.tags.contains('preserve_original_event'))"
@@ -445,4 +444,11 @@ processors:
 on_failure:
 - set:
     field: error.message
-    value: '{{ _ingest.on_failure_message }}'
+    value: >-
+      Processor '{{ _ingest.on_failure_processor_type }}'
+      {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+      {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+- set:
+    field: event.kind
+    value: pipeline_error
+
