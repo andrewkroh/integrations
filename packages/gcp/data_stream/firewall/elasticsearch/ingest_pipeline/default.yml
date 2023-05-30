@@ -1,6 +1,5 @@
 ---
 description: Pipeline for Google Cloud Firewall Logs
-
 processors:
   - set:
       field: ecs.version
@@ -43,7 +42,7 @@ processors:
       field: json.resource.labels.subnetwork_name
       target_field: network.name
       ignore_missing: true
-  - set: 
+  - set:
       field: event.id
       copy_from: json.insertId
       ignore_empty_value: true
@@ -323,14 +322,14 @@ processors:
       ignore_missing: true
       ignore_failure: true
       if: ctx?.network?.direction == "inbound"
-  - set: 
+  - set:
       field: network.direction
       value: internal
       if: ctx?.gcp?.source?.instance == ctx?.gcp?.destination?.instance
   - set:
       field: network.type
       value: ipv4
-      if: ctx?.source?.ip != null && ctx?.source?.ip.contains(".") 
+      if: ctx?.source?.ip != null && ctx?.source?.ip.contains(".")
   - set:
       field: network.type
       value: ipv6
@@ -407,4 +406,11 @@ processors:
 on_failure:
   - set:
       field: error.message
-      value: "{{ _ingest.on_failure_message }}"
+      value: >-
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+  - set:
+      field: event.kind
+      value: pipeline_error
+

@@ -1,6 +1,5 @@
 ---
 description: Pipeline for Google Cloud DNS logs
-
 processors:
   - set:
       field: ecs.version
@@ -36,17 +35,17 @@ processors:
       field: json.logName
       target_field: log.logger
       ignore_missing: true
-  - set: 
+  - set:
       field: event.id
       copy_from: json.insertId
       ignore_empty_value: true
       ignore_failure: true
-  - convert: 
+  - convert:
       field: json.resource.labels.project_id
       target_field: cloud.project.id
       type: string
       ignore_failure: true
-  - convert: 
+  - convert:
       field: json.resource.labels.zone
       target_field: cloud.region
       type: string
@@ -123,12 +122,12 @@ processors:
       ignore_missing: true
       patterns:
       - ^%{IP:destination.nat.ip}(:%{POSINT:destination.nat.port:long})?$
-  - set: 
+  - set:
       field: destination.address
       copy_from: url.domain
       ignore_empty_value: true
       ignore_failure: true
-  - set: 
+  - set:
       field: destination.port
       copy_from: url.port
       ignore_empty_value: true
@@ -139,10 +138,10 @@ processors:
       type: ip
       ignore_missing: true
       on_failure:
-        - rename: 
+        - rename:
             field: url.domain
             target_field: destination.domain
-            ignore_missing: true 
+            ignore_missing: true
             ignore_failure: true
   - rename:
       field: json.severity
@@ -201,7 +200,7 @@ processors:
       allow_duplicates: false
       if: ctx?.destination?.domain != null
   - remove:
-      field: 
+      field:
         - json
       ignore_missing: true
   - remove:
@@ -212,4 +211,11 @@ processors:
 on_failure:
   - set:
       field: error.message
-      value: "{{ _ingest.on_failure_message }}"
+      value: >-
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+  - set:
+      field: event.kind
+      value: pipeline_error
+
