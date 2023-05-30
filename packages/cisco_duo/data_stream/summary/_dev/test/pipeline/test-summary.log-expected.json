@@ -1,7 +1,7 @@
 {
     "expected": [
         {
-            "@timestamp": "2023-05-10T14:53:30.657737Z",
+            "@timestamp": "2023-05-30T23:54:14.741737041Z",
             "cisco_duo": {
                 "summary": {
                     "admin_count": 6,
@@ -21,7 +21,7 @@
             ]
         },
         {
-            "@timestamp": "2023-05-10T14:53:30.657748400Z",
+            "@timestamp": "2023-05-30T23:54:14.741744208Z",
             "cisco_duo": {
                 "summary": {
                     "admin_count": 3,
