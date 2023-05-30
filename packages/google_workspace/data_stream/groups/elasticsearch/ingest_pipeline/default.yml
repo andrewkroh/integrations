@@ -4,10 +4,10 @@ processors:
   - set:
       field: ecs.version
       value: '8.7.0'
-  - append: 
+  - append:
       field: event.category
       value: iam
-  - append: 
+  - append:
       field: event.type
       value: group
   - set:
@@ -123,27 +123,27 @@ processors:
       value: "{{source.user.name}}"
       if: ctx?.source?.user?.name != null
       allow_duplicates: false
-  - append: 
+  - append:
       field: event.type
       value: change
       if: '["change_basic_setting", "change_identity_setting", "change_info_setting", "change_new_members_restrictions_setting", "change_post_replies_setting", "change_spam_moderation_setting", "change_topic_setting", "change_acl_permission", "approve_join_request", "join"].contains(ctx?.event?.action)'
-  - append: 
+  - append:
       field: event.category
       value: configuration
       if: '["change_basic_setting", "change_identity_setting", "change_info_setting", "change_new_members_restrictions_setting", "change_post_replies_setting", "change_spam_moderation_setting", "change_topic_setting", "add_info_setting", "remove_info_setting"].contains(ctx?.event?.action)'
-  - append: 
+  - append:
       field: event.type
       value: info
       if: '["accept_invitation", "request_to_join", "ban_user_with_moderation", "revoke_invitation", "invite_user", "reject_join_request", "reinvite_user", "moderate_message", "always_post_from_user"].contains(ctx?.event?.action)'
-  - append: 
+  - append:
       field: event.type
       value: user
       if: '["accept_invitation", "approve_join_request", "join", "request_to_join", "ban_user_with_moderation", "revoke_invitation", "invite_user", "reject_join_request", "reinvite_user", "add_user", "remove_user"].contains(ctx?.event?.action)'
-  - append: 
+  - append:
       field: event.type
       value: creation
       if: '["create_group", "add_info_setting", "add_user"].contains(ctx?.event?.action)'
-  - append: 
+  - append:
       field: event.type
       value: deletion
       if: '["delete_group", "remove_info_setting", "remove_user"].contains(ctx?.event?.action)'
@@ -305,4 +305,11 @@ processors:
 on_failure:
   - set:
       field: error.message
-      value: "{{ _ingest.on_failure_message }}"
+      value: >-
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+  - set:
+      field: event.kind
+      value: pipeline_error
+

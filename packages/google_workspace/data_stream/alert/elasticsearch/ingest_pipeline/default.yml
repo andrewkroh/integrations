@@ -41,8 +41,7 @@ processors:
         - json.endTime
       target_field: _id
       ignore_missing: true
-
-# Pipeline For Common fields.
+  # Pipeline For Common fields.
   - date:
       field: json.createTime
       target_field: '@timestamp'
@@ -223,14 +222,12 @@ processors:
       field: json.data.alertDetails
       target_field: google_workspace.alert.data.alert_details
       ignore_missing: true
-
-# Pipeline For Domain wide takeout.
+  # Pipeline For Domain wide takeout.
   - rename:
       field: json.data.takeoutRequestId
       target_field: google_workspace.alert.data.takeout.request.id
       ignore_missing: true
-
-# Pipeline For Gmail phishing.
+  # Pipeline For Gmail phishing.
   - foreach:
       field: json.data.messages
       processor:
@@ -434,8 +431,7 @@ processors:
       field: source.ip
       copy_from: google_workspace.alert.data.source.ip
       ignore_failure: true
-
-# Pipeline For Google identity.
+  # Pipeline For Google identity.
   - convert:
       field: json.data.loginDetails.ipAddress
       target_field: google_workspace.alert.data.login_details.ip_address
@@ -490,8 +486,7 @@ processors:
       field: json.data.suspensionDetails
       target_field: google_workspace.alert.data.suspension_details
       ignore_missing: true
-
-# Pipeline For Google Operations.
+  # Pipeline For Google Operations.
   - rename:
       field: json.data.affectedUserEmails
       target_field: google_workspace.alert.data.affected.user_emails
@@ -535,8 +530,7 @@ processors:
       field: user.domain
       copy_from: google_workspace.alert.data.domain
       ignore_failure: true
-
-# Pipeline For Mobile device management.
+  # Pipeline For Mobile device management.
   - foreach:
       field: json.data.events
       processor:
@@ -631,8 +625,7 @@ processors:
       field: json.data.events
       target_field: google_workspace.alert.data.events
       ignore_missing: true
-
-# Pipeline For AppMaker Editor.
+  # Pipeline For AppMaker Editor.
   - foreach:
       field: json.data.requestInfo
       processor:
@@ -664,8 +657,7 @@ processors:
       field: json.data.requestInfo
       target_field: google_workspace.alert.data.request.info
       ignore_missing: true
-
-# Pipeline For Security Center rules.
+  # Pipeline For Security Center rules.
   - rename:
       field: json.data.description
       if: ctx.event?.action == 'Security Center rules'
@@ -745,8 +737,7 @@ processors:
       field: json.data.query
       target_field: google_workspace.alert.data.query
       ignore_missing: true
-
-# Pipeline For Data Loss Prevention.
+  # Pipeline For Data Loss Prevention.
   - rename:
       field: json.data.ruleViolationInfo.ruleInfo.displayName
       target_field: google_workspace.alert.data.rule.violation_info.rule_info.display.name
@@ -826,8 +817,7 @@ processors:
       field: json.data.ruleViolationInfo.suppressedActionTypes
       target_field: google_workspace.alert.data.rule.violation_info.suppressed.action.types
       ignore_missing: true
-
-# Pipeline For Apps outage.
+  # Pipeline For Apps outage.
   - rename:
       field: json.data.products
       target_field: google_workspace.alert.data.products
@@ -882,8 +872,7 @@ processors:
       field: json.data.mergeInfo.newAlertId
       target_field: google_workspace.alert.data.merge_info.new_alert.id
       ignore_missing: true
-
-# Pipeline For Sensitive Admin Action.
+  # Pipeline For Sensitive Admin Action.
   - rename:
       field: json.data.actorEmail
       target_field: google_workspace.alert.data.actor.email
@@ -1022,7 +1011,7 @@ processors:
   - script:
         description: Drops null/empty values recursively.
         lang: painless
-        source:
+        source: |
           boolean dropEmptyFields(Object object) {
             if (object == null || object == '') {
               return true;
@@ -1039,4 +1028,11 @@ processors:
 on_failure:
 - append:
     field: error.message
-    value: '{{{ _ingest.on_failure_message }}}'
+    value: >-
+      Processor '{{ _ingest.on_failure_processor_type }}'
+      {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+      {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+- set:
+    field: event.kind
+    value: pipeline_error
+
