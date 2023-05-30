@@ -49,7 +49,7 @@ processors:
   - script:
       description: Convert 'json.linked' integer value of '0' or '1' to boolean
       lang: painless
-      source:
+      source: |
         if (ctx.json?.linked != null && ctx.json.linked != '') {
           if (ctx.json.linked == 0) {
             ctx.json.linked = false
@@ -61,7 +61,7 @@ processors:
   - script:
       description: Convert 'json.shared' integer value of '0' or '1' to boolean
       lang: painless
-      source:
+      source: |
         if (ctx.json?.shared != null && ctx.json.shared != '') {
           if (ctx.json.shared == 0) {
             ctx.json.shared = false
@@ -164,7 +164,7 @@ processors:
   - script:
       description: Drops null/empty values recursively.
       lang: painless
-      source:
+      source: |
         boolean dropEmptyFields(Object object) {
           if (object == null || object == '') {
             return true;
@@ -181,7 +181,11 @@ processors:
 on_failure:
   - append:
       field: error.message
-      value: '{{{ _ingest.on_failure_message }}}'
+      value: >-
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
   - set:
       field: event.kind
       value: pipeline_error
+
