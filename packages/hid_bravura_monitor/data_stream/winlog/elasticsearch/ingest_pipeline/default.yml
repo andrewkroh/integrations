@@ -4,22 +4,18 @@ processors:
   - set:
       field: event.ingested
       value: '{{_ingest.timestamp}}'
-
   - convert:
       field: event.code
       type: string
       ignore_missing: true
-
   - rename:
       field: message
       target_field: event.original
       ignore_missing: true
-
   - grok:
       field: event.original
       patterns:
         - '%{DATA:winlog.event_data.Message}\|%{GREEDYDATA:kvpairs}'
-
   - kv:
       field: kvpairs
       field_split: '\|'
@@ -27,24 +23,20 @@ processors:
       target_field: winlog.event_data
       ignore_missing: false
       ignore_failure: false
-
   - remove:
       field: kvpairs
       ignore_missing: true
       ignore_failure: true
-
   - split:
       field: winlog.event_data.ClientIPs
       separator: ","
       preserve_trailing: true
       ignore_missing: true
-
   - split:
       field: winlog.event_data.FailedTargets
       separator: ","
       preserve_trailing: true
       ignore_missing: true
-
   - script:
       lang: painless
       ignore_failure: false
@@ -181,7 +173,6 @@ processors:
           return;
         }
         ctx.winlog.put("symbolic_id", t)
-
   - script:
       lang: painless
       ignore_failure: false
@@ -322,61 +313,50 @@ processors:
           ctx.winlog.put("event_data", map);
         }
         ctx.winlog.event_data.put("Description", t)
-
   - convert:
       field: winlog.record_id
       type: string
       ignore_missing: true
-
   - convert:
       field: winlog.event_id
       type: string
       ignore_missing: true
-
   - convert:
       field: winlog.event_data.DelayThreshold
       type: long
       ignore_missing: true
-
   - convert:
       field: winlog.event_data.QueueDelay
       type: long
       ignore_missing: true
-
   - convert:
       field: winlog.event_data.QueueSize
       type: long
       ignore_missing: true
-
   - convert:
       field: winlog.event_data.Runtime
       type: long
       ignore_missing: true
-
   - set:
       field: ecs.version
       value: '8.7.0'
-
   - set:
       field: log.level
       copy_from: winlog.level
       ignore_empty_value: true
       ignore_failure: true
       if: ctx?.winlog?.level != ""
-
   - date:
       field: winlog.time_created
       formats:
         - ISO8601
       ignore_failure: true
       if: ctx?.winlog?.time_created != null
-
   - remove:
       field: event.original
       if: "ctx?.tags == null || !(ctx.tags.contains('preserve_original_event'))"
       ignore_failure: true
       ignore_missing: true
-
   - remove:
       ignore_missing: true
       field:
@@ -389,9 +369,14 @@ processors:
         - winlog.event_data.Value7
         - winlog.event_data.Value8
         - winlog.event_data.Value9
-
 on_failure:
   - set:
       field: error.message
-      value: |-
-        Processor "{{ _ingest.on_failure_processor_type }}" with tag "{{ _ingest.on_failure_processor_tag }}" in pipeline "{{ _ingest.on_failure_pipeline }}" failed with message "{{ _ingest.on_failure_message }}"
+      value: >-
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+  - set:
+      field: event.kind
+      value: pipeline_error
+
