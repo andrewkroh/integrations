@@ -68,7 +68,6 @@ processors:
     - set:
           field: server
           copy_from: destination
-
     - set:
           field: event.category
           value: [network, intrusion_detection]
@@ -86,11 +85,14 @@ processors:
           field: event.kind
           value: event
           if: ctx.event?.kind == null
-
 on_failure:
     - set:
         field: event.kind
         value: pipeline_error
     - append:
         field: error.message
-        value: "{{ _ingest.on_failure_message }}"
+        value: >-
+          Processor '{{ _ingest.on_failure_processor_type }}'
+          {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+          {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+
