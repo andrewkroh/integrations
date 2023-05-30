@@ -1,9 +1,9 @@
 ---
 description: Pipeline for parsing Recorded Future threat intel.
 processors:
-#
-# Set basic ECS fields.
-#
+  #
+  # Set basic ECS fields.
+  #
   - set:
       field: ecs.version
       value: '8.7.0'
@@ -22,23 +22,21 @@ processors:
   - set:
       field: threat.feed.name
       value: "Recorded Future"
-#
-# TODO: Add dashboard
-#
-#  - set:
-#      field: threat.feed.dashboard_id
-#      value: "recordedfuture-96fe1e60-4261-11ec-b7be-d3026acdf1cf"
-
+  #
+  # TODO: Add dashboard
+  #
+  #  - set:
+  #      field: threat.feed.dashboard_id
+  #      value: "recordedfuture-96fe1e60-4261-11ec-b7be-d3026acdf1cf"
   - rename:
       field: message
       target_field: event.original
       ignore_missing: true
-
-#
-# Decode event.original as JSON if it starts with the "{" character.
-# This is the common case when events are ingested from the API, as httpjson
-# transforms the CSV to a JSON message.
-#
+  #
+  # Decode event.original as JSON if it starts with the "{" character.
+  # This is the common case when events are ingested from the API, as httpjson
+  # transforms the CSV to a JSON message.
+  #
   - json:
       field: event.original
       target_field: json
@@ -46,31 +44,27 @@ processors:
       on_failure:
         - fail:
             message: "Failed decoding message field as JSON: {{{ _ingest.on_failure_message }}}"
-
-#
-# Decode event.original as CSV when the above processor didn't execute.
-# This is used when ingesting CSV lines from a file.
-#
+  #
+  # Decode event.original as CSV when the above processor didn't execute.
+  # This is used when ingesting CSV lines from a file.
+  #
   - pipeline:
       name: '{{ IngestPipeline "decode_csv" }}'
       if: 'ctx.json == null'
       on_failure:
         - fail:
             message: "Failed decoding message field as CSV: {{{ _ingest.on_failure_message }}}"
-
-#
-# Decode EvidenceDetails column as JSON.
-#
+  #
+  # Decode EvidenceDetails column as JSON.
+  #
   - json:
       field: json.EvidenceDetails
       target_field: _temp_.EvidenceDetails
       ignore_failure: true
-
   - rename:
       field: _temp_.EvidenceDetails.EvidenceDetails
       target_field: json.evidence_details
       ignore_missing: true
-
   - foreach:
       field: json.evidence_details
       ignore_missing: true
@@ -105,14 +99,13 @@ processors:
               field: threat.indicator.provider
               value: '{{{ _ingest._value }}}'
               allow_duplicates: false
-
-#
-# Hash indicators (threat.indicator.type=file)
-# As risklist indicators don't have a "type" field, it's necessary
-# to detect the kind of indicator in the Name field.
-#
-# An indicator is of type `hash` when the Algorithm field is present.
-#
+  #
+  # Hash indicators (threat.indicator.type=file)
+  # As risklist indicators don't have a "type" field, it's necessary
+  # to detect the kind of indicator in the Name field.
+  #
+  # An indicator is of type `hash` when the Algorithm field is present.
+  #
   - set:
       field: threat.indicator.type
       value: file
@@ -143,12 +136,11 @@ processors:
       field: _hashes
       target_field: threat.indicator.file.hash
       ignore_missing: true
-
-#
-# IP indicators (threat.indicator.type=ipvN-addr)
-#
-# An indicator is of type `ip` if Name is a valid IP address.
-#
+  #
+  # IP indicators (threat.indicator.type=ipvN-addr)
+  #
+  # An indicator is of type `ip` if Name is a valid IP address.
+  #
   - convert:
       field: json.Name
       target_field: threat.indicator.ip
@@ -163,11 +155,10 @@ processors:
       field: threat.indicator.type
       value: ipv6-addr
       if: 'ctx.threat?.indicator?.ip != null && ctx.threat.indicator.ip.contains(":")'
-
-#
-# URL indicators (threat.indicator.type=url)
-# An indicator is of type `url` if Name contains a slash character.
-#
+  #
+  # URL indicators (threat.indicator.type=url)
+  # An indicator is of type `url` if Name contains a slash character.
+  #
   - set:
       field: threat.indicator.type
       value: url
@@ -181,11 +172,10 @@ processors:
         - set:
             field: threat.indicator.url.original
             copy_from: json.Name
-
-#
-# Domain indicators (threat.indicator.type=domain)
-# This is a catch-all type.
-#
+  #
+  # Domain indicators (threat.indicator.type=domain)
+  # This is a catch-all type.
+  #
   - set:
       field: threat.indicator.type
       value: domain-name
@@ -195,10 +185,9 @@ processors:
       value: '{{{ json.Name }}}'
       ignore_empty_value: true
       if: 'ctx.threat?.indicator?.type == "domain-name" && ctx.threat?.indicator?.url?.domain == null'
-
-#
-# Normalize Risk
-#
+  #
+  # Normalize Risk
+  #
   - convert:
       field: json.Risk
       target_field: event.risk_score
@@ -208,10 +197,9 @@ processors:
         - append:
             field: error.message
             value: "Risk score `{{{ json.Risk }}}` cannot be converted to float: {{{ _ingest.on_failure_message }}}"
-
-#
-# Save fields without an ECS mapping under `recordedfuture`.
-#
+  #
+  # Save fields without an ECS mapping under `recordedfuture`.
+  #
   - rename:
       field: json.RiskString
       target_field: json.risk_string
@@ -222,10 +210,9 @@ processors:
   - rename:
       field: json
       target_field: recordedfuture
-
-#
-# Cleanup
-#
+  #
+  # Cleanup
+  #
   - remove:
       field: event.original
       if: "ctx?.tags == null || !(ctx.tags.contains('preserve_original_event'))"
@@ -242,4 +229,11 @@ processors:
 on_failure:
   - append:
       field: error.message
-      value: "{{{ _ingest.on_failure_message }}}"
+      value: >-
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+  - set:
+      field: event.kind
+      value: pipeline_error
+
