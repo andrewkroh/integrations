@@ -56,7 +56,6 @@ processors:
       ZonedDateTime start = ZonedDateTime.parse(ctx.event.start);
       ZonedDateTime end = ZonedDateTime.parse(ctx.event.end);
       ctx.event.duration = ChronoUnit.NANOS.between(start, end);
-# TLS Fields
 - rename:
     field: json.ClientSSLProtocol
     target_field: cloudflare.client.ssl.protocol
@@ -472,4 +471,11 @@ processors:
 on_failure:
 - set:
     field: error.message
-    value: "{{ _ingest.on_failure_message }}"
+    value: >-
+      Processor '{{ _ingest.on_failure_processor_type }}'
+      {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+      {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+- set:
+    field: event.kind
+    value: pipeline_error
+
