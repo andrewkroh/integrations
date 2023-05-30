@@ -794,11 +794,15 @@
             "@timestamp": "2023-05-05T17:51:17.000Z",
             "cisco": {
                 "asa": {
-                    "source_interface": "srcif",
                     "destination_interface": "dstif",
+                    "icmp_code": 3,
                     "icmp_type": 3,
-                    "icmp_code": 3
+                    "source_interface": "srcif"
                 }
+            },
+            "destination": {
+                "ip": "192.168.2.3",
+                "port": 10872
             },
             "ecs": {
                 "version": "8.7.0"
@@ -820,6 +824,9 @@
             "host": {
                 "hostname": "dev01"
             },
+            "input": {
+                "type": "udp"
+            },
             "log": {
                 "level": "warning"
             },
@@ -828,27 +835,16 @@
                 "iana_number": "1",
                 "transport": "icmp"
             },
-            "destination": {
-              "port": 10872,
-              "ip": "192.168.2.3"
-            },
-            "source": {
-              "port": 53,
-              "ip": "192.168.2.2"
-            },
-            "input": {
-              "type": "udp"
-            },
             "observer": {
+                "egress": {
+                    "interface": {
+                        "name": "dstif"
+                    }
+                },
                 "hostname": "dev01",
                 "ingress": {
                     "interface": {
                         "name": "srcif"
-                    }
-                },
-                "egress": {
-                    "interface": {
-                        "name": "dstif"
                     }
                 },
                 "product": "asa",
@@ -864,6 +860,10 @@
                     "192.168.2.3"
                 ]
             },
+            "source": {
+                "ip": "192.168.2.2",
+                "port": 53
+            },
             "tags": [
                 "preserve_original_event"
             ]
@@ -872,11 +872,15 @@
             "@timestamp": "2023-05-05T17:51:17.000Z",
             "cisco": {
                 "asa": {
-                    "source_interface": "srcif",
                     "destination_interface": "dstif",
+                    "icmp_code": 3,
                     "icmp_type": 3,
-                    "icmp_code": 3
+                    "source_interface": "srcif"
                 }
+            },
+            "destination": {
+                "ip": "192.168.2.3",
+                "port": 10872
             },
             "ecs": {
                 "version": "8.7.0"
@@ -898,6 +902,9 @@
             "host": {
                 "hostname": "dev01"
             },
+            "input": {
+                "type": "udp"
+            },
             "log": {
                 "level": "warning"
             },
@@ -906,34 +913,16 @@
                 "iana_number": "1",
                 "transport": "icmp"
             },
-            "destination": {
-              "port": 10872,
-              "ip": "192.168.2.3"
-            },
-            "source": {
-              "port": 53,
-              "user": {
-                "name": "testuser",
-                "domain": "LOCAL",
-                "group": {
-                  "name": "testgroup"
-                }
-              },
-              "ip": "192.168.2.2"
-            },
-            "input": {
-              "type": "udp"
-            },
             "observer": {
+                "egress": {
+                    "interface": {
+                        "name": "dstif"
+                    }
+                },
                 "hostname": "dev01",
                 "ingress": {
                     "interface": {
                         "name": "srcif"
-                    }
-                },
-                "egress": {
-                    "interface": {
-                        "name": "dstif"
                     }
                 },
                 "product": "asa",
@@ -953,6 +942,17 @@
                     "testuser"
                 ]
             },
+            "source": {
+                "ip": "192.168.2.2",
+                "port": 53,
+                "user": {
+                    "domain": "LOCAL",
+                    "group": {
+                        "name": "testgroup"
+                    },
+                    "name": "testuser"
+                }
+            },
             "tags": [
                 "preserve_original_event"
             ]
@@ -961,11 +961,15 @@
             "@timestamp": "2023-05-05T17:51:17.000Z",
             "cisco": {
                 "asa": {
-                    "source_interface": "srcif",
                     "destination_interface": "dstif",
+                    "icmp_code": 3,
                     "icmp_type": 3,
-                    "icmp_code": 3
+                    "source_interface": "srcif"
                 }
+            },
+            "destination": {
+                "ip": "192.168.2.3",
+                "port": 10872
             },
             "ecs": {
                 "version": "8.7.0"
@@ -987,6 +991,9 @@
             "host": {
                 "hostname": "dev01"
             },
+            "input": {
+                "type": "udp"
+            },
             "log": {
                 "level": "warning"
             },
@@ -995,31 +1002,16 @@
                 "iana_number": "1",
                 "transport": "icmp"
             },
-            "destination": {
-              "port": 10872,
-              "ip": "192.168.2.3"
-            },
-            "source": {
-              "port": 53,
-              "user": {
-                "name": "testuser",
-                "domain": "LOCAL"
-              },
-              "ip": "192.168.2.2"
-            },
-            "input": {
-              "type": "udp"
-            },
             "observer": {
+                "egress": {
+                    "interface": {
+                        "name": "dstif"
+                    }
+                },
                 "hostname": "dev01",
                 "ingress": {
                     "interface": {
                         "name": "srcif"
-                    }
-                },
-                "egress": {
-                    "interface": {
-                        "name": "dstif"
                     }
                 },
                 "product": "asa",
@@ -1039,11 +1031,18 @@
                     "testuser"
                 ]
             },
+            "source": {
+                "ip": "192.168.2.2",
+                "port": 53,
+                "user": {
+                    "domain": "LOCAL",
+                    "name": "testuser"
+                }
+            },
             "tags": [
                 "preserve_original_event"
             ]
         },
-
         {
             "@timestamp": "2023-05-05T18:16:21.000Z",
             "cisco": {

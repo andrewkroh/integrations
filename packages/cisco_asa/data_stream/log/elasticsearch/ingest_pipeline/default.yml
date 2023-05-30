@@ -5,7 +5,7 @@ processors:
       field: message
       target_field: event.original
       tag: "rename_message"
-      on_failure: 
+      on_failure:
         - append:
             field: error.message
             value: "fail-{{{ _ingest.on_failure_processor_tag }}}"
@@ -61,7 +61,6 @@ processors:
         - append:
             field: error.message
             value: "Processor {{{ _ingest.on_failure_processor_type }}} with tag {{{ _ingest.on_failure_processor_tag }}} in pipeline {{{ _ingest.on_failure_pipeline }}} failed with message: {{{ _ingest.on_failure_message }}}"
-
   #
   # Parse FTD/ASA style message
   #
@@ -84,7 +83,6 @@ processors:
             value: "fail-{{{ _ingest.on_failure_processor_tag }}}"
         - fail:
             message: "Processor {{ _ingest.on_failure_processor_type }} with tag {{ _ingest.on_failure_processor_tag }} in pipeline {{ _ingest.on_failure_pipeline }} failed with message: {{ _ingest.on_failure_message }}"
-
   #
   # Create missing fields when no %FTD label is present
   #
@@ -93,7 +91,6 @@ processors:
       field: _temp_.cisco.message_id
       value: ""
       if: "ctx?._temp_?.cisco?.message_id == null"
-
   #
   # set default event.severity to 7 (debug):
   #
@@ -103,7 +100,6 @@ processors:
       field: event.severity
       value: 7
       if: "ctx?.event?.severity == null"
-
   # Time zone can come from three sources, choose in order: log, config, locale, default to UTC.
   - set:
       field: _temp_.tz
@@ -181,7 +177,6 @@ processors:
               - append:
                   field: error.message
                   value: "{{{ _ingest.on_failure_message }}}"
-
   #
   # Set log.level
   #
@@ -217,7 +212,6 @@ processors:
       field: "log.level"
       if: "ctx.event.severity == 7"
       value: debug
-
   #
   # Firewall messages
   #
@@ -452,7 +446,7 @@ processors:
       if: "ctx._temp_.cisco.message_id == '113005'"
       description: "113005"
       field: "message"
-      patterns: 
+      patterns:
       - "AAA user authentication Rejected: reason = %{REASON}: server = %{IP:destination.address} : user = ?%{CISCO_USER:source.user.name}: user IP = %{IP:source.address}"
       pattern_definitions:
         REASON: (AAA failure|Account has been disabled)
@@ -465,7 +459,6 @@ processors:
       - "AAA user authentication Successful(%{SPACE})?: local database(%{SPACE})?: [Uu]ser = %{CISCO_USER:source.user.name}"
       pattern_definitions:
         CISCO_USER: ((LOCAL\\)?(%{HOSTNAME}\\)?%{USERNAME}(@%{HOSTNAME})?(, *%{NUMBER})?)
-
   - dissect:
       if: "ctx._temp_.cisco.message_id == '113019'"
       field: "message"
@@ -509,9 +502,9 @@ processors:
         IPORHOST: "(?:%{IP}|%{HOSTNAME})"
         NOTCOLON: "[^:]*"
         CISCO_USER: ((LOCAL\\)?(%{HOSTNAME}\\)?%{USERNAME}(@%{HOSTNAME})?(, *%{NUMBER})?)
-# For messages: 302013, 302015, if outbound is specified in `network.direction`, the original control connection was initiated from the inside.
-# Hence reverse src and dst.
-# https://www.cisco.com/c/en/us/td/docs/security/asa/syslog/b_syslog/syslogs3.html#con_4770603
+  # For messages: 302013, 302015, if outbound is specified in `network.direction`, the original control connection was initiated from the inside.
+  # Hence reverse src and dst.
+  # https://www.cisco.com/c/en/us/td/docs/security/asa/syslog/b_syslog/syslogs3.html#con_4770603
   - grok:
       if: '["302013", "302015"].contains(ctx._temp_.cisco.message_id) && ctx.network.direction == "outbound"'
       field: "_temp_.var_302013_302015"
@@ -871,12 +864,12 @@ processors:
       field: "message"
       description: "710005"
       pattern: "%{network.transport} request %{event.outcome} from %{source.address}/%{source.port} to %{_temp_.cisco.destination_interface}:%{destination.address}/%{destination.port}"
-  - grok: 
+  - grok:
       if: "ctx._temp_.cisco.message_id == '713049'"
       tag: "grok_message_713049"
       field: "message"
       description: "713049"
-      patterns: 
+      patterns:
         - "Group = %{NOTSPACE}, IP = %{IP:source.address}, Security negotiation complete for LAN-to-LAN Group (%{DATA}) %{DATA}, Inbound SPI = %{DATA}, Outbound SPI = %{DATA}"
         - "Group = %{NOTSPACE}, Username = %{NOTSPACE:user.name}, IP = %{IP:source.address}, Security negotiation complete for User (%{DATA}) %{DATA}, Inbound SPI = %{DATA}, Outbound SPI = %{DATA}"
       on_failure:
@@ -984,7 +977,7 @@ processors:
       if: "ctx._temp_.cisco.message_id == '713202'"
       field: "message"
       pattern: "IP = %{source.address}, %{event.reason}. %{} packet."
-# Support masked user
+  # Support masked user
   - grok:
       if: "ctx._temp_.cisco.message_id == '716039'"
       field: "message"
@@ -1000,7 +993,7 @@ processors:
       field: "message"
       patterns:
         - "^(Group = %{IP}, )?(IP = %{IP:source.address}, )?%{GREEDYDATA:event.reason}$"
-   # Handle ecs action outcome protocol
+  # Handle ecs action outcome protocol
   - set:
       if: '["434002", "434004"].contains(ctx._temp_.cisco.message_id)'
       field: "event.outcome"
@@ -1081,7 +1074,6 @@ processors:
       if: '["750003", "713905", "713904", "713906", "713902", "713901"].contains(ctx._temp_.cisco.message_id)'
       field: "event.type"
       value: "error"
-
   #
   # Handle 302xxx messages (Flow expiration a.k.a "Teardown")
   #
@@ -1118,7 +1110,6 @@ processors:
             value: "fail-{{{ _ingest.on_failure_processor_tag }}}"
         - fail:
             message: "Processor {{ _ingest.on_failure_processor_type }} with tag {{ _ingest.on_failure_processor_tag }} in pipeline {{ _ingest.on_failure_pipeline }} failed with message: {{ _ingest.on_failure_message }}"
-
   #
   # Decode FTD's Security Event Syslog Messages
   #
@@ -1142,7 +1133,6 @@ processors:
             value: "fail-{{{ _ingest.on_failure_processor_tag }}}"
         - fail:
             message: "Processor {{ _ingest.on_failure_processor_type }} with tag {{ _ingest.on_failure_processor_tag }} in pipeline {{ _ingest.on_failure_pipeline }} failed with message: {{ _ingest.on_failure_message }}"
-
   #
   # Remove _temp_.full_message.
   #
@@ -1159,7 +1149,6 @@ processors:
         - message
         - _temp_.full_message
       ignore_missing: true
-
   #
   # Populate ECS fields from Security Events
   #
@@ -1543,7 +1532,6 @@ processors:
   #*******************************************************************************
   # End of generated code.
   #*******************************************************************************
-
   #
   # Normalize ECS field values
   #
@@ -1626,7 +1614,6 @@ processors:
       if: 'ctx._temp_.cisco.message_id == "430005"'
       field: event.action
       value: malware-detected
-
   #
   # Handle event.duration
   #
@@ -1637,7 +1624,6 @@ processors:
       field: "_temp_.duration_hms"
       value: "{{{event.duration}}}"
       ignore_empty_value: true
-
   #
   # Process the flow duration "hh:mm:ss" present in some messages
   # This will fill event.start, event.end and event.duration
@@ -1670,7 +1656,6 @@ processors:
         ctx.event['start'] = ZonedDateTime.ofInstant(
             Instant.parse(end).minusNanos(nanos),
             ZoneOffset.UTC);
-  #
   # Parse Source/Dest Username/Domain
   #
   - grok:
@@ -1755,7 +1740,6 @@ processors:
             value: "fail-{{{ _ingest.on_failure_processor_tag }}}"
         - fail:
             message: "Processor {{ _ingest.on_failure_processor_type }} with tag {{ _ingest.on_failure_processor_tag }} in pipeline {{ _ingest.on_failure_pipeline }} failed with message: {{ _ingest.on_failure_message }}"
-
   #
   # Normalize protocol names
   #
@@ -1824,7 +1808,6 @@ processors:
           net['iana_number'] = net.transport;
           net['transport'] = trans;
         }
-  #
   # Normalize event.outcome
   #
   - lowercase:
@@ -1992,7 +1975,6 @@ processors:
         - append:
             field: error.message
             value: "Processor {{{ _ingest.on_failure_processor_type }}} with tag {{{ _ingest.on_failure_processor_tag }}} in pipeline {{{ _ingest.on_failure_pipeline }}} failed with message: {{{ _ingest.on_failure_message }}}"
-      
   #
   # Assign ECS .ip fields from .address is a valid IP address is found,
   # otherwise set .domain field.
@@ -2220,12 +2202,10 @@ processors:
             !ctx._temp_.internal_zones.contains(ctx.observer.ingress.zone)
           )
         )
-
   - set:
       field: _temp_.url_domain
       value: "{{{url.domain}}}"
       if: ctx?.url?.domain != null
-
   - uri_parts:
       field: url.original
       tag: "uriparts_url_original"
@@ -2239,7 +2219,6 @@ processors:
       value: "{{{_temp_.url_domain}}}"
       allow_duplicates: false
       if: ctx?._temp_?.url_domain != null
-
   #
   # Populate ECS event.code
   #
@@ -2424,8 +2403,6 @@ processors:
           ctx.event.category.add('intrusion_detection');
           ctx.event.outcome = 'success';
         }
-
-  # Malware event kind is classified as alert when sha_disposition is "Malware", "Custom Detection" not for other cases.
   - set:
       if: 'ctx?.event?.code == "430005" && ["Malware", "Custom Detection"].contains(ctx.cisco.asa.security.sha_disposition)'
       field: event.kind
@@ -2434,14 +2411,12 @@ processors:
       if: 'ctx?.event?.code == "430005" && !["Malware", "Custom Detection"].contains(ctx.cisco.asa.security.sha_disposition)'
       field: event.category
       value: file
-
   - set:
       description: copy destination.user.name to user.name if it is not set
       field: user.name
       value: "{{{destination.user.name}}}"
       ignore_empty_value: true
       if: ctx?.user?.name == null
-
   # Configures observer fields with a copy from cisco and host fields. Later on these might replace host.hostname.
   - set:
       field: observer.hostname
@@ -2589,12 +2564,18 @@ on_failure:
       field: _temp_.cisco
       target_field: "cisco.asa"
       ignore_missing: true
-  # Remove _temp_/_conf to avoid adding a lot of unnecessary fields to the index.
   - remove:
-      field: 
+      field:
         - _temp_
         - _conf
       ignore_missing: true
   - append:
-      field: "error.message"
-      value: "{{{ _ingest.on_failure_message }}}"
+      field: error.message
+      value: >-
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+  - set:
+      field: event.kind
+      value: pipeline_error
+
