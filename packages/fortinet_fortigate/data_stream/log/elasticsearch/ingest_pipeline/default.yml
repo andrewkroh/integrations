@@ -25,7 +25,7 @@ processors:
         }
   - gsub:
       field: syslog5424_sd
-      pattern: "\u0000"
+      pattern: "\x00"
       replacement: ""
   - script:
       lang: painless
@@ -222,7 +222,6 @@ processors:
       field: fortinet.firewall.msg
       target_field: message
       ignore_missing: true
-
   # Handle interface-based network directionality
   - set:
       field: network.direction
@@ -543,13 +542,11 @@ processors:
       value: "{{dns.question.name}}"
       if: "ctx.dns?.question?.name != null"
       allow_duplicates: false
-
   # Fix up network direction field to match ECS-allowable values.
   - set:
       field: network.direction
       value: unknown
       if: "ctx.network?.direction != null && !(['ingress', 'egress', 'inbound', 'outbound', 'internal', 'external'].contains(ctx.network.direction))"
-
   - script:
       lang: painless
       source: |
@@ -572,4 +569,11 @@ processors:
 on_failure:
   - set:
       field: error.message
-      value: "{{ _ingest.on_failure_message }}"
+      value: >-
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+  - set:
+      field: event.kind
+      value: pipeline_error
+
