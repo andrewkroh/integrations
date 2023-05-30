@@ -35,7 +35,6 @@ processors:
             to: trendmicro.event.tenant_id
           - name: TrendMicroDsTenant
             to: trendmicro.event.tenant_name
-
       source: |
         def actions = new ArrayList();
         def exts = ctx.cef?.extensions;
@@ -69,12 +68,17 @@ processors:
         set:
           field: "{{_ingest._value.to}}"
           value: "{{_ingest._value.value}}"
-
   - remove:
       field:
         - _tmp_copy
-
 on_failure:
   - set:
       field: error.message
-      value: "{{ _ingest.on_failure_message }}"
+      value: >-
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+  - set:
+      field: event.kind
+      value: pipeline_error
+
