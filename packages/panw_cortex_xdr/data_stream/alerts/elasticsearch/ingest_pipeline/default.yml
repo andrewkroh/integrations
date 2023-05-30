@@ -241,7 +241,6 @@ processors:
       field: threat.framework
       value: "MITRE ATT&CK"
       if: "ctx.threat?.technique != null || ctx.threat?.tactic != null"
-
   #The Action actor is an an activity that took place and was recorded by the agent.
   - convert:
       field: panw_cortex.xdr.events.action_remote_ip
@@ -399,8 +398,7 @@ processors:
       field: panw_cortex.xdr.events.causality_actor_process_execution_time
       target_field: process.parent.uptime
       ignore_missing: true
-
-# Parse user.domain from user.name
+  # Parse user.domain from user.name
   - grok:
       field: panw_cortex.xdr.events.user_name
       ignore_missing: true
@@ -531,12 +529,11 @@ processors:
   - foreach:
       field: panw_cortex.xdr.tags
       if: ctx.panw_cortex?.xdr?.tags != null
-      processor: 
+      processor:
         append:
           field: tags
           value: '{{{_ingest._value}}}'
           allow_duplicates: false
-      
   - remove:
       field:
         - panw_cortex.xdr.host_name
@@ -561,4 +558,11 @@ processors:
 on_failure:
   - set:
       field: error.message
-      value: "{{ _ingest.on_failure_message }}"
+      value: >-
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+  - set:
+      field: event.kind
+      value: pipeline_error
+
