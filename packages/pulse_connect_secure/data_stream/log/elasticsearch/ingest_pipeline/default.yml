@@ -29,13 +29,13 @@ processors:
       timezone: "{{ event.timezone }}"
       formats:
       - ISO8601
-      if: ctx.event?.timezone != null   
+      if: ctx.event?.timezone != null
   - date:
       field: _tmp.timestamp
       target_field: '@timestamp'
       formats:
       - ISO8601
-      if: ctx.event?.timezone == null      
+      if: ctx.event?.timezone == null
   - set:
       field: event.created
       copy_from: '@timestamp'
@@ -43,7 +43,7 @@ processors:
       field: client.address
       target_field: client.ip
       type: ip
-      ignore_missing: true 
+      ignore_missing: true
   - set:
       field: event.kind
       value: event
@@ -116,9 +116,6 @@ processors:
   - set:
       field: source
       copy_from: client
-
-
-      
   - remove:
       field:
         - _tmp
@@ -131,4 +128,11 @@ processors:
 on_failure:
   - set:
       field: error.message
-      value: '{{ _ingest.on_failure_message }}'
+      value: >-
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+  - set:
+      field: event.kind
+      value: pipeline_error
+
