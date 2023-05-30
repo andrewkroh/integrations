@@ -69,4 +69,3 @@ policy_templates:
             show_user: true
 owner:
   github: elastic/security-external-integrations
-
