@@ -19,10 +19,9 @@ processors:
         - host
         - cloud
       ignore_missing: true
-
-#########################
-## ECS General Mapping ##
-#########################
+  #########################
+  ## ECS General Mapping ##
+  #########################
   - script:
       lang: painless
       if: ctx?.json != null
@@ -68,14 +67,13 @@ processors:
       field: json.title
       target_field: message
       ignore_missing: true
-
-#######################
-## ECS Event Mapping ##
-#######################
+  #######################
+  ## ECS Event Mapping ##
+  #######################
   - set:
       field: event.kind
       value: alert
-# Events returned from the API is always in UTC, so should never use anything else
+  # Events returned from the API is always in UTC, so should never use anything else
   - set:
       field: event.timezone
       value: UTC
@@ -154,10 +152,8 @@ processors:
         Instant eventstart = ZonedDateTime.parse(ctx?.event?.start).toInstant();
         Instant eventend = ZonedDateTime.parse(ctx?.event?.end).toInstant();
         ctx.event['duration'] = ChronoUnit.NANOS.between(eventstart, eventend);
-
-########################
-## ECS Threat Mapping ##
-########################
+  ## ECS Threat Mapping ##
+  ########################
   - set:
       field: threat.framework
       value: MITRE ATT&CK
@@ -171,10 +167,9 @@ processors:
       target_field: rule.description
       ignore_missing: true
       if: (ctx.json?.description).length() < 1020
-
-######################
-## ECS File Mapping ##
-######################
+  ######################
+  ## ECS File Mapping ##
+  ######################
   - rename:
       field: json.evidence.fileName
       target_field: file.name
@@ -191,10 +186,9 @@ processors:
       field: json.evidence.filePath
       target_field: file.path
       ignore_missing: true
-
-######################
-## ECS Process Mapping ##
-######################
+  ######################
+  ## ECS Process Mapping ##
+  ######################
   - rename:
       field: json.evidence.processId
       target_field: process.pid
@@ -215,10 +209,9 @@ processors:
       field: json.evidence.parentProcessCreationTime
       target_field: process.parent.start
       ignore_missing: true
-
-##########################
-## ECS Observer Mapping ##
-##########################
+  ##########################
+  ## ECS Observer Mapping ##
+  ##########################
   - set:
       field: observer.product
       value: Defender for Endpoint
@@ -229,10 +222,9 @@ processors:
       field: json.detectionSource
       target_field: observer.name
       ignore_missing: true
-
-#####################
-## ECS URL Mapping ##
-#####################
+  #####################
+  ## ECS URL Mapping ##
+  #####################
   - rename:
       field: json.evidence.url
       target_field: url.full
@@ -242,10 +234,9 @@ processors:
       field: url.full
       ignore_failure: true
       if: ctx?.url?.full != null
-
-######################
-## ECS Host Mapping ##
-######################
+  ######################
+  ## ECS Host Mapping ##
+  ######################
   - rename:
       field: json.computerDnsName
       target_field: host.hostname
@@ -254,10 +245,9 @@ processors:
       target_field: host.name
       field: host.hostname
       if: ctx.host?.hostname != null
-
-######################
-## ECS User Mapping ##
-######################
+  ######################
+  ## ECS User Mapping ##
+  ######################
   - rename:
       field: json.relatedUser.userName
       target_field: user.name
@@ -270,10 +260,9 @@ processors:
       field: json.evidence.userSid
       target_field: user.id
       ignore_missing: true
-
-#########################
-## ECS Related Mapping ##
-#########################
+  #########################
+  ## ECS Related Mapping ##
+  #########################
   - append:
       field: related.ip
       value: '{{json.evidence.ipAddress}}'
@@ -295,10 +284,9 @@ processors:
       value: '{{host.name}}'
       if: ctx.host?.name != null && ctx.host.name != ''
       allow_duplicates: false
-
-#############
-## Cleanup ##
-#############
+  #############
+  ## Cleanup ##
+  #############
   - remove:
       field:
         - json.alertCreationTime
@@ -325,4 +313,11 @@ processors:
 on_failure:
   - set:
       field: error.message
-      value: '{{_ingest.on_failure_message}}'
+      value: >-
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+  - set:
+      field: event.kind
+      value: pipeline_error
+
