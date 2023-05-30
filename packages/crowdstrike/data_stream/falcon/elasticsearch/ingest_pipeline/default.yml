@@ -403,7 +403,6 @@ processors:
         - crowdstrike.metadata.customerIDString
       target_field: _id
       ignore_missing: true
-
   - script:
       lang: painless
       description: This script processor iterates over the whole document to remove fields with null values.
@@ -432,4 +431,11 @@ processors:
 on_failure:
   - set:
       field: error.message
-      value: '{{ _ingest.on_failure_message }}'
+      value: >-
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+  - set:
+      field: event.kind
+      value: pipeline_error
+
