@@ -13,8 +13,7 @@ processors:
       target_field: json
       ignore_failure: true
       allow_duplicate_keys: true
-
-# according to check apache modesec log or nginx modsec log
+  # according to check apache modesec log or nginx modsec log
   - set:
       field: modsec.audit.server
       copy_from: json.audit_data.server
@@ -29,11 +28,14 @@ processors:
   - pipeline:
       name: '{{ IngestPipeline "apache-modsec" }}'
       if: ctx.modsec.audit.server.toLowerCase().contains('apache')
-
 on_failure:
   - set:
       field: event.kind
       value: pipeline_error
   - append:
       field: error.message
-      value: "{{ _ingest.on_failure_message }}"
+      value: >-
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+
