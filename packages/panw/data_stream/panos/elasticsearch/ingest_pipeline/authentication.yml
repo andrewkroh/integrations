@@ -45,7 +45,6 @@ processors:
         - _temp_.future_use3
         - _temp_.user_agent
         - panw.panos.flow_id
-
   - append:
       field: source.user.name
       value: '{{{_temp_.user}}}'
@@ -58,8 +57,7 @@ processors:
       if: ctx.panw?.panos?.normalize_user != null && ctx.panw.panos.normalize_user != ''
       allow_duplicates: false
       ignore_failure: true
-
-# Set event.kind & event.category field.
+  # Set event.kind & event.category field.
   - set:
       field: event.kind
       value: event
@@ -67,13 +65,11 @@ processors:
       field: event.category
       value:
         - authentication
-
-# Set event.outcome
+  # Set event.outcome
   - set:
       field: event.outcome
       value: success
-
-# Set custom fields to ECS fields
+  # Set custom fields to ECS fields
   - set:
       field: observer.hostname
       copy_from: panw.panos.device_name
@@ -98,7 +94,10 @@ on_failure:
   - append:
       field: error.message
       value: >-
-        error in Authentication pipeline:
-        error in [{{{_ingest.on_failure_processor_type}}}] processor{{{#_ingest.on_failure_processor_tag}}}
-        with tag [{{{_ingest.on_failure_processor_tag}}}]{{{/_ingest.on_failure_processor_tag}}}
-        {{{_ingest.on_failure_message}}}
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+  - set:
+      field: event.kind
+      value: pipeline_error
+

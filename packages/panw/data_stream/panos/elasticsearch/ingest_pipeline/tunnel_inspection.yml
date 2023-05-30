@@ -82,8 +82,7 @@ processors:
         - panw.panos.application.container
         - panw.panos.application.is_saas
         - panw.panos.application.is_sanctioned
-
-# Set event.category.
+  # Set event.category.
   - set:
       field: event.kind
       value: event
@@ -91,9 +90,8 @@ processors:
       field: event.category
       value:
         - network
-
-# Set event.outcome from panw.panos.action: allowable values:
-#  allow, deny, drop, drop ICMP, reset both, reset client, and reset server
+  # Set event.outcome from panw.panos.action: allowable values:
+  #  allow, deny, drop, drop ICMP, reset both, reset client, and reset server
   - set:
       if: ctx.panw?.panos?.action == "allow"
       field: event.outcome
@@ -102,8 +100,7 @@ processors:
       if: ctx.event?.outcome == null || ctx.event.outcome == ""
       field: event.outcome
       value: failure
-
-# Set custom fields to ECS fields
+  # Set custom fields to ECS fields
   - set:
       field: destination.bytes
       copy_from: panw.panos.bytes_received
@@ -216,12 +213,14 @@ processors:
       field: source.packets
       copy_from: panw.panos.packets_sent
       ignore_failure: true
-
 on_failure:
   - append:
       field: error.message
       value: >-
-        error in Tunnel Inspection pipeline:
-        error in [{{{_ingest.on_failure_processor_type}}}] processor{{{#_ingest.on_failure_processor_tag}}}
-        with tag [{{{_ingest.on_failure_processor_tag}}}]{{{/_ingest.on_failure_processor_tag}}}
-        {{{_ingest.on_failure_message}}}
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+  - set:
+      field: event.kind
+      value: pipeline_error
+

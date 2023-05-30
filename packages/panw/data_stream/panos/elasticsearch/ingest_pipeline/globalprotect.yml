@@ -47,7 +47,6 @@ processors:
         - panw.panos.vsys_name
         - panw.panos.device_name
         - panw.panos.vsys_id
-
   - set:
       field: source.ip
       copy_from: panw.panos.private.ip
@@ -68,8 +67,7 @@ processors:
       field: source.nat.ip
       value: '{{{_temp_.public_ipv6}}}'
       if: (ctx.source?.nat?.ip == null || ctx.source.nat.ip == '0.0.0.0') && ctx._temp_?.public_ipv6 != null && ctx._temp_.public_ipv6 != '0.0.0.0'
-
-# Set event.category.
+  # Set event.category.
   - set:
       field: event.kind
       value: event
@@ -77,8 +75,7 @@ processors:
       field: event.category
       value:
         - network
-
-# Set custom fields to ECS fields
+  # Set custom fields to ECS fields
   - set:
       field: event.code
       copy_from: panw.panos.event.id
@@ -131,12 +128,14 @@ processors:
       field: panw.panos.private.ipv6
       copy_from: _temp_.private_ipv6
       ignore_failure: true
-
 on_failure:
   - append:
       field: error.message
       value: >-
-        error in Global Protect pipeline:
-        error in [{{_ingest.on_failure_processor_type}}}] processor{{{#_ingest.on_failure_processor_tag}}}
-        with tag [{{{_ingest.on_failure_processor_tag }}}]{{{/_ingest.on_failure_processor_tag}}}
-        {{{ _ingest.on_failure_message }}}
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+  - set:
+      field: event.kind
+      value: pipeline_error
+

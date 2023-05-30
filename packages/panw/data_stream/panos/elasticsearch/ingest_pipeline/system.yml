@@ -25,8 +25,7 @@ processors:
         - _temp_.future_use3
         - _temp_.future_use4
         - _temp_.high_res_timestamp
-
-# Set event.kind & event.category field.
+  # Set event.kind & event.category field.
   - set:
       field: event.kind
       value: event
@@ -34,8 +33,7 @@ processors:
       field: event.category
       value:
         - configuration
-
-# Set custom fields to ECS fields
+  # Set custom fields to ECS fields
   - set:
       field: event.code
       copy_from: panw.panos.event.id
@@ -48,12 +46,14 @@ processors:
       field: observer.hostname
       copy_from: panw.panos.device_name
       ignore_failure: true
-
 on_failure:
   - append:
       field: error.message
       value: >-
-        error in System pipeline:
-        error in [{{{_ingest.on_failure_processor_type}}}] processor{{{#_ingest.on_failure_processor_tag}}}
-        with tag [{{{_ingest.on_failure_processor_tag}}}]{{{/_ingest.on_failure_processor_tag}}}
-        {{{_ingest.on_failure_message}}}
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+  - set:
+      field: event.kind
+      value: pipeline_error
+
