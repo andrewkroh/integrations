@@ -20,7 +20,6 @@ processors:
       field: message
       target_field: event.original
       ignore_missing: true
-
   # Parse the syslog header
   #
   # This populates the host.hostname, process.name, timestamp and other fields
@@ -54,7 +53,6 @@ processors:
           facility['code'] = ctx.log.syslog.priority>>3;
           ctx.log.syslog['facility'] = facility;
         }
-
   # Get FortiEDR fields
   - kv:
       field: _temp_.full_message
@@ -137,7 +135,6 @@ processors:
   - rename:
       field: "fortinet.edr.Users"
       target_field: fortinet.edr.users
-
   # Map to ECS fields
   - set:
       field: event.id
@@ -224,7 +221,6 @@ processors:
       field: event.end
       copy_from: fortinet.edr.last_seen
       if: ctx.fortinet?.edr?.last_seen != null
-
   - remove:
       field: event.original
       if: "ctx?.tags == null || !(ctx.tags.contains('preserve_original_event'))"
@@ -237,4 +233,11 @@ processors:
 on_failure:
   - append:
       field: error.message
-      value: "{{ _ingest.on_failure_message }}"
+      value: >-
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+  - set:
+      field: event.kind
+      value: pipeline_error
+
