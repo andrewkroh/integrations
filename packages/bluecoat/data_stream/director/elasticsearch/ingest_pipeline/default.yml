@@ -1,6 +1,5 @@
 ---
 description: Pipeline for Blue Coat Director
-
 processors:
   - set:
       field: ecs.version
@@ -63,5 +62,12 @@ processors:
       ignore_missing: true
 on_failure:
   - append:
-        field: error.message
-        value: "{{ _ingest.on_failure_message }}"
+      field: error.message
+      value: >-
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+  - set:
+      field: event.kind
+      value: pipeline_error
+
