@@ -1,6 +1,5 @@
 ---
 description: Pipeline for CyberArk PAS
-
 processors:
   #
   # Set ECS version.
@@ -8,7 +7,6 @@ processors:
   - set:
       field: ecs.version
       value: '8.7.0'
-
   #
   # Set event.original from message, unless reindexing.
   #
@@ -16,7 +14,6 @@ processors:
       field: message
       target_field: event.original
       if: 'ctx.event?.original == null'
-
   #
   # Parse syslog headers (if any) and extract JSON payload.
   #
@@ -27,12 +24,10 @@ processors:
         # UseLegacySyslogFormat=No
         # <5>1 2021-03-04T17:28:23Z VAULT {"format":"elastic","version":"1.0",...}
         - "^<%{NONNEGINT:log.syslog.priority:long}>%{NONNEGINT} %{TIMESTAMP_ISO8601:_tmp.syslog_ts} %{SYSLOGHOST:_tmp.hostname} %{JSON_PAYLOAD:_tmp.payload}"
-
         # Legacy format.
         # UseLegacySyslogFormat=Yes
         # Mar 08 02:57:42 VAULT {"format":"elastic","version":"1.0",...}
         - "^%{SYSLOGTIMESTAMP:_tmp.syslog_ts} %{SYSLOGHOST:_tmp.hostname} %{JSON_PAYLOAD:_tmp.payload}"
-
         # Catch-all mode, just JSON payload.
         - "%{JSON_PAYLOAD:_tmp.payload}"
       pattern_definitions:
@@ -40,22 +35,18 @@ processors:
       on_failure:
         - fail:
             message: "unexpected event format: {{{_ingest.on_failure_message}}}"
-
   - json:
       field: _tmp.payload
       target_field: _tmp.json
       on_failure:
         - fail:
             message: "malformed JSON event: {{{_ingest.on_failure_message}}}"
-
   - rename:
       field: _tmp.json.syslog.audit_record
       target_field: cyberarkpas.audit
       on_failure:
         - fail:
             message: "unexpected event structure: {{{_ingest.on_failure_message}}}"
-
-
   #
   # Remove all empty fields
   #
@@ -64,12 +55,10 @@ processors:
       description: 'Removes empty audit fields'
       source: >-
         ctx.cyberarkpas.audit.entrySet().removeIf(entry -> entry.getValue() == "");
-
   - rename:
       field: _tmp.json.raw
       target_field: cyberarkpas.audit.raw
       ignore_missing: true
-
   # The following processors populate @timestamp from the different sources that can exist in an event.
   # In the following order of precedence:
   # - IsoTimestamp field (expected ISO8601). Present when new syslog format is used (rfc5424: yes).
@@ -86,7 +75,6 @@ processors:
         - append:
             field: error.message
             value: "failed to parse ISO timestamp field: {{{cyberarkpas.audit.IsoTimestamp}}}: {{{_ingest.on_failure_message}}}"
-
   - date:
       if: 'ctx._tmp.timestamp == null && ctx.cyberarkpas.audit.Timestamp != null'
       field: cyberarkpas.audit.Timestamp
@@ -115,7 +103,6 @@ processors:
         - append:
             field: error.message
             value: "failed to parse timestamp field: {{{cyberarkpas.audit.Timestamp}}}: {{{_ingest.on_failure_message}}}"
-
   - date:
       if: 'ctx._tmp.timestamp == null && ctx._tmp.syslog_ts != null && ctx.event?.timezone == null'
       field: _tmp.syslog_ts
@@ -144,7 +131,6 @@ processors:
         - append:
             field: error.message
             value: "failed to parse legacy syslog timestamp: {{{_tmp.syslog_ts}}}: {{{_ingest.on_failure_message}}}"
-
   - date:
       if: 'ctx._tmp.timestamp == null && ctx._tmp.syslog_ts != null && ctx.event?.timezone != null'
       field: _tmp.syslog_ts
@@ -174,13 +160,11 @@ processors:
         - append:
             field: error.message
             value: "failed to parse legacy syslog timestamp: {{{_tmp.syslog_ts}}}: {{{_ingest.on_failure_message}}}"
-
   - set:
       field: '@timestamp'
       value: '{{{_tmp.timestamp}}}'
       ignore_empty_value: true
       override: true
-
   # This script ensures that CAProperties.CAProperty is an array.
   # When there's a single property, it is serialised as an object instead
   # of a single element array.
@@ -192,8 +176,6 @@ processors:
         if (props != null && props instanceof Map) {
           ctx.cyberarkpas.audit.CAProperties.CAProperty = [ props ];
         }
-
-  # This script converts the nested object under cyberarkpas.audit.CAProperties.CAProperty
   # into an object under cyberarkpas.audit.CAProperties:
   #
   # input:
@@ -226,7 +208,6 @@ processors:
   - remove:
       field: cyberarkpas.audit.CAProperties.CAProperty
       ignore_missing: true
-
   # Parse key-value pairs at ExtraDetails:
   # input:
   #   "cyberarkpas.audit.ExtraDetails": "Command=ls \"/var/tmp\";ConnectionComponentId=PSMP-SSH;DstHost=[...]",
@@ -252,12 +233,10 @@ processors:
   - remove:
       field: cyberarkpas.audit.ExtraDetails
       ignore_missing: true
-
   - rename:
       field: _tmp.kv
       target_field: cyberarkpas.audit.ExtraDetails
       ignore_missing: true
-
   #
   # Convert field names from CamelCase to snake_case.
   #
@@ -302,8 +281,6 @@ processors:
           );
         }
         ctx.cyberarkpas.audit = keys_to_snake_case_recursive(ctx.cyberarkpas.audit);
-
-  #
   # Convert rfc5424 field to boolean.
   #
   - script:
@@ -312,23 +289,18 @@ processors:
       source: >
         def value = ctx.cyberarkpas.audit.rfc5424;
         ctx.cyberarkpas.audit["rfc5424"] = value == 'yes';
-
-  ########################################################
   # ECS enrichment
   #
   # All processors from this point use the snake_case form
   # to access CyberArk fields.
   ########################################################
-
   - set:
       field: event.kind
       value: event
-
   - lowercase:
       field: cyberarkpas.audit.action
       target_field: event.action
       ignore_missing: true
-
   # Severity to number
   #
   # Possible values:
@@ -351,27 +323,22 @@ processors:
       field: event.type
       value: error
       if: 'ctx.event?.severity > 6'
-
   - rename:
       field: cyberarkpas.audit.message_id
       target_field: event.code
       ignore_missing: true
-
   - set:
       field: source.address
       value: '{{{cyberarkpas.audit.station}}}'
       ignore_empty_value: true
-
   - set:
       field: destination.address
       value: '{{{cyberarkpas.audit.gateway_station}}}'
       ignore_empty_value: true
-
   - set:
       field: file.path
       value: '{{{cyberarkpas.audit.file}}}'
       if: 'ctx.cyberarkpas.audit?.file != null'
-
   #
   # Observer fields
   #
@@ -428,10 +395,9 @@ processors:
           - set: event.type
             value: ["error"]
           - set: event.action
-            value:  "authentication_failure"
+            value: "authentication_failure"
           - set: event.outcome
             value: "failure"
-
         # 7 - Logon
         #
         # User logged on to the PVWA.
@@ -439,14 +405,13 @@ processors:
           - set: user.name
             from: cyberarkpas.audit.issuer
           - set: event.category
-            value: [ "authentication", "session"]
+            value: ["authentication", "session"]
           - set: event.type
-            value: [ "start"]
+            value: ["start"]
           - set: event.action
-            value:  "authentication_success"
+            value: "authentication_success"
           - set: event.outcome
             value: "success"
-
         # 8 - Logoff
         #
         # User logged of from the PVWA.
@@ -454,12 +419,11 @@ processors:
           - set: user.name
             from: cyberarkpas.audit.issuer
           - set: event.category
-            value: [ "authentication", "session"]
+            value: ["authentication", "session"]
           - set: event.type
             value: ["end"]
           - set: event.outcome
             value: "success"
-
         # 19 - Full gateway connection.
         "19":
           - set: source.user.name
@@ -474,7 +438,6 @@ processors:
             value: ["start"]
           - set: event.outcome
             value: "success"
-
         # 22 - CPM Verify Password
         #
         # Password on a target host is verified.
@@ -494,13 +457,11 @@ processors:
             value: ["iam"]
           - set: event.type
             value: ["admin", "info"]
-
         # 23 - Action on closed safe
         #
         # Nothing remarkable.
         #
         # "23":
-
         # 24 - CPM Change Password
         "24":
           - set: destination.address # This could be host.* or user.target.* (doesn't exists).
@@ -515,7 +476,6 @@ processors:
             value: ["iam"]
           - set: event.type
             value: ["user", "change"]
-
         # 31 - CPM Reconcile Password
         #
         "31":
@@ -531,7 +491,6 @@ processors:
             value: ["iam"]
           - set: event.type
             value: ["user", "change"]
-
         # 32 - Add Owner
         #
         # Change owner of a Safe.
@@ -542,12 +501,12 @@ processors:
           - set: user.target.name
             from: cyberarkpas.audit.source_user
           - set: event.category
-            value: ["iam"] # How to best model Vault/Safes? An IAM system? A Database?
+            value: ["iam"]
+            # How to best model Vault/Safes? An IAM system? A Database?
           - set: event.type
             value: ["admin", "change"]
           - set: event.outcome
             value: "success"
-
         # 33 - Update Owner
         #
         # Same as above
@@ -557,12 +516,12 @@ processors:
           - set: user.target.name
             from: cyberarkpas.audit.source_user
           - set: event.category
-            value: ["iam"] # How to best model Vault/Safes? An IAM system? A Database?
+            value: ["iam"]
+            # How to best model Vault/Safes? An IAM system? A Database?
           - set: event.type
             value: ["admin", "change"]
           - set: event.outcome
             value: "success"
-
         # 38 - CPM Verify Password Failed
         #
         # Like 22 but failed.
@@ -584,7 +543,6 @@ processors:
             value: ["iam"]
           - set: event.type
             value: ["error"]
-
         # 50 - Store File
         #
         # I don't think it makes much sense to enrich Vault file events as "file" category.
@@ -592,7 +550,6 @@ processors:
         # Then these file events may be treated as file events in SIEM, which can have
         # unwanted consequences.
         # "50":
-
         # 57 - CPM Change Password Failed
         "57":
           - set: destination.address # This could be host.* or user.target.* (doesn't exists).
@@ -609,7 +566,6 @@ processors:
             value: ["user", "change", "error"]
           - set: event.reason
             from: cyberarkpas.audit.ca_properties.cpm_error_details
-
         # 60 - CPM Reconcile Password Failed
         "60":
           - set: destination.address # This could be host.* or user.target.* (doesn't exists).
@@ -626,7 +582,6 @@ processors:
             value: ["user", "change", "error"]
           - set: event.reason
             from: cyberarkpas.audit.ca_properties.cpm_error_details
-
         # 130 - CPM Disable Password
         "130":
           - set: event.outcome
@@ -643,7 +598,6 @@ processors:
             from: cyberarkpas.audit.ca_properties.cpm_error_details
           - set: event.outcome
             from: cyberarkpas.audit.ca_properties.cpm_status
-
         # 174 - Change User (untested)
         "174":
           - set: user.target.name
@@ -654,7 +608,6 @@ processors:
             value: ["iam"]
           - set: event.outcome
             value: "success"
-
         # 175 - Change Your User (untested)
         "175":
           - set: user.target.name
@@ -665,7 +618,6 @@ processors:
             value: ["iam"]
           - set: event.outcome
             value: "success"
-
         # 176 - Delete User (untested)
         "176":
           - set: user.target.name
@@ -676,7 +628,6 @@ processors:
             value: ["iam"]
           - set: event.outcome
             value: "success"
-
         # 177 - Delete Your User (untested)
         "177":
           - set: user.target.name
@@ -687,7 +638,6 @@ processors:
             value: ["iam"]
           - set: event.outcome
             value: "success"
-
         # 173 - Add User (alternative to 180, untested)
         "173":
           - set: user.target.name
@@ -698,7 +648,6 @@ processors:
             value: ["iam"]
           - set: event.outcome
             value: "success"
-
         # 180 - Add User
         "180":
           - set: user.target.name
@@ -709,7 +658,6 @@ processors:
             value: ["iam"]
           - set: event.outcome
             value: "success"
-
         # 295 - Retrieve Password succeeded
         "295":
           - set: destination.address
@@ -728,7 +676,6 @@ processors:
             value: "success"
           - set: event.reason
             from: cyberarkpas.audit.reason
-
         # 300 - PSM Connect
         "300":
           - set: destination.address
@@ -749,7 +696,6 @@ processors:
             value: ["start"]
           - set: event.outcome
             value: "success"
-
         # 302 - PSM Disconnect
         "302":
           - set: destination.address
@@ -772,7 +718,6 @@ processors:
             value: ["end"]
           - set: event.outcome
             value: "success"
-
         # 308 - Use Password
         "308":
           - set: destination.address
@@ -791,7 +736,6 @@ processors:
             from: cyberarkpas.audit.ca_properties.cpm_status
           - set: event.reason
             from: cyberarkpas.audit.reason
-
         # 309 - Undefined user logon
         #
         "309":
@@ -802,10 +746,9 @@ processors:
           - set: event.type
             value: ["error"]
           - set: event.action
-            value:  "authentication_failure"
+            value: "authentication_failure"
           - set: event.outcome
             value: "failure"
-
         # 361 - Keystroke logging
         "361":
           - set: destination.address
@@ -824,7 +767,6 @@ processors:
             value: ["session"]
           - set: event.type
             value: ["info"]
-
         # 412 - Keystroke logging (same as 361?)
         "412":
           - set: destination.address
@@ -843,7 +785,6 @@ processors:
             value: ["session"]
           - set: event.type
             value: ["info"]
-
         # 359 - SQL Command
         "359":
           - set: destination.address
@@ -864,7 +805,6 @@ processors:
             value: ["access"]
           - set: event.outcome
             from: cyberarkpas.audit.ca_properties.cpm_status
-
         # 411 - Window Title
         "411":
           - set: destination.address
@@ -887,7 +827,6 @@ processors:
             value: ["process"]
           - set: event.type
             value: ["access", "info"]
-
         # 414 - CPM Verify SSH Key
         #
         # SSH-key on a target host is verified.
@@ -907,7 +846,6 @@ processors:
             value: ["iam"]
           - set: event.type
             value: ["admin", "info"]
-
         # 428 - Retrieve SSH Key
         "428":
           - set: destination.address
@@ -926,7 +864,6 @@ processors:
             value: "success"
           - set: event.reason
             from: cyberarkpas.audit.reason
-
       source: >
         def clone(def val) {
             return val instanceof List? new ArrayList(val) : val;
@@ -950,7 +887,6 @@ processors:
           ]);
         }
         if (!values.isEmpty()) ctx._tmp["values"] = values;
-
   - foreach:
       field: _tmp.values
       ignore_missing: true
@@ -960,7 +896,6 @@ processors:
           copy_from: '_ingest._value.value'
           ignore_empty_value: true
           override: true
-
   #
   # Force event.outcome: unknown in case it gets a value other than one of the allowed.
   #
@@ -968,8 +903,6 @@ processors:
       field: event.outcome
       value: 'unknown'
       if: 'ctx.event?.outcome != null && !["success", "failure"].contains(ctx.event.outcome)'
-
-
   #
   # Set event.duration from the session duration ("hh:mm:ss") present in some messages.
   #
@@ -994,8 +927,6 @@ processors:
         }
         long nanos = parse_hms(ctx._tmp.duration_hms) * 1000000000L;
         ctx.event['duration'] = nanos;
-
-  #
   # Populate ip/domain fields from address.
   #
   - convert:
@@ -1016,7 +947,6 @@ processors:
         - set:
             field: destination.domain
             copy_from: destination.address
-
   #
   # Populate related.ip
   #
@@ -1040,7 +970,6 @@ processors:
       value: '{{{cyberarkpas.audit.gateway_station}}}'
       if: 'ctx.cyberarkpas.audit.gateway_station != null'
       allow_duplicates: false
-
   #
   # Populate related.user
   #
@@ -1064,24 +993,20 @@ processors:
       value: '{{{user.target.name}}}'
       if: 'ctx.user?.target?.name != null'
       allow_duplicates: false
-
   #
   # sometimes application is capitalized.
   #
   - lowercase:
       field: network.application
       ignore_missing: true
-
   - geoip:
       field: source.ip
       target_field: source.geo
       ignore_missing: true
-
   - geoip:
       field: destination.ip
       target_field: destination.geo
       ignore_missing: true
-
   #
   # Set host.name
   # This sets host.name from observer.hostname when the original event from Filebeat didn't
@@ -1092,19 +1017,16 @@ processors:
       value: '{{{observer.hostname}}}'
       ignore_empty_value: true
       if: 'ctx.host?.name == null'
-
   - network_direction:
       ignore_missing: true
       internal_networks:
         - loopback
         - private
         - unspecified
-
   - convert:
       field: process.pid
       type: long
       ignore_missing: true
- 
   #
   # Save only interesting fields under extra_fields and ca_properties
   # to prevent mapping explosion. Keep the rest under .other (type flattened).
@@ -1170,7 +1092,6 @@ processors:
           selected['other'] = base;
           audit[lst.getKey()] = selected;
         });
-  #
   # Cleanup
   #
   - remove:
@@ -1184,10 +1105,14 @@ processors:
 on_failure:
   - append:
       field: error.message
-      value: '{{{_ingest.on_failure_message}}}'
+      value: >-
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
   - remove:
       field: _tmp
       ignore_missing: true
   - set:
       field: event.kind
       value: pipeline_error
+
