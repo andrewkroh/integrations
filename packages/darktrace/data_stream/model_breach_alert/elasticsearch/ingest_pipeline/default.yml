@@ -45,7 +45,7 @@ processors:
       lang: painless
       if: ctx.json?.triggeredComponents instanceof List
       ignore_failure: true
-      source:
+      source: |
         for (component in ctx.json.triggeredComponents) {
           if (component?.metric?.label?.toLowerCase().contains('connection')) {
             ctx.event?.type?.add('connection');
@@ -802,7 +802,7 @@ processors:
       params:
         componentList: data_component_list
         weightedComponentList: data_weighted_component_list
-      source:
+      source: |
         def data = ctx.json.model.logic.data;
         if (ctx.json.model.logic?.type != null) {
           if (['componentList', 'weightedComponentList'].contains(ctx.json.model.logic?.type)) {
@@ -1018,7 +1018,7 @@ processors:
       description: Normalize event.risk_score to event.risk_score_norm
       lang: painless
       if: ctx.event?.risk_score != null
-      source:
+      source: |
         def normalizedRiskScore = ctx.event.risk_score * 100.0;
         ctx.event.risk_score_norm = normalizedRiskScore;
   - date:
@@ -1105,7 +1105,7 @@ processors:
       lang: painless
       if: ctx.json?.triggeredComponents instanceof List
       ignore_failure: true
-      source:
+      source: |
         for (component in ctx.json.triggeredComponents) {
           component.logic.data = component?.logic?.data.toString();
         }
@@ -1426,7 +1426,7 @@ processors:
   - script:
       description: Drops null/empty values recursively.
       lang: painless
-      source:
+      source: |
         boolean dropEmptyFields(Object object) {
           if (object == null || object == "") {
             return true;
@@ -1443,4 +1443,11 @@ processors:
 on_failure:
   - append:
       field: error.message
-      value: '{{{ _ingest.on_failure_message }}}'
+      value: >-
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+  - set:
+      field: event.kind
+      value: pipeline_error
+

@@ -622,7 +622,7 @@ processors:
       ignore_failure: true
       params:
         NANOS_IN_A_MILLI_SECOND: 1000000
-      source:
+      source: |
         def duration = new ArrayList();
         for (event in ctx.json.periods) {
           duration.add((event?.end - event?.start) * params.NANOS_IN_A_MILLI_SECOND);
@@ -836,7 +836,7 @@ processors:
   - script:
       description: Drops null/empty values recursively.
       lang: painless
-      source:
+      source: |
         boolean dropEmptyFields(Object object) {
           if (object == null || object == "") {
             return true;
@@ -853,4 +853,11 @@ processors:
 on_failure:
   - append:
       field: error.message
-      value: '{{{ _ingest.on_failure_message }}}'
+      value: >-
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+  - set:
+      field: event.kind
+      value: pipeline_error
+
