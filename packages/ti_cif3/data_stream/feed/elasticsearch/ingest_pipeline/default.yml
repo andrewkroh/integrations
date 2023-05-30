@@ -16,7 +16,6 @@ processors:
   - set:
       field: event.type
       value: indicator
-
   ######################
   # General ECS fields #
   ######################
@@ -27,7 +26,6 @@ processors:
   - json:
       field: event.original
       target_field: cif3
-
   #####################
   # Threat ECS Fields #
   #####################
@@ -98,8 +96,7 @@ processors:
       value: "{{{ _tmp.hashvalue }}}"
       ignore_failure: true
       if: "ctx.threat?.indicator?.type == 'file' && ctx?.threat?.indicator?.file?.pe?.imphash == null"
-
-   ## ASN indicator operations
+  ## ASN indicator operations
   - set:
       field: threat.indicator.type
       value: autonomous-system
@@ -110,7 +107,6 @@ processors:
         - "as(?:%{INT:threat.indicator.as.number})"
       ignore_failure: true
       if: "ctx.cif3?.itype == 'asn'"
-
   ## IP indicator operations
   - set:
       field: threat.indicator.type
@@ -170,7 +166,6 @@ processors:
       target_field: threat.indicator.geo.timezone
       ignore_missing: true
       if: "ctx.threat?.indicator?.type != null && ['ipv4-addr', 'ipv6-addr'].contains(ctx.threat.indicator.type) && ctx.cif3?.timezone != null"
-
   ## URL indicator operations
   - set:
       field: threat.indicator.type
@@ -194,7 +189,6 @@ processors:
         - "%{URIPROTO:threat.indicator.url.scheme}://(?:%{IPV4:threat.indicator.ip}|\\[?%{IPV6:threat.indicator.ip}\\]?|%{HOSTNAME:threat.indicator.url.domain})(?::%{POSINT:threat.indicator.url.port})?(?:%{URIPATH:threat.indicator.url.path})?.*"
       ignore_failure: true
       if: "ctx.cif3?.itype == 'url'"
-
   ## Email indicator operations
   - set:
       field: threat.indicator.type
@@ -211,12 +205,11 @@ processors:
         - "%{USERNAME}@%{GREEDYDATA:threat.indicator.url.domain}"
       ignore_failure: true
       if: "ctx.threat?.indicator?.type == 'email-addr'"
-
   ## Domain indicator operations
   - set:
       field: threat.indicator.type
       value: domain-name
-      if:  "ctx.cif3?.itype == 'fqdn'"
+      if: "ctx.cif3?.itype == 'fqdn'"
   - rename:
       field: cif3.indicator
       target_field: threat.indicator.url.domain
@@ -226,7 +219,6 @@ processors:
       field: related.hosts
       value: "{{{ threat.indicator.url.domain }}}"
       if: ctx?.threat?.indicator?.url?.domain != null
-
   ######################
   #     Confidence     #
   ######################
@@ -252,8 +244,6 @@ processors:
           ctx.threat.indicator.confidence = "High";
           return;
         }
-
-  ###################
   # Tags ECS fields #
   ###################
   - foreach:
@@ -265,23 +255,21 @@ processors:
           value: "{{_ingest._value}}"
           allow_duplicates: false
       if: ctx.cif3?.tags != null
-
   ## Misc
   - rename:
       field: cif3.protocol
       target_field: network.transport
-      if:  ctx.cif3?.protocol != null
+      if: ctx.cif3?.protocol != null
   - rename:
       field: cif3.application
       target_field: network.protocol
-      if:  ctx.cif3?.application != null
+      if: ctx.cif3?.application != null
   - rename:
       field: cif3.port
       target_field: threat.indicator.port
       # sometimes contains a range like 1000-1002 or CSVs like 10,22,52
       ignore_failure: true
-      if:  ctx.cif3?.port != null
-
+      if: ctx.cif3?.port != null
   ######################
   # Cleanup processors #
   ######################
@@ -343,4 +331,11 @@ processors:
 on_failure:
   - set:
       field: error.message
-      value: "{{ _ingest.on_failure_message }}"
+      value: >-
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+  - set:
+      field: event.kind
+      value: pipeline_error
+
