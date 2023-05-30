@@ -1,6 +1,5 @@
 ---
 description: Pipeline for Office 365 Audit logs
-
 processors:
   - set:
       field: ecs.version
@@ -179,15 +178,15 @@ processors:
           }
           ctx.event.code = schema;
         }
-  - set: 
+  - set:
       field: event.outcome
       value: success
       if: 'ctx.o365audit?.ResultStatus != null && ["succeeded", "success", "partiallysucceeded", "true"].contains(ctx.o365audit?.ResultStatus.toLowerCase())'
-  - set: 
+  - set:
       field: event.outcome
       value: failure
       if: 'ctx.o365audit?.ResultStatus != null && ["failed", "false"].contains(ctx.o365audit?.ResultStatus.toLowerCase())'
-  - set: 
+  - set:
       field: event.outcome
       value: success
       if: ctx.event?.outcome == null
@@ -246,7 +245,6 @@ processors:
           return;
         }
         ctx.o365audit.ModifiedProperties = newparams;
-
   - rename:
       field: o365audit.ModifiedProperties
       target_field: o365audit.ModifiedProperties._raw
@@ -267,19 +265,19 @@ processors:
           return;
         }
         ctx.o365audit.AlertLinks = links;
-  - set: 
+  - set:
       field: event.severity
       value: 1
       if: ctx.o365audit?.Severity == "informational"
-  - set: 
+  - set:
       field: event.severity
       value: 2
       if: ctx.o365audit?.Severity == "low"
-  - set: 
+  - set:
       field: event.severity
       value: 3
       if: ctx.o365audit?.Severity == "medium"
-  - set: 
+  - set:
       field: event.severity
       value: 4
       if: ctx.o365audit?.Severity == "high"
@@ -332,71 +330,71 @@ processors:
       ignore_missing: true
       if: ctx.event?.code == "ExchangeItem"
   # AzureActiveDirectory Schema
-  - set: 
+  - set:
       field: user.target.id
       copy_from: o365audit.ObjectId
       if: ctx.event?.code == "AzureActiveDirectory"
   ## AzureActiveDirectory Schema new user
-  - set: 
+  - set:
       field: event.action
       value: added-user-account
       if: 'ctx.event?.code == "AzureActiveDirectory" && ctx.event?.action == "Add user."'
-  - append: 
+  - append:
       field: event.category
       value: iam
       if: 'ctx.event?.code == "AzureActiveDirectory" && ctx.event?.action == "added-user-account"'
-  - append: 
+  - append:
       field: event.type
       value: user
       if: 'ctx.event?.code == "AzureActiveDirectory" && ctx.event?.action == "added-user-account"'
-  - append: 
+  - append:
       field: event.type
       value: creation
       if: 'ctx.event?.code == "AzureActiveDirectory" && ctx.event?.action == "added-user-account"'
   ## AzureActiveDirectory Schema update user
-  - set: 
+  - set:
       field: event.action
       value: modified-user-account
       if: 'ctx.event?.code == "AzureActiveDirectory" && ctx.event?.action == "Update user."'
-  - append: 
+  - append:
       field: event.category
       value: iam
       if: 'ctx.event?.code == "AzureActiveDirectory" && ctx.event?.action == "modified-user-account"'
-  - append: 
+  - append:
       field: event.type
       value: user
       if: 'ctx.event?.code == "AzureActiveDirectory" && ctx.event?.action == "modified-user-account"'
-  - append: 
+  - append:
       field: event.type
       value: change
       if: 'ctx.event?.code == "AzureActiveDirectory" && ctx.event?.action == "modified-user-account"'
   ## AzureActiveDirectory Schema delete user
-  - set: 
+  - set:
       field: event.action
       value: deleted-user-account
       if: 'ctx.event?.code == "AzureActiveDirectory" && ctx.event?.action == "Delete user."'
-  - append: 
+  - append:
       field: event.category
       value: iam
       if: 'ctx.event?.code == "AzureActiveDirectory" && ctx.event?.action == "deleted-user-account"'
-  - append: 
+  - append:
       field: event.type
       value: user
       if: 'ctx.event?.code == "AzureActiveDirectory" && ctx.event?.action == "deleted-user-account"'
-  - append: 
+  - append:
       field: event.type
       value: deletion
       if: 'ctx.event?.code == "AzureActiveDirectory" && ctx.event?.action == "deleted-user-account"'
   # AzureActiveDirectoryStsLogon Schema
-  - append: 
+  - append:
       field: event.category
       value: authentication
       if: ctx.event?.code == "AzureActiveDirectoryStsLogon"
-  - append: 
+  - append:
       field: event.type
       value: start
       if: ctx.event?.code == "AzureActiveDirectoryStsLogon"
-  - append: 
+  - append:
       field: event.type
       value: access
       if: 'ctx.event?.code == "AzureActiveDirectoryStsLogon"'
@@ -421,27 +419,27 @@ processors:
       target_field: file.extension
       ignore_missing: true
       if: ctx.event?.code != null && ["SharePointFileOperation", "SharePointSharingOperation"].contains(ctx.event.code)
-  - append: 
+  - append:
       field: event.category
       value: file
       if: 'ctx.event?.action != null && ["FileAccessed", "FileDeleted", "FileDownloaded", "FileModified", "FileMoved", "FileRenamed", "FileRestored", "FileUploaded", "FolderCopied", "FolderCreated", "FolderDeleted", "FolderModified", "FolderMoved", "FolderRenamed", "FolderRestored"].contains(ctx.event?.action)'
-  - append: 
+  - append:
       field: event.category
       value: configuration
       if: ctx.event?.action == "ComplianceSettingChanged"
-  - append: 
+  - append:
       field: event.type
       value: access
       if: 'ctx.event?.action != null && ["FileAccessed", "FileDownloaded"].contains(ctx.event?.action)'
-  - append: 
+  - append:
       field: event.type
       value: change
       if: 'ctx.event?.action != null && ["ComplianceSettingChanged", "FileModified", "FileMoved", "FileRenamed", "FileRestored", "FolderModified", "FolderMoved", "FolderRenamed", "FolderRestored"].contains(ctx.event?.action)'
-  - append: 
+  - append:
       field: event.type
       value: deletion
       if: 'ctx.event?.action != null && ["FileDeleted", "FolderDeleted"].contains(ctx.event?.action)'
-  - append: 
+  - append:
       field: event.type
       value: creation
       if: 'ctx.event?.action != null && ["FileUploaded", "FolderCopied", "FolderCreated"].contains(ctx.event?.action)'
@@ -481,33 +479,33 @@ processors:
       target_field: rule.reference
       ignore_missing: true
       if: ctx.event?.code == "SecurityComplianceAlerts"
-  - set: 
+  - set:
       field: event.kind
       value: alert
       if: ctx.event?.code == "SecurityComplianceAlerts"
-  - append: 
+  - append:
       field: event.category
       value: authentication
       if: 'ctx.event?.code == "SecurityComplianceAlerts" && ctx.o365audit?.Category == "AccessGovernance"'
-  - append: 
+  - append:
       field: event.category
       value: file
       if: 'ctx.event?.code == "SecurityComplianceAlerts" && ctx.o365audit?.Category != null && ["DataGovernance", "DataLossPrevention"].contains(ctx.o365audit?.Category)'
-  - append: 
+  - append:
       field: event.category
       value: malware
       if: 'ctx.event?.code == "SecurityComplianceAlerts" && ctx.o365audit?.Category == "ThreatManagement"'
-  - append: 
+  - append:
       field: event.category
       value: authentication
       allow_duplicates: false
       if: 'ctx.event?.code == "SecurityComplianceAlerts" && ctx.o365audit?.Category != null && !["DataGovernance", "DataLossPrevention", "ThreatManagement", "AccessGovernance"].contains(ctx.o365audit?.Category)'
-  - append: 
+  - append:
       field: event.category
       value: web
       allow_duplicates: false
       if: ctx.event?.code == "SecurityComplianceAlerts"
-  - append: 
+  - append:
       field: event.type
       value: info
       allow_duplicates: false
@@ -529,15 +527,15 @@ processors:
       ignore_missing: true
       if: 'ctx.event?.code == "SecurityComplianceAlerts" && ctx.rule?.ruleset == "MalwareFamily"'
   # DLP Schema
-  - set: 
+  - set:
       field: event.kind
       value: alert
       if: 'ctx.event?.code != null && ["ComplianceDLPSharePoint", "ComplianceDLPExchange"].contains(ctx.event?.code)'
-  - append: 
+  - append:
       field: event.category
       value: file
       if: 'ctx.event?.code != null && ["ComplianceDLPSharePoint", "ComplianceDLPExchange"].contains(ctx.event?.code)'
-  - append: 
+  - append:
       field: event.type
       value: access
       if: 'ctx.event?.code != null && ["ComplianceDLPSharePoint", "ComplianceDLPExchange"].contains(ctx.event?.code)'
@@ -705,7 +703,6 @@ processors:
           return;
         }
         ctx.event.outcome = "failure";
-  # Yammer Schema
   - rename:
       field: o365audit.ActorUserId
       target_field: user.email
@@ -742,56 +739,56 @@ processors:
       target_field: destination.user.id
       ignore_missing: true
       if: ctx.event?.code == "Yammer"
-  - append: 
+  - append:
       field: event.category
       value: configuration
       if: 'ctx.event?.code == "Yammer" && ctx.event?.action != null && ["NetworkConfigurationUpdated", "NetworkSecurityConfigurationUpdated", "SoftDeleteSettingsUpdated", "ProcessProfileFields", "SupervisorAdminToggled"].contains(ctx.event?.action)'
-  - append: 
+  - append:
       field: event.category
       value: iam
       if: 'ctx.event?.code == "Yammer" && ctx.event?.action != null && ["NetworkSecurityConfigurationUpdated", "GroupCreation", "GroupDeletion", "NetworkUserSuspended", "UserSuspension"].contains(ctx.event?.action)'
-  - append: 
+  - append:
       field: event.category
       value: file
       if: 'ctx.event?.code == "Yammer" && ctx.event?.action != null && ["FileCreated", "FileDownloaded", "FileShared", "FileUpdateDescription", "FileUpdateName", "FileVisited"].contains(ctx.event?.action)'
-  - append: 
+  - append:
       field: event.type
       value: change
       if: 'ctx.event?.code == "Yammer" && ctx.event?.action != null && ["NetworkConfigurationUpdated", "NetworkSecurityConfigurationUpdated", "SoftDeleteSettingsUpdated", "ProcessProfileFields", "SupervisorAdminToggled"].contains(ctx.event?.action)'
-  - append: 
+  - append:
       field: event.type
       value: admin
       if: 'ctx.event?.code == "Yammer" && ctx.event?.action == "NetworkSecurityConfigurationUpdated"'
-  - append: 
+  - append:
       field: event.type
       value: creation
       if: 'ctx.event?.code == "Yammer" && ctx.event?.action != null && ["FileCreated", "GroupCreation", "FileUpdateName"].contains(ctx.event?.action)'
-  - append: 
+  - append:
       field: event.type
       value: deletion
       if: 'ctx.event?.code == "Yammer" && ctx.event?.action == "GroupDeletion"'
-  - append: 
+  - append:
       field: event.type
       value: access
       if: 'ctx.event?.code == "Yammer" && ctx.event?.action != null && ["FileDownloaded", "FileShared", "FileUpdateDescription", "FileVisited"].contains(ctx.event?.action)'
-  - append: 
+  - append:
       field: event.type
       value: group
       if: 'ctx.event?.code == "Yammer" && ctx.event?.action != null && ["GroupCreation", "GroupDeletion"].contains(ctx.event?.action)'
   # Teams Schema
-  - set: 
+  - set:
       field: event.action
       value: added-group-account-to
       if: 'ctx.event?.code == "MicrosoftTeams" && ctx.event?.action == "TeamCreated"'
-  - append: 
+  - append:
       field: event.category
       value: iam
       if: 'ctx.event?.code == "MicrosoftTeams" && ctx.event?.action == "added-group-account-to"'
-  - append: 
+  - append:
       field: event.type
       value: group
       if: 'ctx.event?.code == "MicrosoftTeams" && ctx.event?.action == "added-group-account-to"'
-  - append: 
+  - append:
       field: event.type
       value: creation
       if: 'ctx.event?.code == "MicrosoftTeams" && ctx.event?.action == "added-group-account-to"'
@@ -800,35 +797,35 @@ processors:
       target_field: group.name
       ignore_missing: true
       if: ctx.event?.code == "MicrosoftTeams"
-  - set: 
+  - set:
       field: event.action
       value: added-users-to-group
       if: 'ctx.event?.code == "MicrosoftTeams" && ctx.event?.action == "MemberAdded"'
-  - append: 
+  - append:
       field: event.category
       value: iam
       if: 'ctx.event?.code == "MicrosoftTeams" && ctx.event?.action == "added-users-to-group"'
-  - append: 
+  - append:
       field: event.type
       value: group
       if: 'ctx.event?.code == "MicrosoftTeams" && ctx.event?.action == "added-users-to-group"'
-  - append: 
+  - append:
       field: event.type
       value: change
       if: 'ctx.event?.code == "MicrosoftTeams" && ctx.event?.action == "added-users-to-group"'
-  - set: 
+  - set:
       field: event.action
       value: deleted-user-account
       if: 'ctx.event?.code == "MicrosoftTeams" && ctx.event?.action == "Delete user."'
-  - append: 
+  - append:
       field: event.category
       value: iam
       if: 'ctx.event?.code == "MicrosoftTeams" && ctx.event?.action == "deleted-user-account"'
-  - append: 
+  - append:
       field: event.type
       value: user
       if: 'ctx.event?.code == "MicrosoftTeams" && ctx.event?.action == "deleted-user-account"'
-  - append: 
+  - append:
       field: event.type
       value: deletion
       if: 'ctx.event?.code == "MicrosoftTeams" && ctx.event?.action == "deleted-user-account"'
@@ -860,7 +857,7 @@ processors:
       ignore_missing: true
   - grok:
       field: client._temp
-      patterns: 
+      patterns:
         - '%{IPANDPORTBRACKETS}'
         - '^%{IP:client.address}$'
         - '^\[%{IP:client.address}\]$'
@@ -881,7 +878,7 @@ processors:
       if: 'ctx.client?._temp != null && !ctx.client?._temp.isEmpty()'
   - gsub:
       field: server._temp
-      pattern: "[\n\r]"
+      pattern: "[\n\\r]"
       replacement: ""
       ignore_missing: true
   - grok:
@@ -910,7 +907,7 @@ processors:
       target_field: server.ip
       type: ip
       ignore_failure: true
-  - remove: 
+  - remove:
       field:
         - client._port
         - client._temp
@@ -1110,4 +1107,11 @@ processors:
 on_failure:
   - set:
       field: error.message
-      value: '{{ _ingest.on_failure_message }}'
+      value: >-
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+  - set:
+      field: event.kind
+      value: pipeline_error
+
