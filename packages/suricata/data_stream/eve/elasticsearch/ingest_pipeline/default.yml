@@ -1,6 +1,5 @@
 ---
 description: Pipeline for parsing Suricata EVE logs
-
 processors:
   - set:
       field: ecs.version
@@ -29,7 +28,6 @@ processors:
       field: suricata.eve.ether.src_mac
       target_field: source.mac
       ignore_missing: true
-
   # Format source.mac address.
   - gsub:
       field: source.mac
@@ -44,7 +42,6 @@ processors:
   - uppercase:
       field: source.mac
       ignore_missing: true
-
   # Format destination.mac address.
   - gsub:
       field: destination.mac
@@ -59,12 +56,11 @@ processors:
   - uppercase:
       field: destination.mac
       ignore_missing: true
-
   # Format host.mac addresses.
   - script:
       lang: painless
       if: ctx.host?.mac != null
-      source:
+      source: |
         def fixup(ArrayList macs) {
           for (def i = 0; i < macs.length; i++) {
             macs[i] = macs[i].replace(':','-').toUpperCase();
@@ -72,7 +68,6 @@ processors:
           return macs;
         }
         ctx.host['mac'] = fixup(ctx.host?.mac);
-
   - rename:
       field: suricata.eve.src_ip
       target_field: source.address
@@ -216,7 +211,6 @@ processors:
           type:
             - protocol
           network_protocol: rdp
-
       source: |
         ctx.event.kind = 'event';
         ctx.event.category = ['network'];
@@ -237,7 +231,6 @@ processors:
                 ctx.event[k] = v;
             }
         });
-
   ## Anomaly and Alert
   - lowercase:
       field: suricata.eve.app_proto
@@ -353,7 +346,6 @@ processors:
   - lowercase:
       field: network.transport
       ignore_missing: true
-
   # Suricata alert and metadata
   - convert:
       field: suricata.eve.alert.category
@@ -375,7 +367,7 @@ processors:
   - set:
       field: suricata.eve.alert.action
       value: denied
-      if:  "ctx?.suricata?.eve?.alert?.action == 'blocked'"
+      if: "ctx?.suricata?.eve?.alert?.action == 'blocked'"
   - append:
       field: event.type
       value: "{{{suricata.eve.alert.action}}}"
@@ -681,4 +673,11 @@ processors:
 on_failure:
   - set:
       field: error.message
-      value: '{{{ _ingest.on_failure_message }}}'
+      value: >-
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+  - set:
+      field: event.kind
+      value: pipeline_error
+

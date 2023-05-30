@@ -1,6 +1,5 @@
 ---
 description: Pipeline for Suricata DNS answers v1
-
 # Suricata DNS v1 events contain a single answer. Multiple events are created
 # to represent all of the answers.
 processors:
@@ -36,4 +35,11 @@ processors:
 on_failure:
   - set:
       field: error.message
-      value: '{{{ _ingest.on_failure_message }}}'
+      value: >-
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+  - set:
+      field: event.kind
+      value: pipeline_error
+

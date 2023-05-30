@@ -1,6 +1,5 @@
 ---
 description: Pipeline for Suricata TLS Events
-
 processors:
   - dissect:
       field: suricata.eve.tls.version
@@ -95,7 +94,6 @@ processors:
       field: suricata.eve.tls.kv_issuerdn.ST
       target_field: tls.server.x509.issuer.state_or_province
       ignore_missing: true
-
   - convert:
       field: suricata.eve.tls.session_resumed
       target_field: tls.resumed
@@ -186,4 +184,11 @@ processors:
 on_failure:
   - set:
       field: error.message
-      value: '{{{ _ingest.on_failure_message }}}'
+      value: >-
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+  - set:
+      field: event.kind
+      value: pipeline_error
+
