@@ -16,7 +16,6 @@ processors:
   - set:
       field: event.type
       value: indicator
-
   ######################
   # General ECS fields #
   ######################
@@ -48,7 +47,6 @@ processors:
       value: "{{misp.event.Orgc.name}}"
       if: ctx.misp?.event?.Orgc?.local == 'false'
       ignore_empty_value: true
-
   # Removing fields not needed anymore, either because its copied somewhere else, or is not relevant to this event
   - remove:
       field:
@@ -110,7 +108,6 @@ processors:
       field: misp.event.Tag
       target_field: misp.tag
       ignore_missing: true
-
   # # Dance around issue of not being able to split the document into two.
   # # Make the Object.Attribute field primary if it exists, but keep the
   # # outer Attribute as context.
@@ -124,7 +121,6 @@ processors:
       target_field: misp.attribute
       ignore_missing: true
       if: ctx.misp?.object != null
-
   - date:
       field: misp.attribute.timestamp
       target_field: misp.attribute.timestamp
@@ -167,7 +163,6 @@ processors:
         - append:
             field: error.message
             value: 'Processor {{{_ingest.on_failure_processor_type}}} with tag fail-{{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}'
-
   #####################
   # Threat ECS Fields #
   #####################
@@ -191,7 +186,6 @@ processors:
       field: misp.event.threat_level_id
       type: long
       ignore_missing: true
-
   ## File/Hash indicator operations
   - set:
       field: threat.indicator.type
@@ -223,7 +217,6 @@ processors:
       field: threat.indicator.file.hash.{{_tmp.hashtype}}
       value: "{{_tmp.hashvalue}}"
       if: "ctx.misp?.attribute?.type != null && ctx.misp.attribute.type.startsWith('filename|') && ctx._tmp?.hashvalue != null && ctx._tmp.hashtype != null"
-
   ## URL/URI indicator operations
   - set:
       field: threat.indicator.type
@@ -240,7 +233,6 @@ processors:
       value: "{{{threat.indicator.url.original}}}"
       ignore_empty_value: true
       if: "ctx.threat?.indicator?.type == 'url' && ctx.misp?.attribute?.type != 'uri'"
-
   ## Regkey indicator operations
   - set:
       field: threat.indicator.type
@@ -257,7 +249,6 @@ processors:
         - "%{DATA:threat.indicator.registry.key}\\|%{DATA:threat.indicator.registry.value}"
       ignore_missing: true
       if: "ctx.misp?.attribute?.type == 'regkey|value'"
-
   ## AS indicator operations
   - set:
       field: threat.indicator.type
@@ -269,7 +260,6 @@ processors:
       target_field: threat.indicator.as.number
       ignore_missing: true
       if: ctx.threat?.indicator?.type == 'autonomous-system'
-
   ## Domain/IP/Port indicator operations
   - set:
       field: threat.indicator.type
@@ -301,7 +291,6 @@ processors:
         - "%{IP:threat.indicator.ip}\\|%{NUMBER:threat.indicator.port}"
       ignore_missing: true
       if: "['ip-src|port', 'ip-dst|port'].contains(ctx.misp?.attribute?.type)"
-
   ## Email indicator operations
   # Currently this ignores email-message, except setting the type it will leave the rest of the fields under misp.
   - set:
@@ -325,7 +314,6 @@ processors:
       field: user.roles
       value: "reporting_user"
       if: ctx.user?.email != null
-
   ## MAC Address indicator operations
   - set:
       field: threat.indicator.type
@@ -336,7 +324,6 @@ processors:
       target_field: threat.indicator.mac
       ignore_missing: true
       if: ctx.threat?.indicator?.type == 'mac-addr'
-
   ###################
   # Tags ECS fields #
   ###################
@@ -358,7 +345,6 @@ processors:
         }
         ctx.tags.addAll(tags);
         ctx.threat.indicator.marking = [ 'tlp': tlpTags ];
-
   #################
   # Convert types #
   #################
@@ -390,7 +376,6 @@ processors:
       field: misp.event.attribute_count
       type: long
       ignore_missing: true
-
   ######################
   # Cleanup processors #
   ######################
@@ -439,8 +424,14 @@ processors:
         - _tmp
         - json
       ignore_missing: true
-
 on_failure:
   - set:
       field: error.message
-      value: "{{ _ingest.on_failure_message }}"
+      value: >-
+        Processor '{{ _ingest.on_failure_processor_type }}'
+        {{#_ingest.on_failure_processor_tag}}with tag '{{ _ingest.on_failure_processor_tag }}'
+        {{/_ingest.on_failure_processor_tag}}failed with message '{{ _ingest.on_failure_message }}'
+  - set:
+      field: event.kind
+      value: pipeline_error
+
