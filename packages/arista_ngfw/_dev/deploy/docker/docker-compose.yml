@@ -6,7 +6,7 @@ services:
       - ./sample_logs:/sample_logs:ro
     command: log --start-signal=SIGHUP --delay=5s --addr elastic-agent:9514 -p=tcp /sample_logs/*.log
   arista-ngfw-udp:
-    image: docker.elastic.co/observability/stream:v0.6.2
+    image: docker.elastic.co/observability/stream:v0.14.0@sha256:a108f4f782df597a4be3c426a3f9c00e58284f682811d45fd13d4686f2260125
     volumes:
       - ./sample_logs:/sample_logs:ro
     command: log --start-signal=SIGHUP --delay=5s --addr elastic-agent:9514 -p=udp /sample_logs/*.log
