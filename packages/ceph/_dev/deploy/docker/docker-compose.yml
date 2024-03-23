@@ -1,7 +1,7 @@
 version: '2.3'
 services:
   ceph:
-    image: docker.elastic.co/observability/stream:v0.8.0
+    image: docker.elastic.co/observability/stream:v0.14.0@sha256:a108f4f782df597a4be3c426a3f9c00e58284f682811d45fd13d4686f2260125
     ports:
       - 8080
     volumes:
