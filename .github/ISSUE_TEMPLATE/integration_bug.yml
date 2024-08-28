@@ -290,7 +290,6 @@ body:
         - Zoom [zoom]
         - Zscaler Internet Access [zscaler_zia]
         - Zscaler Private Access [zscaler_zpa]
-
     validations:
       required: true
   - type: input
@@ -377,7 +376,7 @@ body:
     id: what_did_you_see
     attributes:
       label: What did you see?
-      description: Please provide the ingested document, relevant logging or dashboard screen shot that shows the issue behavior. 
+      description: Please provide the ingested document, relevant logging or dashboard screen shot that shows the issue behavior.
       placeholder: Paste the sanitized details here.
     validations:
       required: true
