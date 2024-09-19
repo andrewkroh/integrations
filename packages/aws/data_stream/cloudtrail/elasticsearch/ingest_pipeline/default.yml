@@ -48,9 +48,285 @@ processors:
         }
         drop(ctx);
   # Before renames because some json fields are mutated on the process
-  - pipeline:
-      if: ctx?.json != null
-      name: '{{ IngestPipeline "entity" }}'
+  - script:
+      description: Appends any relevant entity to `related.entity` for all events
+      lang: painless
+      source: |
+        field('related.entity')
+          .append(field('json.userIdentity.arn').get(null))
+          .append(field('json.userIdentity.identityProvider').get(null))
+          .append(field('json.userIdentity.principalId').get(null))
+          .append(field('json.userIdentity.sessionContext.sessionIssuer.arn').get(null))
+          .append(field('json.userIdentity.sessionContext.sessionIssuer.userName').get(null))
+          .append(field('json.userIdentity.sessionContext.webIdFederationData.federatedProvider').get(null))
+          .append(field('json.userIdentity.userName').get(null))
+          .append(field('json.resources.ARN').get(null));
+  - foreach:
+      description: Appends any resource.ARN to `related.entity` for all events
+      field: json.resources
+      ignore_missing: true
+      processor:
+        append:
+          field: related.entity
+          value:
+            - '{{{_ingest._value.ARN}}}'
+
+  # source group signin.amazonaws.com ---------------------------------------------------------------------
+  - append:
+      description: Appends any relevant entity to `related.entity` for signin.amazonaws.com
+      field: related.entity
+      if: ctx.json?.eventSource == "signin.amazonaws.com"
+      value:
+        - '{{{json.additionalEventData.MFAIdentifier}}}'
+
+  # source group sts.amazonaws.com -------------------------------------------------------------------------
+  - append:
+      description: Appends any relevant entity to `related.entity` for sts.amazonaws.com
+      field: related.entity
+      if: ctx.json?.eventSource == "sts.amazonaws.com"
+      value:
+        - '{{{json.requestParameters.roleArn}}}'
+        - '{{{json.sourceIdentity}}}'
+        - '{{{json.additionalEventData.MFAIdentifier}}}'
+        - '{{{json.responseElements.assumedRoleUser.arn}}}'
+        - '{{{json.requestParameters.roleSessionName}}}'
+        - '{{{json.responseElements.accessKeyId}}}'
+
+  # source group iam.amazonaws.com -------------------------------------------------------------------------
+  - append:
+      description: Appends any relevant entity to `related.entity` for iam.amazonaws.com
+      field: related.entity
+      if: ctx.json?.eventSource == "iam.amazonaws.com"
+      value:
+        - '{{{json.requestParameters.userName}}}'
+        - '{{{json.requestParameters.accessKeyId}}}'
+        - '{{{json.requestParameters.policyArn}}}'
+        - '{{{json.requestParameters.roleName}}}'
+        - '{{{json.requestParameters.policyName}}}'
+        - '{{{json.responseElements.accessKey.userName}}}'
+        - '{{{json.responseElements.accessKey.accessKeyId}}}'
+        - '{{{json.responseElements.user.arn}}}'
+        - '{{{json.responseElements.user.userName}}}'
+        - '{{{json.responseElements.userId}}}'
+        - '{{{json.responseElements.role.arn}}}'
+
+  # source group ec2.amazonaws.com -------------------------------------------------------------------------
+  - append:
+      description: Appends any relevant entity to `related.entity` for ec2.amazonaws.com
+      field: related.entity
+      if: ctx.json?.eventSource == "ec2.amazonaws.com"
+      value:
+        - '{{{json.requestParameters.groupId}}}'
+        - '{{{json.requestParameters.groupName}}}'
+        - '{{{json.requestParameters.roleName}}}'
+        - '{{{json.requestParameters.subnetId}}}'
+        - '{{{json.requestParameters.volumeId}}}'
+        - '{{{json.requestParameters.networkInterfaceId}}}'
+        - '{{{json.requestParameters.vpcId}}}'
+        - '{{{json.requestParameters.snapshotId}}}'
+        - '{{{json.responseElements.groupId}}}'
+        - '{{{json.responseElements.reservationId}}}'
+        - '{{{json.responseElements.vpc.vpcId}}}'
+        - '{{{json.responseElements.vpc.dhcpOptionsId}}}'
+        - '{{{json.responseElements.snapshotId}}}'
+        - '{{{json.responseElements.volumeId}}}'
+  - foreach:
+      description: Appends any responseElements.securityGroupRuleSet.items to `related.entity` for ec2.amazonaws.com events
+      if: ctx.json?.eventSource == "ec2.amazonaws.com"
+      field: json.responseElements.securityGroupRuleSet.items
+      ignore_missing: true
+      processor:
+        append:
+          field: related.entity
+          value:
+            - '{{{_ingest._value.groupId}}}'
+            - '{{{_ingest._value.referencedGroupInfo.groupId}}}'
+            - '{{{_ingest._value.securityGroupRuleId}}}'
+  - foreach:
+      description: Appends any responseElements.groupSet.items to `related.entity` for ec2.amazonaws.com events
+      if: ctx.json?.eventSource == "ec2.amazonaws.com"
+      field: json.responseElements.groupSet.items
+      ignore_missing: true
+      processor:
+        append:
+          field: related.entity
+          value:
+            - '{{{_ingest._value.groupId}}}'
+  - foreach:
+      description: Appends any requestParameters.groupSet.items to `related.entity` for ec2.amazonaws.com events
+      if: ctx.json?.eventSource == "ec2.amazonaws.com"
+      field: json.requestParameters.groupSet.items
+      ignore_missing: true
+      processor:
+        append:
+          field: related.entity
+          value:
+            - '{{{_ingest._value.groupId}}}'
+  - foreach:
+      description: Appends any requestParameters.instancesSet.items to `related.entity` for ec2.amazonaws.com events
+      if: ctx.json?.eventSource == "ec2.amazonaws.com"
+      field: json.requestParameters.instancesSet.items
+      ignore_missing: true
+      processor:
+        append:
+          field: related.entity
+          value:
+            - '{{{_ingest._value.instanceId}}}'
+  - foreach:
+      description: Appends any responseElements.instancesSet.items to `related.entity` for ec2.amazonaws.com events
+      if: ctx.json?.eventSource == "ec2.amazonaws.com"
+      field: json.responseElements.instancesSet.items
+      ignore_missing: true
+      processor:
+        append:
+          field: related.entity
+          value:
+            - '{{{_ingest._value.subnetId}}}'
+            - '{{{_ingest._value.vpcId}}}'
+            - '{{{_ingest._value.instanceId}}}'
+            - '{{{_ingest._value.imageId}}}'
+            - '{{{_ingest._value.iamInstanceProfile.arn}}}'
+  - foreach:
+      description: Appends any responseElements.instancesSet.items.networkInterfaceSet.items to `related.entity` for ec2.amazonaws.com events
+      if: ctx.json?.eventSource == "ec2.amazonaws.com"
+      field: json.responseElements.instancesSet.items
+      ignore_missing: true
+      processor:
+        foreach:
+          field: _ingest.value.networkInterfaceSet.items
+          ignore_missing: true
+          processor:
+            append:
+              field: related.entity
+              value:
+                - '{{{_ingest._value.networkInterfaceId}}}'
+                - '{{{_ingest._value.vpcId}}}'
+                - '{{{_ingest._value.subnetId}}}'
+  - foreach:
+      description: Appends any responseElements.instancesSet.items.networkInterfaceSet.items.groupSet.items to `related.entity` for ec2.amazonaws.com events
+      if: ctx.json?.eventSource == "ec2.amazonaws.com"
+      field: json.responseElements.instancesSet.items
+      ignore_missing: true
+      processor:
+        foreach:
+          field: _ingest.value.networkInterfaceSet.items
+          ignore_missing: true
+          processor:
+            foreach:
+              field: _ingest.value.groupSet.items
+              ignore_missing: true
+              processor:
+                append:
+                  field: related.entity
+                  value:
+                    - '{{{_ingest._value.groupId}}}'
+  - foreach:
+      description: Appends any responseElements.revokedSecurityGroupRuleSet.items to `related.entity` for ec2.amazonaws.com events
+      if: ctx.json?.eventSource == "ec2.amazonaws.com"
+      field: json.responseElements.revokedSecurityGroupRuleSet.items
+      ignore_missing: true
+      processor:
+        append:
+          field: related.entity
+          value:
+            - '{{{_ingest._value.securityGroupRuleId}}}'
+            - '{{{_ingest._value.groupId}}}'
+
+  # source group s3.amazonaws.com --------------------------------------------------------------------------
+  - append:
+      description: Appends any relevant entity to `related.entity` for s3.amazonaws.com
+      field: related.entity
+      if: ctx.json?.eventSource == "s3.amazonaws.com"
+      value:
+        - '{{{json.requestParameters.bucketName}}}'
+
+  # source group cloudtrail.amazonaws.com --------------------------------------------------------------------------
+  - append:
+      field: related.entity
+      description: Appends any relevant entity to `related.entity` for cloudtrail.amazonaws.com
+      if: ctx.json?.eventSource == "cloudtrail.amazonaws.com"
+      value:
+        - '{{{json.requestParameters.name}}}'
+        - '{{{json.requestParameters.s3BucketName}}}'
+        - '{{{json.responseElements.cloudWatchLogsLogGroupArn}}}'
+        - '{{{json.responseElements.cloudWatchLogsRoleArn}}}'
+        - '{{{json.responseElements.kmsKeyId}}}'
+        - '{{{json.responseElements.snsTopicARN}}}'
+        - '{{{json.responseElements.trailARN}}}'
+        - '{{{json.responseElements.name}}}'
+
+  # source group kms.amazonaws.com --------------------------------------------------------------------------
+  - append:
+      description: Appends any relevant entity to `related.entity` for kms.amazonaws.com
+      field: related.entity
+      if: ctx.json?.eventSource == "kms.amazonaws.com"
+      value:
+        - '{{{json.requestParameters.keyId}}}'
+        - '{{{json.responseElements.keyId}}}'
+        - '{{{json.responseElements.keyMetadata.arn}}}'
+        - '{{{json.responseElements.keyMetadata.keyId}}}'
+
+  # source group config.amazonaws.com --------------------------------------------------------------------------
+  - append:
+      description: Appends any relevant entity to `related.entity` for config.amazonaws.com
+      field: related.entity
+      if: ctx.json?.eventSource == "config.amazonaws.com"
+      value:
+        - '{{{json.requestParameters.configurationRecorderName}}}'
+
+  # source group lambda.amazonaws.com --------------------------------------------------------------------------
+  - append:
+      description: Appends any relevant entity to `related.entity` for lambda.amazonaws.com
+      field: related.entity
+      if: ctx.json?.eventSource == "lambda.amazonaws.com"
+      value:
+        - '{{{json.requestParameters.functionName}}}'
+        - '{{{json.responseElements.functionArn}}}'
+        - '{{{json.responseElements.functionName}}}'
+        - '{{{json.responseElements.role}}}'
+        - '{{{json.responseElements.vpcConfig.securityGroupIds}}}'
+        - '{{{json.responseElements.vpcConfig.subnetIds}}}'
+
+  # source group rds.amazonaws.com --------------------------------------------------------------------------
+  - append:
+      field: related.entity
+      description: Appends any relevant entity to `related.entity` for rds.amazonaws.com
+      if: ctx.json?.eventSource == "rds.amazonaws.com"
+      value:
+        - '{{{json.requestParameters.dBInstanceArn}}}'
+        - '{{{json.requestParameters.dBInstanceIdentifier}}}'
+        - '{{{json.responseElements.dBInstanceIdentifier}}}'
+        - '{{{json.responseElements.dbInstanceArn}}}'
+        - '{{{json.responseElements.dBSubnetGroup.vpcId}}}'
+        - '{{{json.responseElements.vpcSecurityGroups.vpcSecurityGroupId}}}'
+  - foreach:
+      description: Appends any responseElements.dBSubnetGroup.subnets to `related.entity` for ec2.amazonaws.com events
+      if: ctx.json?.eventSource == "rds.amazonaws.com"
+      field: json.responseElements.dBSubnetGroup.subnets
+      ignore_missing: true
+      processor:
+        append:
+          field: related.entity
+          value:
+            - '{{{_ingest._value.subnetIdentifier}}}'
+  - foreach:
+      description: Appends any responseElements.vpcSecurityGroups to `related.entity` for ec2.amazonaws.com events
+      if: ctx.json?.eventSource == "rds.amazonaws.com"
+      field: json.responseElements.vpcSecurityGroups
+      ignore_missing: true
+      processor:
+        append:
+          field: related.entity
+          value:
+            - '{{{_ingest._value.vpcSecurityGroupId}}}'
+
+  - script:
+      description: Remove empty/null related entities and remove duplicates
+      lang: painless
+      source: |
+        ctx.related.entity.removeIf(v -> v == null || v == "");
+        ctx.related.entity = new ArrayList(new HashSet(ctx.related.entity));
+        Collections.sort(ctx.related.entity)
   - rename:
       field: json.eventVersion
       target_field: aws.cloudtrail.event_version
