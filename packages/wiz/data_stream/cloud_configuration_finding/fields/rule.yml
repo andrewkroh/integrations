@@ -2,11 +2,11 @@
   type: group
   fields:
     - name: uuid
-      type: keyword
+      external: ecs
     - name: id
-      type: keyword
+      external: ecs
     - name: name
-      type: keyword
+      external: ecs
     - name: description
       type: text
     - name: remediation
