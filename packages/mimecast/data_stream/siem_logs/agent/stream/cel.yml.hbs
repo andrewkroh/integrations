@@ -81,110 +81,110 @@ program: |-
       :
         work_list
       ).as(work_list,
-        // Work list items are either {"type": "..."} for fetching batch lists
-        // or {"url": "..."} for downloading individual batch files.
-        ("url" in work_list[0]) ?
-          // Download a single batch file.
-          get(work_list[0].url).as(batch, (batch.StatusCode == 200) ?
-            {
-              "events": bytes(batch.Body).mime("application/gzip").mime("application/x-ndjson").map(e,
-                {
-                  "message": dyn(e.encode_json()),
-                }
-              ),
-              "cursor": {
-                "work_list": tail(work_list),
-              },
-              "token": {
-                "access_token": token.access_token,
-                "expires": token.expires,
-              },
-              "want_more": size(tail(work_list)) != 0,
-            }
-          :
-            {
-              "events": {
-                "error": {
-                  "code": string(batch.StatusCode),
-                  "id": string(batch.Status),
-                  "message": "GET " + work_list[0].url + ": " + (
-                    (size(batch.Body) != 0) ?
-                      string(batch.Body)
-                    :
-                      string(batch.Status) + " (" + string(batch.StatusCode) + ")"
-                  ),
+        state.?cursor.blobs.orValue([]).as(blobs,
+          // Process blobs first if any are queued, otherwise fetch batch lists.
+          (size(blobs) > 0) ?
+            // Download a single batch file.
+            get(blobs[0]).as(batch, (batch.StatusCode == 200) ?
+              {
+                "events": bytes(batch.Body).mime("application/gzip").mime("application/x-ndjson").map(e,
+                  {
+                    "message": dyn(e.encode_json()),
+                  }
+                ),
+                "cursor": {
+                  "blobs": tail(blobs),
+                  "work_list": work_list,
                 },
-              },
-              "cursor": {
-                "work_list": tail(work_list),
-              },
-              "token": {
-                "access_token": token.access_token,
-                "expires": token.expires,
-              },
-              "want_more": size(tail(work_list)) != 0,
-            }
-          )
-        :
-          // Fetch batch list for a log type.
-          get_request(
-            state.url.trim_right("/") + state.path + "?" + {
-              "type": [work_list[0].type],
-              ?"nextPage": work_list[0].?next.optMap(next, [next]),
-              ?"dateRangeStartsAt": state.?start.optMap(start, [start.format("2006-01-02")]),
-              ?"dateRangeEndsAt": state.?end.optMap(end, [end.format("2006-01-02")]),
-              ?"pageSize": state.?page_size.optMap(size, [string(int(size))]),
-            }.format_query()
-          ).with(
-            {
-              "Header": {
-                "Authorization": ["Bearer " + token.access_token],
-                "Accept": ["application/json"],
-                "Content-Type": ["application/json"],
-              },
-            }
-          ).do_request().as(resp, (resp.StatusCode == 200) ?
-            bytes(resp.Body).decode_json().as(body,
-              (
-                // Add batch URLs to work list.
-                body.value.map(b, {"url": b.url}) + (
-                  // If there are more pages, add pagination work item.
-                  ("@nextPage" in body && size(body.value) != 0) ?
-                    [work_list[0].with({"next": body["@nextPage"]})]
-                  :
-                    []
-                ) + tail(work_list)
-              ).as(next_work_list,
+                "token": {
+                  "access_token": token.access_token,
+                  "expires": token.expires,
+                },
+                "want_more": size(tail(blobs)) != 0 || size(work_list) != 0,
+              }
+            :
+              {
+                "events": {
+                  "error": {
+                    "code": string(batch.StatusCode),
+                    "id": string(batch.Status),
+                    "message": "GET " + blobs[0] + ": " + (
+                      (size(batch.Body) != 0) ?
+                        string(batch.Body)
+                      :
+                        string(batch.Status) + " (" + string(batch.StatusCode) + ")"
+                    ),
+                  },
+                },
+                "cursor": {
+                  "blobs": tail(blobs),
+                  "work_list": work_list,
+                },
+                "token": {
+                  "access_token": token.access_token,
+                  "expires": token.expires,
+                },
+                "want_more": size(tail(blobs)) != 0 || size(work_list) != 0,
+              }
+            )
+          :
+            // Fetch batch list for a log type.
+            get_request(
+              state.url.trim_right("/") + state.path + "?" + {
+                "type": [work_list[0].type],
+                ?"nextPage": work_list[0].?next.optMap(next, [next]),
+                ?"dateRangeStartsAt": state.?start.optMap(start, [start.format("2006-01-02")]),
+                ?"dateRangeEndsAt": state.?end.optMap(end, [end.format("2006-01-02")]),
+                ?"pageSize": state.?page_size.optMap(size, [string(int(size))]),
+              }.format_query()
+            ).with(
+              {
+                "Header": {
+                  "Authorization": ["Bearer " + token.access_token],
+                  "Accept": ["application/json"],
+                  "Content-Type": ["application/json"],
+                },
+              }
+            ).do_request().as(resp, (resp.StatusCode == 200) ?
+              bytes(resp.Body).decode_json().as(body,
                 {
                   "events": [{"message": "want_more"}],
                   "cursor": {
-                    "work_list": next_work_list,
+                    "blobs": body.value.map(b, b.url),
+                    "work_list": (
+                      // If there are more pages, add pagination work item.
+                      ("@nextPage" in body && size(body.value) != 0) ?
+                        [work_list[0].with({"next": body["@nextPage"]})]
+                      :
+                        []
+                    ) + tail(work_list),
                   },
                   "token": {
                     "access_token": token.access_token,
                     "expires": token.expires,
                   },
-                  "want_more": size(next_work_list) != 0,
+                  "want_more": size(body.value) != 0 || "@nextPage" in body && size(body.value) != 0 ||
+                  size(tail(work_list)) != 0,
                 }
               )
-            )
-          :
-            {
-              "events": {
-                "error": {
-                  "code": string(resp.StatusCode),
-                  "id": string(resp.Status),
-                  "message": "GET " + state.path + ": " + (
-                    (size(resp.Body) != 0) ?
-                      string(resp.Body)
-                    :
-                      string(resp.Status) + " (" + string(resp.StatusCode) + ")"
-                  ),
+            :
+              {
+                "events": {
+                  "error": {
+                    "code": string(resp.StatusCode),
+                    "id": string(resp.Status),
+                    "message": "GET " + state.path + ": " + (
+                      (size(resp.Body) != 0) ?
+                        string(resp.Body)
+                      :
+                        string(resp.Status) + " (" + string(resp.StatusCode) + ")"
+                    ),
+                  },
                 },
-              },
-              "want_more": false,
-            }
-          )
+                "want_more": false,
+              }
+            )
+        )
       )
     )
   )
