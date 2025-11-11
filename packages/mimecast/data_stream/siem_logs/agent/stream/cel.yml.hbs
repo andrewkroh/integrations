@@ -81,96 +81,110 @@ program: |-
       :
         work_list
       ).as(work_list,
-        get_request(
-          state.url.trim_right("/") + state.path + "?" + {
-            "type": [work_list[0].type],
-            ?"nextPage": work_list[0].?next.optMap(next, [next]),
-            ?"dateRangeStartsAt": state.?start.optMap(start, [start.format("2006-01-02")]),
-            ?"dateRangeEndsAt": state.?end.optMap(end, [end.format("2006-01-02")]),
-            ?"pageSize": state.?page_size.optMap(size, [string(int(size))]),
-          }.format_query()
-        ).with(
-          {
-            "Header": {
-              "Authorization": ["Bearer " + token.access_token],
-              "Accept": ["application/json"],
-              "Content-Type": ["application/json"],
-            },
-          }
-        ).do_request().as(resp, (resp.StatusCode == 200) ?
-          bytes(resp.Body).decode_json().as(body,
+        // Work list items are either {"type": "..."} for fetching batch lists
+        // or {"url": "..."} for downloading individual batch files.
+        ("url" in work_list[0]) ?
+          // Download a single batch file.
+          get(work_list[0].url).as(batch, (batch.StatusCode == 200) ?
             {
-              "events": body.value.map(b, has(b.url),
-                get(b.url).as(batch, (batch.StatusCode == 200) ?
-                  bytes(batch.Body).mime("application/gzip").mime("application/x-ndjson").map(e,
-                    {
-                      "message": dyn(e.encode_json()),
-                    }
-                  )
-                :
-                  [
-                    {
-                      "error": {
-                        "code": string(batch.StatusCode),
-                        "id": string(batch.Status),
-                        "message": "GET " + b.url + ": " + (
-                          (size(batch.Body) != 0) ?
-                            string(batch.Body)
-                          :
-                            string(batch.Status) + " (" + string(batch.StatusCode) + ")"
-                        ),
-                      },
-                    },
-                  ]
-                )
-              ).flatten(),
+              "events": bytes(batch.Body).mime("application/gzip").mime("application/x-ndjson").map(e,
+                {
+                  "message": dyn(e.encode_json()),
+                }
+              ),
               "cursor": {
-                "work_list": (
-                  ("@nextPage" in body && size(body.value) != 0) ?
-                    [work_list[0].with({"next": body["@nextPage"]})]
-                  :
-                    []
-                ) + tail(work_list),
+                "work_list": tail(work_list),
               },
               "token": {
                 "access_token": token.access_token,
                 "expires": token.expires,
               },
-              "want_more": "@nextPage" in body && size(body.value) != 0,
-            }.as(to_publish,
-              to_publish.with(
+              "want_more": size(tail(work_list)) != 0,
+            }
+          :
+            {
+              "events": {
+                "error": {
+                  "code": string(batch.StatusCode),
+                  "id": string(batch.Status),
+                  "message": "GET " + work_list[0].url + ": " + (
+                    (size(batch.Body) != 0) ?
+                      string(batch.Body)
+                    :
+                      string(batch.Status) + " (" + string(batch.StatusCode) + ")"
+                  ),
+                },
+              },
+              "cursor": {
+                "work_list": tail(work_list),
+              },
+              "token": {
+                "access_token": token.access_token,
+                "expires": token.expires,
+              },
+              "want_more": size(tail(work_list)) != 0,
+            }
+          )
+        :
+          // Fetch batch list for a log type.
+          get_request(
+            state.url.trim_right("/") + state.path + "?" + {
+              "type": [work_list[0].type],
+              ?"nextPage": work_list[0].?next.optMap(next, [next]),
+              ?"dateRangeStartsAt": state.?start.optMap(start, [start.format("2006-01-02")]),
+              ?"dateRangeEndsAt": state.?end.optMap(end, [end.format("2006-01-02")]),
+              ?"pageSize": state.?page_size.optMap(size, [string(int(size))]),
+            }.format_query()
+          ).with(
+            {
+              "Header": {
+                "Authorization": ["Bearer " + token.access_token],
+                "Accept": ["application/json"],
+                "Content-Type": ["application/json"],
+              },
+            }
+          ).do_request().as(resp, (resp.StatusCode == 200) ?
+            bytes(resp.Body).decode_json().as(body,
+              (
+                // Add batch URLs to work list.
+                body.value.map(b, {"url": b.url}) + (
+                  // If there are more pages, add pagination work item.
+                  ("@nextPage" in body && size(body.value) != 0) ?
+                    [work_list[0].with({"next": body["@nextPage"]})]
+                  :
+                    []
+                ) + tail(work_list)
+              ).as(next_work_list,
                 {
-                  "want_more": to_publish.want_more || size(to_publish.cursor.work_list) != 0,
+                  "events": [{"message": "want_more"}],
+                  "cursor": {
+                    "work_list": next_work_list,
+                  },
+                  "token": {
+                    "access_token": token.access_token,
+                    "expires": token.expires,
+                  },
+                  "want_more": size(next_work_list) != 0,
                 }
               )
             )
-          ).as(state,
-            // Check whether we still need to get more, but have
-            // no event for this type. If we do, populate events
-            // with a place-holder to be discarded by the ingest
-            // pipeline.
-            (state.want_more && size(state.events) == 0) ?
-              state.with({"events": [{"message": "want_more"}]})
-            :
-              state
-          )
-        :
-          {
-            "events": {
-              "error": {
-                "code": string(resp.StatusCode),
-                "id": string(resp.Status),
-                "message": "GET " + state.path + ": " + (
-                  (size(resp.Body) != 0) ?
-                    string(resp.Body)
-                  :
-                    string(resp.Status) + " (" + string(resp.StatusCode) + ")"
-                ),
+          :
+            {
+              "events": {
+                "error": {
+                  "code": string(resp.StatusCode),
+                  "id": string(resp.Status),
+                  "message": "GET " + state.path + ": " + (
+                    (size(resp.Body) != 0) ?
+                      string(resp.Body)
+                    :
+                      string(resp.Status) + " (" + string(resp.StatusCode) + ")"
+                  ),
+                },
               },
-            },
-            "want_more": false,
-          }
-        )
+              "want_more": false,
+            }
+          )
       )
     )
   )
