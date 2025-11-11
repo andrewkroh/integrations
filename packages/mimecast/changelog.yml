@@ -1,4 +1,9 @@
 # newer versions go on top
+- version: "3.3.0-alpha1"
+  changes:
+    - description: Reduce memory usage by processing SIEM log batch files individually rather than all at once.
+      type: enhancement
+      link: https://github.com/elastic/integrations/pull/XXXXX
 - version: "3.2.1"
   changes:
     - description: Add temporary processor to remove the fields added by the Agentless policy.
