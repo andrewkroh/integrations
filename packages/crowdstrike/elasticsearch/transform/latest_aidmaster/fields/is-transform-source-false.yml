@@ -1,0 +1,4 @@
+- name: labels.is_transform_source
+  type: constant_keyword
+  description: Distinguishes source documents from transform output documents.
+  value: "false"

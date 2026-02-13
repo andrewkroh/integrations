@@ -1,0 +1,18 @@
+---
+description: Keep only host.id and crowdstrike.info host metadata.
+processors:
+  - rename:
+      field: crowdstrike
+      target_field: crowdstrike.info.host
+      ignore_missing: true
+  - remove:
+      # Match existing Filebeat cache enrichment behavior where aid is dropped
+      # before metadata is moved under crowdstrike.info.host.
+      field:
+        - crowdstrike.info.host.aid
+      ignore_missing: true
+  - remove:
+      keep:
+        - host.id
+        - crowdstrike.info
+      ignore_missing: true
