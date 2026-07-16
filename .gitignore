@@ -1,7 +1,9 @@
 .DS_Store
 
 .idea
-.claude
+# Keep project Claude Code settings; ignore local/private Claude files.
+.claude/*
+!.claude/settings.json
 /build
 
 dev/packages
